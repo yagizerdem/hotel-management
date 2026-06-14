@@ -30,12 +30,12 @@ async function handler(req: NextRequest) {
     });
   }
 
-  // ensure role is admin | manager
+  // ensure role is admin | sales manager
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "SALES_MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to create room",
+    message: "Unauthorized: do not have permission to create price",
   });
 
   const body = await req.json();

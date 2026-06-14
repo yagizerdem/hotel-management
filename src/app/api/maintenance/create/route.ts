@@ -1,3 +1,8 @@
+import {
+  validateBody,
+  getCreateMaintenanceSchema,
+  CreateMaintenanceBody,
+} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -7,15 +12,9 @@ import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
-import {
-  deleteByPriceById,
-  ensurePriceExistById,
-} from "@/src/service/price-service";
+import { createMaintenance } from "@/src/service/maintenance-service";
 
-async function handler(
-  req: NextRequest,
-  context: { params: Promise<Record<string, string>> },
-) {
+async function handler(req: NextRequest) {
   await dbConnect();
 
   const headerList = await headers();
@@ -31,28 +30,30 @@ async function handler(
     });
   }
 
-  // ensure role is admin | sales manager
+  // ensure role is admin | manager
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "SALES_MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete price",
+    message: "Unauthorized: do not have permission to create maintenance",
   });
 
-  const params = await context.params;
-
-  await ensurePriceExistById(params.id);
-  const price = await deleteByPriceById(params.id);
+  const body = await req.json();
+  const maintenanceData = validateBody<CreateMaintenanceBody>(
+    getCreateMaintenanceSchema(),
+    body,
+  );
+  const maintenance = await createMaintenance(maintenanceData);
 
   return NextResponse.json(
-    ApiResponse.ok({
-      data: price,
-      message: "Price deleted successfully!",
+    ApiResponse.created({
+      data: maintenance,
+      message: "Maintenance created successfully!",
     }),
     {
-      status: HttpStatusCode.OK,
+      status: HttpStatusCode.CREATED,
     },
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

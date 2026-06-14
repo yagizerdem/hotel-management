@@ -8,9 +8,14 @@ import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
 import {
-  deleteByPriceById,
-  ensurePriceExistById,
-} from "@/src/service/price-service";
+  getUpdateMaintenanceSchema,
+  UpdateMaintenanceBody,
+  validateBody,
+} from "@/src/lib/validators";
+import {
+  ensureMaintenanceExistById,
+  updateMaintenanceById,
+} from "@/src/service/maintenance-service";
 
 async function handler(
   req: NextRequest,
@@ -31,23 +36,28 @@ async function handler(
     });
   }
 
-  // ensure role is admin | sales manager
+  // ensure role is admin | manager
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "SALES_MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete price",
+    message: "Unauthorized: do not have permission to update maintenance",
   });
 
   const params = await context.params;
 
-  await ensurePriceExistById(params.id);
-  const price = await deleteByPriceById(params.id);
+  await ensureMaintenanceExistById(params.id);
+  const body = await req.json();
+  const maintenanceData = validateBody<UpdateMaintenanceBody>(
+    getUpdateMaintenanceSchema(),
+    body,
+  );
+  const maintenance = await updateMaintenanceById(params.id, maintenanceData);
 
   return NextResponse.json(
     ApiResponse.ok({
-      data: price,
-      message: "Price deleted successfully!",
+      data: maintenance,
+      message: "Maintenance updated successfully!",
     }),
     {
       status: HttpStatusCode.OK,
@@ -55,4 +65,4 @@ async function handler(
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

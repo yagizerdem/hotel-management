@@ -144,6 +144,55 @@ function getUpdatePriceSchema() {
   return schema;
 }
 
+function getCreateMaintenanceSchema() {
+  const schema = z
+    .object({
+      room: z.string().min(1, "Room is required"),
+
+      reason: z
+        .string()
+        .min(1, "Reason is required")
+        .max(1000, "Reason is too long"),
+
+      startDate: z.coerce.date({
+        message: "Start date must be a valid date",
+      }),
+
+      endDate: z.coerce.date({
+        message: "End date must be a valid date",
+      }),
+
+      status: z
+        .enum(["PLANNED", "ACTIVE", "DONE", "CANCELLED"])
+        .default("PLANNED"),
+
+      createdBy: z.string().optional(),
+    })
+    .refine((data) => data.endDate > data.startDate, {
+      message: "End date must be after start date",
+      path: ["endDate"],
+    });
+
+  return schema;
+}
+
+function getUpdateMaintenanceSchema() {
+  const schema = getCreateMaintenanceSchema()
+    .partial()
+    .refine(
+      (data) => {
+        if (!data.startDate || !data.endDate) return true;
+        return data.endDate > data.startDate;
+      },
+      {
+        message: "End date must be after start date",
+        path: ["endDate"],
+      },
+    );
+
+  return schema;
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -165,6 +214,12 @@ type CreateRoomBody = z.infer<ReturnType<typeof getCreateRoomSchema>>;
 type UpdateRoomBody = z.infer<ReturnType<typeof getUpdateRoomSchema>>;
 type CreatePriceBody = z.infer<ReturnType<typeof getCreatePriceSchema>>;
 type UpdatePriceBody = z.infer<ReturnType<typeof getUpdatePriceSchema>>;
+type CreateMaintenanceBody = z.infer<
+  ReturnType<typeof getCreateMaintenanceSchema>
+>;
+type UpdateMaintenanceBody = z.infer<
+  ReturnType<typeof getUpdateMaintenanceSchema>
+>;
 
 export {
   getRegisterSchema,
@@ -172,8 +227,10 @@ export {
   getCreateRoomSchema,
   getUpdateRoomSchema,
   getCreatePriceSchema,
-  validateBody,
   getUpdatePriceSchema,
+  getCreateMaintenanceSchema,
+  getUpdateMaintenanceSchema,
+  validateBody,
 };
 
 export type {
@@ -183,4 +240,6 @@ export type {
   UpdateRoomBody,
   CreatePriceBody,
   UpdatePriceBody,
+  CreateMaintenanceBody,
+  UpdateMaintenanceBody,
 };

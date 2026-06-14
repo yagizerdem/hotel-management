@@ -36,10 +36,10 @@ async function handler(
     });
   }
 
-  // ensure role is admin | manager
+  // ensure role is admin | sales manager
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "SALES_MANAGER" }),
     role: toRoleMask({ role }),
     message: "Unauthorized: do not have permission to update price",
   });
@@ -52,7 +52,7 @@ async function handler(
   const price = await updatePriceById(params.id, priceData);
 
   return NextResponse.json(
-    ApiResponse.created({
+    ApiResponse.ok({
       data: price,
       message: "Price updated successfully!",
     }),
