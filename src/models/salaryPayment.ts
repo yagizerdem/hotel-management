@@ -22,6 +22,8 @@ const salaryPaymentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const SalaryPayment = mongoose.model("SalaryPayment", salaryPaymentSchema);
+const SalaryPayment =
+  mongoose.models.SalaryPayment ||
+  mongoose.model("SalaryPayment", salaryPaymentSchema);
 
 export { SalaryPayment };

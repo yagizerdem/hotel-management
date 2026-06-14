@@ -1,7 +1,15 @@
 import mongoose from "mongoose";
+import { required } from "zod/mini";
 
 const employeeSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      unique: true,
+      required: true,
+    },
+
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     phone: String,
@@ -31,6 +39,7 @@ const employeeSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Employee = mongoose.model("Employee", employeeSchema);
+const Employee =
+  mongoose.models.Employee || mongoose.model("Employee", employeeSchema);
 
 export { Employee };

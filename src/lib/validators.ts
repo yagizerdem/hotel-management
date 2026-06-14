@@ -4,6 +4,8 @@ import { AppError } from "./app-error";
 import HttpStatusCode from "./http-status-code";
 
 const passwordRegexp = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{6,}$/;
+const mongoDbObjectIdRegexp = /^[0-9a-fA-F]{24}$/;
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function getRegisterSchema() {
   const schema = z.object({
@@ -193,6 +195,58 @@ function getUpdateMaintenanceSchema() {
   return schema;
 }
 
+function getCreateShiftSchema() {
+  return z
+    .object({
+      employee: z
+        .string()
+        .regex(
+          mongoDbObjectIdRegexp,
+          "Employee ID must be a valid MongoDB ObjectId",
+        ),
+
+      date: z.coerce.date({
+        message: "Date must be a valid date",
+      }),
+
+      startTime: z
+        .string()
+        .regex(timeRegex, "Start time must be in HH:mm format"),
+
+      endTime: z.string().regex(timeRegex, "End time must be in HH:mm format"),
+
+      isOffDay: z.boolean().default(false),
+
+      isOvertime: z.boolean().default(false),
+    })
+    .refine(
+      (data) => {
+        if (data.isOffDay) return true;
+        return data.endTime > data.startTime;
+      },
+      {
+        message: "End time must be after start time",
+        path: ["endTime"],
+      },
+    );
+}
+
+function getUpdateShiftSchema() {
+  return getCreateShiftSchema()
+    .partial()
+    .refine(
+      (data) => {
+        if (data.isOffDay) return true;
+        if (!data.startTime || !data.endTime) return true;
+        return data.endTime > data.startTime;
+      },
+      {
+        message: "End time must be after start time",
+        path: ["endTime"],
+      },
+    );
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -220,6 +274,8 @@ type CreateMaintenanceBody = z.infer<
 type UpdateMaintenanceBody = z.infer<
   ReturnType<typeof getUpdateMaintenanceSchema>
 >;
+type CreateShiftBody = z.infer<ReturnType<typeof getCreateShiftSchema>>;
+type UpdateShiftBody = z.infer<ReturnType<typeof getUpdateShiftSchema>>;
 
 export {
   getRegisterSchema,
@@ -230,6 +286,8 @@ export {
   getUpdatePriceSchema,
   getCreateMaintenanceSchema,
   getUpdateMaintenanceSchema,
+  getCreateShiftSchema,
+  getUpdateShiftSchema,
   validateBody,
 };
 
@@ -242,4 +300,6 @@ export type {
   UpdatePriceBody,
   CreateMaintenanceBody,
   UpdateMaintenanceBody,
+  CreateShiftBody,
+  UpdateShiftBody,
 };

@@ -25,6 +25,8 @@ const extraExpenseSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const ExtraExpense = mongoose.model("ExtraExpense", extraExpenseSchema);
+const ExtraExpense =
+  mongoose.models.ExtraExpense ||
+  mongoose.model("ExtraExpense", extraExpenseSchema);
 
 export { ExtraExpense };

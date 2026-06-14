@@ -17,6 +17,6 @@ const priceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Price = mongoose.model("Price", priceSchema);
+const Price = mongoose.models.Price || mongoose.model("Price", priceSchema);
 
 export { Price };

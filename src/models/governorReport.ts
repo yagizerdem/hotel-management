@@ -14,6 +14,8 @@ const governorReportSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const GovernorReport = mongoose.model("GovernorReport", governorReportSchema);
+const GovernorReport =
+  mongoose.models.GovernorReport ||
+  mongoose.model("GovernorReport", governorReportSchema);
 
 export { GovernorReport };
