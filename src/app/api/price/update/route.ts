@@ -6,11 +6,16 @@ import dbConnect from "@/src/lib/mongodb";
 import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
-import {
-  deleteByRoomById,
-  ensureRoomExistById,
-} from "@/src/service/room-service";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
+import {
+  getUpdatePriceSchema,
+  UpdatePriceBody,
+  validateBody,
+} from "@/src/lib/validators";
+import {
+  ensurePriceExistById,
+  updatePriceById,
+} from "@/src/service/price-service";
 
 async function handler(
   req: NextRequest,
@@ -31,23 +36,25 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is admin | manager
   authorizeRole({
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete room",
+    message: "Unauthorized: do not have permission to update price",
   });
 
   const params = await context.params;
 
-  await ensureRoomExistById(params.id);
-  const room = await deleteByRoomById(params.id);
+  await ensurePriceExistById(params.id);
+  const body = await req.json();
+  const priceData = validateBody<UpdatePriceBody>(getUpdatePriceSchema(), body);
+  const price = await updatePriceById(params.id, priceData);
 
   return NextResponse.json(
     ApiResponse.created({
-      data: room,
-      message: "Room deleted successfully!",
+      data: price,
+      message: "Price updated successfully!",
     }),
     {
       status: HttpStatusCode.OK,
@@ -55,4 +62,4 @@ async function handler(
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

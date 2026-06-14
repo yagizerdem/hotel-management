@@ -105,6 +105,45 @@ function getUpdateRoomSchema() {
   return schema;
 }
 
+const packageTypes = ["FULL_BOARD", "ALL_INCLUSIVE"] as const;
+
+function getCreatePriceSchema() {
+  const schema = z
+    .object({
+      roomType: z.string().min(1, "Room type is required"),
+
+      packageType: z.enum(packageTypes, {
+        message: "Package type must be FULL_BOARD or ALL_INCLUSIVE",
+      }),
+
+      nightlyPrice: z.number().positive("Nightly price must be greater than 0"),
+
+      currency: z.string().default("USD"),
+
+      validFrom: z.coerce.date({
+        message: "Valid from must be a valid date",
+      }),
+
+      validTo: z.coerce.date({
+        message: "Valid to must be a valid date",
+      }),
+
+      createdBy: z.string().optional(),
+    })
+    .refine((data) => data.validTo > data.validFrom, {
+      message: "validTo must be after validFrom",
+      path: ["validTo"],
+    });
+
+  return schema;
+}
+
+function getUpdatePriceSchema() {
+  const schema = getCreatePriceSchema().partial();
+
+  return schema;
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -124,13 +163,24 @@ type RegisterBody = z.infer<ReturnType<typeof getRegisterSchema>>;
 type LoginBody = z.infer<ReturnType<typeof getLoginSchema>>;
 type CreateRoomBody = z.infer<ReturnType<typeof getCreateRoomSchema>>;
 type UpdateRoomBody = z.infer<ReturnType<typeof getUpdateRoomSchema>>;
+type CreatePriceBody = z.infer<ReturnType<typeof getCreatePriceSchema>>;
+type UpdatePriceBody = z.infer<ReturnType<typeof getUpdatePriceSchema>>;
 
 export {
   getRegisterSchema,
   getLoginSchema,
   getCreateRoomSchema,
   getUpdateRoomSchema,
+  getCreatePriceSchema,
   validateBody,
+  getUpdatePriceSchema,
 };
 
-export type { RegisterBody, LoginBody, CreateRoomBody, UpdateRoomBody };
+export type {
+  RegisterBody,
+  LoginBody,
+  CreateRoomBody,
+  UpdateRoomBody,
+  CreatePriceBody,
+  UpdatePriceBody,
+};
