@@ -41,7 +41,7 @@ async function authenticationHandler(req: NextRequest) {
   }
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY!);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
 
     const { payload } = await jwtVerify(token, secret, {
       algorithms: ["HS256"],
