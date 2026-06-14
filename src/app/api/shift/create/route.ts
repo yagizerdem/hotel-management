@@ -1,3 +1,8 @@
+import {
+  validateBody,
+  getCreateShiftSchema,
+  CreateShiftBody,
+} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -6,16 +11,10 @@ import dbConnect from "@/src/lib/mongodb";
 import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
-import {
-  deleteByRoomById,
-  ensureRoomExistById,
-} from "@/src/service/room-service";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
+import { createShift } from "@/src/service/shift-service";
 
-async function handler(
-  req: NextRequest,
-  context: { params: Promise<Record<string, string>> },
-) {
+async function handler(req: NextRequest) {
   await dbConnect();
 
   const headerList = await headers();
@@ -36,23 +35,22 @@ async function handler(
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete room",
+    message: "Unauthorized: do not have permission to create shift",
   });
 
-  const params = await context.params;
-
-  await ensureRoomExistById(params.id);
-  const room = await deleteByRoomById(params.id);
+  const body = await req.json();
+  const shiftData = validateBody<CreateShiftBody>(getCreateShiftSchema(), body);
+  const shift = await createShift(shiftData);
 
   return NextResponse.json(
     ApiResponse.created({
-      data: room,
-      message: "Room deleted successfully!",
+      data: shift,
+      message: "Shift created successfully!",
     }),
     {
-      status: HttpStatusCode.OK,
+      status: HttpStatusCode.CREATED,
     },
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

@@ -44,6 +44,8 @@ reservationSchema.index(
   { unique: false },
 );
 
-const Reservation = mongoose.model("Reservation", reservationSchema);
+const Reservation =
+  mongoose.models.Reservation ||
+  mongoose.model("Reservation", reservationSchema);
 
 export { Reservation };

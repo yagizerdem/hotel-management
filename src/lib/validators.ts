@@ -4,6 +4,8 @@ import { AppError } from "./app-error";
 import HttpStatusCode from "./http-status-code";
 
 const passwordRegexp = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{6,}$/;
+const mongoDbObjectIdRegexp = /^[0-9a-fA-F]{24}$/;
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function getRegisterSchema() {
   const schema = z.object({
@@ -105,6 +107,146 @@ function getUpdateRoomSchema() {
   return schema;
 }
 
+const packageTypes = ["FULL_BOARD", "ALL_INCLUSIVE"] as const;
+
+function getCreatePriceSchema() {
+  const schema = z
+    .object({
+      roomType: z.string().min(1, "Room type is required"),
+
+      packageType: z.enum(packageTypes, {
+        message: "Package type must be FULL_BOARD or ALL_INCLUSIVE",
+      }),
+
+      nightlyPrice: z.number().positive("Nightly price must be greater than 0"),
+
+      currency: z.string().default("USD"),
+
+      validFrom: z.coerce.date({
+        message: "Valid from must be a valid date",
+      }),
+
+      validTo: z.coerce.date({
+        message: "Valid to must be a valid date",
+      }),
+
+      createdBy: z.string().optional(),
+    })
+    .refine((data) => data.validTo > data.validFrom, {
+      message: "validTo must be after validFrom",
+      path: ["validTo"],
+    });
+
+  return schema;
+}
+
+function getUpdatePriceSchema() {
+  const schema = getCreatePriceSchema().partial();
+
+  return schema;
+}
+
+function getCreateMaintenanceSchema() {
+  const schema = z
+    .object({
+      room: z.string().min(1, "Room is required"),
+
+      reason: z
+        .string()
+        .min(1, "Reason is required")
+        .max(1000, "Reason is too long"),
+
+      startDate: z.coerce.date({
+        message: "Start date must be a valid date",
+      }),
+
+      endDate: z.coerce.date({
+        message: "End date must be a valid date",
+      }),
+
+      status: z
+        .enum(["PLANNED", "ACTIVE", "DONE", "CANCELLED"])
+        .default("PLANNED"),
+
+      createdBy: z.string().optional(),
+    })
+    .refine((data) => data.endDate > data.startDate, {
+      message: "End date must be after start date",
+      path: ["endDate"],
+    });
+
+  return schema;
+}
+
+function getUpdateMaintenanceSchema() {
+  const schema = getCreateMaintenanceSchema()
+    .partial()
+    .refine(
+      (data) => {
+        if (!data.startDate || !data.endDate) return true;
+        return data.endDate > data.startDate;
+      },
+      {
+        message: "End date must be after start date",
+        path: ["endDate"],
+      },
+    );
+
+  return schema;
+}
+
+function getCreateShiftSchema() {
+  return z
+    .object({
+      employee: z
+        .string()
+        .regex(
+          mongoDbObjectIdRegexp,
+          "Employee ID must be a valid MongoDB ObjectId",
+        ),
+
+      date: z.coerce.date({
+        message: "Date must be a valid date",
+      }),
+
+      startTime: z
+        .string()
+        .regex(timeRegex, "Start time must be in HH:mm format"),
+
+      endTime: z.string().regex(timeRegex, "End time must be in HH:mm format"),
+
+      isOffDay: z.boolean().default(false),
+
+      isOvertime: z.boolean().default(false),
+    })
+    .refine(
+      (data) => {
+        if (data.isOffDay) return true;
+        return data.endTime > data.startTime;
+      },
+      {
+        message: "End time must be after start time",
+        path: ["endTime"],
+      },
+    );
+}
+
+function getUpdateShiftSchema() {
+  return getCreateShiftSchema()
+    .partial()
+    .refine(
+      (data) => {
+        if (data.isOffDay) return true;
+        if (!data.startTime || !data.endTime) return true;
+        return data.endTime > data.startTime;
+      },
+      {
+        message: "End time must be after start time",
+        path: ["endTime"],
+      },
+    );
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -124,13 +266,40 @@ type RegisterBody = z.infer<ReturnType<typeof getRegisterSchema>>;
 type LoginBody = z.infer<ReturnType<typeof getLoginSchema>>;
 type CreateRoomBody = z.infer<ReturnType<typeof getCreateRoomSchema>>;
 type UpdateRoomBody = z.infer<ReturnType<typeof getUpdateRoomSchema>>;
+type CreatePriceBody = z.infer<ReturnType<typeof getCreatePriceSchema>>;
+type UpdatePriceBody = z.infer<ReturnType<typeof getUpdatePriceSchema>>;
+type CreateMaintenanceBody = z.infer<
+  ReturnType<typeof getCreateMaintenanceSchema>
+>;
+type UpdateMaintenanceBody = z.infer<
+  ReturnType<typeof getUpdateMaintenanceSchema>
+>;
+type CreateShiftBody = z.infer<ReturnType<typeof getCreateShiftSchema>>;
+type UpdateShiftBody = z.infer<ReturnType<typeof getUpdateShiftSchema>>;
 
 export {
   getRegisterSchema,
   getLoginSchema,
   getCreateRoomSchema,
   getUpdateRoomSchema,
+  getCreatePriceSchema,
+  getUpdatePriceSchema,
+  getCreateMaintenanceSchema,
+  getUpdateMaintenanceSchema,
+  getCreateShiftSchema,
+  getUpdateShiftSchema,
   validateBody,
 };
 
-export type { RegisterBody, LoginBody, CreateRoomBody, UpdateRoomBody };
+export type {
+  RegisterBody,
+  LoginBody,
+  CreateRoomBody,
+  UpdateRoomBody,
+  CreatePriceBody,
+  UpdatePriceBody,
+  CreateMaintenanceBody,
+  UpdateMaintenanceBody,
+  CreateShiftBody,
+  UpdateShiftBody,
+};

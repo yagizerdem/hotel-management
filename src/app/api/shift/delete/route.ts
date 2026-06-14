@@ -6,11 +6,11 @@ import dbConnect from "@/src/lib/mongodb";
 import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
-import {
-  deleteByRoomById,
-  ensureRoomExistById,
-} from "@/src/service/room-service";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
+import {
+  deleteShiftById,
+  ensureShiftExistById,
+} from "@/src/service/shift-service";
 
 async function handler(
   req: NextRequest,
@@ -36,18 +36,18 @@ async function handler(
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete room",
+    message: "Unauthorized: do not have permission to delete shift",
   });
 
   const params = await context.params;
 
-  await ensureRoomExistById(params.id);
-  const room = await deleteByRoomById(params.id);
+  await ensureShiftExistById(params.id);
+  const shift = await deleteShiftById(params.id);
 
   return NextResponse.json(
     ApiResponse.created({
-      data: room,
-      message: "Room deleted successfully!",
+      data: shift,
+      message: "Shift deleted successfully!",
     }),
     {
       status: HttpStatusCode.OK,

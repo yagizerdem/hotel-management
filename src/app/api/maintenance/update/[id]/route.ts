@@ -6,11 +6,16 @@ import dbConnect from "@/src/lib/mongodb";
 import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
-import {
-  deleteByRoomById,
-  ensureRoomExistById,
-} from "@/src/service/room-service";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
+import {
+  getUpdateMaintenanceSchema,
+  UpdateMaintenanceBody,
+  validateBody,
+} from "@/src/lib/validators";
+import {
+  ensureMaintenanceExistById,
+  updateMaintenanceById,
+} from "@/src/service/maintenance-service";
 
 async function handler(
   req: NextRequest,
@@ -31,23 +36,28 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is admin | manager
   authorizeRole({
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete room",
+    message: "Unauthorized: do not have permission to update maintenance",
   });
 
   const params = await context.params;
 
-  await ensureRoomExistById(params.id);
-  const room = await deleteByRoomById(params.id);
+  await ensureMaintenanceExistById(params.id);
+  const body = await req.json();
+  const maintenanceData = validateBody<UpdateMaintenanceBody>(
+    getUpdateMaintenanceSchema(),
+    body,
+  );
+  const maintenance = await updateMaintenanceById(params.id, maintenanceData);
 
   return NextResponse.json(
-    ApiResponse.created({
-      data: room,
-      message: "Room deleted successfully!",
+    ApiResponse.ok({
+      data: maintenance,
+      message: "Maintenance updated successfully!",
     }),
     {
       status: HttpStatusCode.OK,
@@ -55,4 +65,4 @@ async function handler(
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

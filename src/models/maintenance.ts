@@ -16,6 +16,8 @@ const maintenanceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Maintenance = mongoose.model("Maintenance", maintenanceSchema);
+const Maintenance =
+  mongoose.models.Maintenance ||
+  mongoose.model("Maintenance", maintenanceSchema);
 
 export { Maintenance };

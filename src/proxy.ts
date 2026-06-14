@@ -10,6 +10,15 @@ const protectedRoutePatterns = [
   /^\/api\/room\/create$/,
   /^\/api\/room\/delete\/[^/]+$/,
   /^\/api\/room\/update\/[^/]+$/,
+  /^\/api\/shift\/create$/,
+  /^\/api\/shift\/update\/[^/]+$/,
+  /^\/api\/shift\/delete\/[^/]+$/,
+  /^\/api\/price\/create$/,
+  /^\/api\/price\/update\/[^/]+$/,
+  /^\/api\/price\/delete\/[^/]+$/,
+  /^\/api\/maintenance\/create$/,
+  /^\/api\/maintenance\/update\/[^/]+$/,
+  /^\/api\/maintenance\/delete\/[^/]+$/,
 ];
 
 type AuthJwtPayload = {
@@ -84,5 +93,14 @@ export const config = {
     "/api/room/create",
     "/api/room/delete/:id",
     "/api/room/update/:id",
+    "/api/shift/create",
+    "/api/shift/update/:id",
+    "/api/shift/delete/:id",
+    "/api/price/create",
+    "/api/price/update/:id",
+    "/api/price/delete/:id",
+    "/api/maintenance/create",
+    "/api/maintenance/update/:id",
+    "/api/maintenance/delete/:id",
   ],
 };
