@@ -5,12 +5,18 @@ import { jwtVerify } from "jose";
 import { ApiResponse } from "./lib/api-response";
 import HttpStatusCode from "./lib/http-status-code";
 
-const protectedRoutes = ["/api/auth/me"];
+const protectedRoutePatterns = [
+  /^\/api\/auth\/me$/,
+  /^\/api\/room\/create$/,
+  /^\/api\/room\/delete\/[^/]+$/,
+  /^\/api\/room\/update\/[^/]+$/,
+];
 
 type AuthJwtPayload = {
   _id: string;
   username: string;
   email: string;
+  role: string;
 };
 
 function jsonUnauthorized(message = "Unauthorized") {
@@ -28,7 +34,9 @@ function jsonUnauthorized(message = "Unauthorized") {
 
 async function authenticationHandler(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutes.includes(path);
+  const isProtectedRoute = protectedRoutePatterns.some((pattern) =>
+    pattern.test(path),
+  );
 
   if (!isProtectedRoute) {
     return NextResponse.next();
@@ -47,13 +55,14 @@ async function authenticationHandler(req: NextRequest) {
       algorithms: ["HS256"],
     });
 
-    const { _id, username, email } = payload as AuthJwtPayload;
+    const { _id, role, username, email } = payload as AuthJwtPayload;
 
     const requestHeaders = new Headers(req.headers);
 
     requestHeaders.set("x-user-id", String(_id));
     requestHeaders.set("x-user-email", String(email));
     requestHeaders.set("x-user-username", String(username));
+    requestHeaders.set("x-user-role", String(role));
 
     return NextResponse.next({
       request: {
@@ -70,5 +79,10 @@ export default async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/auth/me"],
+  matcher: [
+    "/api/auth/me",
+    "/api/room/create",
+    "/api/room/delete/:id",
+    "/api/room/update/:id",
+  ],
 };

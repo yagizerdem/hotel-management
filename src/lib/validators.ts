@@ -38,6 +38,73 @@ function getLoginSchema() {
   return schema;
 }
 
+const roomTypes = [
+  "SINGLE",
+  "DOUBLE_TWIN",
+  "DOUBLE_DUBLE",
+  "TRIPLE_SINGLE",
+  "TRIPLE_MIXED",
+  "QUAD",
+  "KING_SUITE",
+] as const;
+
+const roomStatuses = [
+  "AVAILABLE",
+  "OCCUPIED",
+  "RESERVED",
+  "MAINTENANCE",
+  "CLEANING",
+] as const;
+
+function getCreateRoomSchema() {
+  const schema = z.object({
+    floor: z
+      .number("floor is required")
+      .int("floor must be an integer")
+      .min(1, "floor must be at least 1")
+      .max(4, "floor must be at most 4"),
+
+    number: z
+      .string("room number is required")
+      .trim()
+      .min(1, "room number is required")
+      .max(20, "room number must be at most 20 characters"),
+
+    type: z.enum(roomTypes, "invalid room type"),
+
+    capacity: z
+      .number("capacity is required")
+      .int("capacity must be an integer")
+      .min(1, "capacity must be at least 1")
+      .max(10, "capacity must be at most 10"),
+
+    beds: z
+      .object({
+        single: z.number().int().min(0).default(0),
+        double: z.number().int().min(0).default(0),
+      })
+      .optional(),
+
+    hasBalcony: z.boolean().optional(),
+    hasMinibar: z.boolean().optional(),
+    hasAirConditioner: z.boolean().optional(),
+    hasTv: z.boolean().optional(),
+    hasHairDryer: z.boolean().optional(),
+    hasWifi: z.boolean().optional(),
+
+    status: z.enum(roomStatuses, "invalid room status").optional(),
+    isActive: z.boolean().optional(),
+  });
+
+  return schema;
+}
+
+function getUpdateRoomSchema() {
+  const schema = getCreateRoomSchema().partial();
+
+  return schema;
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -55,7 +122,15 @@ function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
 
 type RegisterBody = z.infer<ReturnType<typeof getRegisterSchema>>;
 type LoginBody = z.infer<ReturnType<typeof getLoginSchema>>;
+type CreateRoomBody = z.infer<ReturnType<typeof getCreateRoomSchema>>;
+type UpdateRoomBody = z.infer<ReturnType<typeof getUpdateRoomSchema>>;
 
-export { getRegisterSchema, getLoginSchema, validateBody };
+export {
+  getRegisterSchema,
+  getLoginSchema,
+  getCreateRoomSchema,
+  getUpdateRoomSchema,
+  validateBody,
+};
 
-export type { RegisterBody, LoginBody };
+export type { RegisterBody, LoginBody, CreateRoomBody, UpdateRoomBody };

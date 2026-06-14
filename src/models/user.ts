@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: [
+        "ADMIN",
         "CUSTOMER",
         "RECEPTIONIST",
         "MANAGER",
@@ -37,6 +38,6 @@ userSchema.pre("save", async function () {
   }
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export { User };
