@@ -293,6 +293,37 @@ function getUpdateExtraExpenseSchema() {
   return getCreateExtraExpenseSchema().partial();
 }
 
+function getCreateGovernorReportSchema() {
+  return z.object({
+    reportDate: z.coerce.date({
+      message: "Report date must be a valid date",
+    }),
+
+    customers: z
+      .array(
+        z
+          .string()
+          .regex(
+            mongoDbObjectIdRegexp,
+            "Customer ID must be a valid MongoDB ObjectId",
+          ),
+      )
+      .default([]),
+
+    status: z
+      .enum(["PENDING", "SENT", "FAILED"], {
+        message: "Status must be one of PENDING, SENT, FAILED",
+      })
+      .default("PENDING"),
+
+    responseMessage: z.string().trim().max(1000).optional(),
+  });
+}
+
+function getUpdateGovernorReportSchema() {
+  return getCreateGovernorReportSchema().partial();
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -328,6 +359,12 @@ type CreateExtraExpenseBody = z.infer<
 type UpdateExtraExpenseBody = z.infer<
   ReturnType<typeof getUpdateExtraExpenseSchema>
 >;
+type CreateGovernorReportBody = z.infer<
+  ReturnType<typeof getCreateGovernorReportSchema>
+>;
+type UpdateGovernorReportBody = z.infer<
+  ReturnType<typeof getUpdateGovernorReportSchema>
+>;
 
 export {
   getRegisterSchema,
@@ -342,6 +379,8 @@ export {
   getUpdateShiftSchema,
   getCreateExtraExpenseSchema,
   getUpdateExtraExpenseSchema,
+  getCreateGovernorReportSchema,
+  getUpdateGovernorReportSchema,
   validateBody,
 };
 
@@ -358,4 +397,6 @@ export type {
   UpdateShiftBody,
   CreateExtraExpenseBody,
   UpdateExtraExpenseBody,
+  CreateGovernorReportBody,
+  UpdateGovernorReportBody,
 };
