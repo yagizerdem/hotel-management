@@ -247,6 +247,52 @@ function getUpdateShiftSchema() {
     );
 }
 
+function getCreateExtraExpenseSchema() {
+  const schema = z.object({
+    reservation: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "Reservation ID must be a valid MongoDB ObjectId",
+      ),
+
+    customer: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "Customer ID must be a valid MongoDB ObjectId",
+      ),
+
+    type: z.enum(["BAR", "SNACKBAR", "MINIBAR", "ROOM_SERVICE", "OTHER"], {
+      message:
+        "Type must be one of BAR, SNACKBAR, MINIBAR, ROOM_SERVICE, OTHER",
+    }),
+
+    description: z.string().trim().max(500).optional(),
+
+    amount: z.coerce
+      .number({
+        message: "Amount must be a valid number",
+      })
+      .positive("Amount must be greater than 0"),
+
+    currency: z.string().trim().length(3).default("USD"),
+
+    createdBy: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "CreatedBy ID must be a valid MongoDB ObjectId",
+      )
+      .optional(),
+  });
+  return schema;
+}
+
+function getUpdateExtraExpenseSchema() {
+  return getCreateExtraExpenseSchema().partial();
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -276,6 +322,12 @@ type UpdateMaintenanceBody = z.infer<
 >;
 type CreateShiftBody = z.infer<ReturnType<typeof getCreateShiftSchema>>;
 type UpdateShiftBody = z.infer<ReturnType<typeof getUpdateShiftSchema>>;
+type CreateExtraExpenseBody = z.infer<
+  ReturnType<typeof getCreateExtraExpenseSchema>
+>;
+type UpdateExtraExpenseBody = z.infer<
+  ReturnType<typeof getUpdateExtraExpenseSchema>
+>;
 
 export {
   getRegisterSchema,
@@ -288,6 +340,8 @@ export {
   getUpdateMaintenanceSchema,
   getCreateShiftSchema,
   getUpdateShiftSchema,
+  getCreateExtraExpenseSchema,
+  getUpdateExtraExpenseSchema,
   validateBody,
 };
 
@@ -302,4 +356,6 @@ export type {
   UpdateMaintenanceBody,
   CreateShiftBody,
   UpdateShiftBody,
+  CreateExtraExpenseBody,
+  UpdateExtraExpenseBody,
 };
