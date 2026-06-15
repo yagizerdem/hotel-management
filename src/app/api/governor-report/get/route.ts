@@ -4,11 +4,11 @@ import HttpStatusCode from "@/src/lib/http-status-code";
 import { ApiResponse } from "@/src/lib/api-response";
 import dbConnect from "@/src/lib/mongodb";
 import { APIFeatures } from "@/src/lib/api-features";
-import { Shift } from "@/src/models/shift";
+import { GovernorReport } from "@/src/models/governorReport";
+import { headers } from "next/headers";
+import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { AppError } from "@/src/lib/app-error";
-import { ensureUserExistByEmail } from "@/src/service/user-service";
-import { headers } from "next/headers";
 
 async function handler(
   req: NextRequest,
@@ -29,22 +29,24 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is admin | manager | hr_manager
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) |
+      toRoleMask({ role: "MANAGER" }) |
+      toRoleMask({ role: "HR_MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to get shift",
+    message: "Unauthorized: do not have permission to get governor report",
   });
 
-  const query = Shift.find({});
+  const query = GovernorReport.find({});
   const queryParams = req?.nextUrl?.searchParams;
   const apiFeatures = new APIFeatures(
     query,
     Object.fromEntries(queryParams.entries()),
   );
 
-  const shifts = await apiFeatures
+  const governorReports = await apiFeatures
     .filter()
     .search()
     .sort()
@@ -53,8 +55,8 @@ async function handler(
 
   return NextResponse.json(
     ApiResponse.ok({
-      data: shifts,
-      message: "Shifts retrieved successfully!",
+      data: governorReports,
+      message: "Governor reports retrieved successfully!",
     }),
     {
       status: HttpStatusCode.OK,

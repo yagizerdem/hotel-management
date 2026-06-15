@@ -247,6 +247,83 @@ function getUpdateShiftSchema() {
     );
 }
 
+function getCreateExtraExpenseSchema() {
+  const schema = z.object({
+    reservation: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "Reservation ID must be a valid MongoDB ObjectId",
+      ),
+
+    customer: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "Customer ID must be a valid MongoDB ObjectId",
+      ),
+
+    type: z.enum(["BAR", "SNACKBAR", "MINIBAR", "ROOM_SERVICE", "OTHER"], {
+      message:
+        "Type must be one of BAR, SNACKBAR, MINIBAR, ROOM_SERVICE, OTHER",
+    }),
+
+    description: z.string().trim().max(500).optional(),
+
+    amount: z.coerce
+      .number({
+        message: "Amount must be a valid number",
+      })
+      .positive("Amount must be greater than 0"),
+
+    currency: z.string().trim().length(3).default("USD"),
+
+    createdBy: z
+      .string()
+      .regex(
+        mongoDbObjectIdRegexp,
+        "CreatedBy ID must be a valid MongoDB ObjectId",
+      )
+      .optional(),
+  });
+  return schema;
+}
+
+function getUpdateExtraExpenseSchema() {
+  return getCreateExtraExpenseSchema().partial();
+}
+
+function getCreateGovernorReportSchema() {
+  return z.object({
+    reportDate: z.coerce.date({
+      message: "Report date must be a valid date",
+    }),
+
+    customers: z
+      .array(
+        z
+          .string()
+          .regex(
+            mongoDbObjectIdRegexp,
+            "Customer ID must be a valid MongoDB ObjectId",
+          ),
+      )
+      .default([]),
+
+    status: z
+      .enum(["PENDING", "SENT", "FAILED"], {
+        message: "Status must be one of PENDING, SENT, FAILED",
+      })
+      .default("PENDING"),
+
+    responseMessage: z.string().trim().max(1000).optional(),
+  });
+}
+
+function getUpdateGovernorReportSchema() {
+  return getCreateGovernorReportSchema().partial();
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -276,6 +353,18 @@ type UpdateMaintenanceBody = z.infer<
 >;
 type CreateShiftBody = z.infer<ReturnType<typeof getCreateShiftSchema>>;
 type UpdateShiftBody = z.infer<ReturnType<typeof getUpdateShiftSchema>>;
+type CreateExtraExpenseBody = z.infer<
+  ReturnType<typeof getCreateExtraExpenseSchema>
+>;
+type UpdateExtraExpenseBody = z.infer<
+  ReturnType<typeof getUpdateExtraExpenseSchema>
+>;
+type CreateGovernorReportBody = z.infer<
+  ReturnType<typeof getCreateGovernorReportSchema>
+>;
+type UpdateGovernorReportBody = z.infer<
+  ReturnType<typeof getUpdateGovernorReportSchema>
+>;
 
 export {
   getRegisterSchema,
@@ -288,6 +377,10 @@ export {
   getUpdateMaintenanceSchema,
   getCreateShiftSchema,
   getUpdateShiftSchema,
+  getCreateExtraExpenseSchema,
+  getUpdateExtraExpenseSchema,
+  getCreateGovernorReportSchema,
+  getUpdateGovernorReportSchema,
   validateBody,
 };
 
@@ -302,4 +395,8 @@ export type {
   UpdateMaintenanceBody,
   CreateShiftBody,
   UpdateShiftBody,
+  CreateExtraExpenseBody,
+  UpdateExtraExpenseBody,
+  CreateGovernorReportBody,
+  UpdateGovernorReportBody,
 };

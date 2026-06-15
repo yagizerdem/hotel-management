@@ -4,7 +4,7 @@ import HttpStatusCode from "@/src/lib/http-status-code";
 import { ApiResponse } from "@/src/lib/api-response";
 import dbConnect from "@/src/lib/mongodb";
 import { APIFeatures } from "@/src/lib/api-features";
-import { Shift } from "@/src/models/shift";
+import { ExtraExpense } from "@/src/models/extraExpense";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { AppError } from "@/src/lib/app-error";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
@@ -29,22 +29,24 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is admin | sales_manager | receptionist
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) |
+      toRoleMask({ role: "SALES_MANAGER" }) |
+      toRoleMask({ role: "RECEPTIONIST" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to get shift",
+    message: "Unauthorized: do not have permission to create extra expense",
   });
 
-  const query = Shift.find({});
+  const query = ExtraExpense.find({});
   const queryParams = req?.nextUrl?.searchParams;
   const apiFeatures = new APIFeatures(
     query,
     Object.fromEntries(queryParams.entries()),
   );
 
-  const shifts = await apiFeatures
+  const extraExpenses = await apiFeatures
     .filter()
     .search()
     .sort()
@@ -53,8 +55,8 @@ async function handler(
 
   return NextResponse.json(
     ApiResponse.ok({
-      data: shifts,
-      message: "Shifts retrieved successfully!",
+      data: extraExpenses,
+      message: "Extra expenses retrieved successfully!",
     }),
     {
       status: HttpStatusCode.OK,

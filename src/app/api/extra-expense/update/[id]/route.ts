@@ -3,12 +3,19 @@ import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
 import { ApiResponse } from "@/src/lib/api-response";
 import dbConnect from "@/src/lib/mongodb";
-import { APIFeatures } from "@/src/lib/api-features";
-import { Shift } from "@/src/models/shift";
-import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { AppError } from "@/src/lib/app-error";
-import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { headers } from "next/headers";
+import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
+import {
+  ensureExtraExpenseExistById,
+  updateExtraExpenseById,
+} from "@/src/service/extra-expense-service";
+import { ensureUserExistByEmail } from "@/src/service/user-service";
+import {
+  getUpdateExtraExpenseSchema,
+  UpdateExtraExpenseBody,
+  validateBody,
+} from "@/src/lib/validators";
 
 async function handler(
   req: NextRequest,
@@ -34,27 +41,26 @@ async function handler(
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to get shift",
+    message: "Unauthorized: do not have permission to update extra expense",
   });
 
-  const query = Shift.find({});
-  const queryParams = req?.nextUrl?.searchParams;
-  const apiFeatures = new APIFeatures(
-    query,
-    Object.fromEntries(queryParams.entries()),
+  const params = await context.params;
+
+  await ensureExtraExpenseExistById(params.id);
+  const body = await req.json();
+  const extraExpenseData = validateBody<UpdateExtraExpenseBody>(
+    getUpdateExtraExpenseSchema(),
+    body,
+  );
+  const extraExpense = await updateExtraExpenseById(
+    params.id,
+    extraExpenseData,
   );
 
-  const shifts = await apiFeatures
-    .filter()
-    .search()
-    .sort()
-    .limitFields()
-    .paginate().mongooseQuery;
-
   return NextResponse.json(
-    ApiResponse.ok({
-      data: shifts,
-      message: "Shifts retrieved successfully!",
+    ApiResponse.created({
+      data: extraExpense,
+      message: "Extra expense updated successfully!",
     }),
     {
       status: HttpStatusCode.OK,
@@ -62,4 +68,4 @@ async function handler(
   );
 }
 
-export const GET = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

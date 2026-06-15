@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
 import { ApiResponse } from "@/src/lib/api-response";
 import dbConnect from "@/src/lib/mongodb";
-import { APIFeatures } from "@/src/lib/api-features";
-import { Shift } from "@/src/models/shift";
-import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { AppError } from "@/src/lib/app-error";
-import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { headers } from "next/headers";
+import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
+import { ensureUserExistByEmail } from "@/src/service/user-service";
+import { deleteExtraExpenseById } from "@/src/service/extra-expense-service";
+import { ensureExtraExpenseExistById } from "@/src/service/extra-expense-service";
 
 async function handler(
   req: NextRequest,
@@ -29,32 +29,26 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is admin | manager
+  // ensure role is admin | sales_manager | receptionist
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) |
+      toRoleMask({ role: "SALES_MANAGER" }) |
+      toRoleMask({ role: "RECEPTIONIST" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to get shift",
+    message: "Unauthorized: do not have permission to delete extra expense",
   });
 
-  const query = Shift.find({});
-  const queryParams = req?.nextUrl?.searchParams;
-  const apiFeatures = new APIFeatures(
-    query,
-    Object.fromEntries(queryParams.entries()),
-  );
+  const params = await context.params;
 
-  const shifts = await apiFeatures
-    .filter()
-    .search()
-    .sort()
-    .limitFields()
-    .paginate().mongooseQuery;
+  await ensureExtraExpenseExistById(params.id);
+  const extraExpense = await deleteExtraExpenseById(params.id);
 
   return NextResponse.json(
-    ApiResponse.ok({
-      data: shifts,
-      message: "Shifts retrieved successfully!",
+    ApiResponse.created({
+      data: extraExpense,
+      message: "Extra expense deleted successfully!",
     }),
     {
       status: HttpStatusCode.OK,
@@ -62,4 +56,4 @@ async function handler(
   );
 }
 
-export const GET = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);
