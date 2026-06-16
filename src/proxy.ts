@@ -1,5 +1,3 @@
-// src/proxy.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { ApiResponse } from "./lib/api-response";
@@ -98,7 +96,7 @@ async function authenticationHandler(req: NextRequest) {
 }
 
 export default async function proxy(req: NextRequest) {
-  return authenticationHandler(req);
+  return await authenticationHandler(req);
 }
 
 export const config = {
