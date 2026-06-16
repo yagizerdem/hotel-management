@@ -225,4 +225,27 @@ async function calculateExpense(
   return reservation;
 }
 
-export { createReservation };
+async function cancelBooking(reservationId: string) {
+  const reservation = await Reservation.findById(reservationId);
+  if (!reservation) {
+    throw new AppError({
+      message: `Reservation does not exist`,
+      statusCode: HttpStatusCode.NOT_FOUND,
+      isOperational: true,
+    });
+  }
+
+  if (reservation.status === "CANCELLED") {
+    throw new AppError({
+      message: "Reservation is already cancelled",
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      isOperational: true,
+    });
+  }
+
+  reservation.status = "CANCELLED";
+  await reservation.save();
+  return reservation;
+}
+
+export { createReservation, cancelBooking };
