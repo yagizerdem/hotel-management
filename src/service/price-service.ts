@@ -5,6 +5,22 @@ import { Price } from "../models/price";
 
 async function createPrice(priceData: CreatePriceBody) {
   const price = new Price({ ...priceData });
+
+  const exist = await Price.exists({
+    roomType: priceData.roomType,
+    packageType: priceData.packageType,
+    validFrom: { $lt: priceData.validTo },
+    validTo: { $gt: priceData.validFrom },
+  });
+
+  if (exist) {
+    throw new AppError({
+      message: `Price for room type ${priceData.roomType} and package type ${priceData.packageType} already exists for the given date range`,
+      statusCode: HttpStatusCode.CONFLICT,
+      isOperational: true,
+    });
+  }
+
   await price.save();
 
   return price;

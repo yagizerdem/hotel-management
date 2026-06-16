@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { HydratedDocument, InferSchemaType } from "mongoose";
 
 const reservationSchema = new mongoose.Schema(
   {
@@ -34,7 +34,11 @@ const reservationSchema = new mongoose.Schema(
     discountRate: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true },
 
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true },
 );
@@ -48,4 +52,10 @@ const Reservation =
   mongoose.models.Reservation ||
   mongoose.model("Reservation", reservationSchema);
 
+type ReservationDocument = HydratedDocument<
+  InferSchemaType<typeof reservationSchema>
+>;
+
 export { Reservation };
+
+export type { ReservationDocument };

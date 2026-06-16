@@ -32,7 +32,9 @@ async function handler(
   // ensure role is admin
   authorizeRole({
     allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) | toRoleMask({ role: "MANAGER" }),
+      toRoleMask({ role: "ADMIN" }) |
+      toRoleMask({ role: "MANAGER" }) |
+      toRoleMask({ role: "HR_MANAGER" }),
     role: toRoleMask({ role }),
     message: "Unauthorized: do not have permission to get shift",
   });

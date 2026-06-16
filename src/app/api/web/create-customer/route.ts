@@ -1,3 +1,8 @@
+import {
+  CreateCustomerBody,
+  validateBody,
+  getCreateCustomerSchema,
+} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -7,21 +12,17 @@ import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
-import {
-  deleteShiftById,
-  ensureShiftExistById,
-} from "@/src/service/shift-service";
+import { createCustomer } from "@/src/service/customer-service";
 
-async function handler(
-  req: NextRequest,
-  context: { params: Promise<Record<string, string>> },
-) {
+async function handler(req: NextRequest) {
   await dbConnect();
 
   const headerList = await headers();
   const email = headerList.get("x-user-email");
   const userFromDb = await ensureUserExistByEmail(email!);
   const role = userFromDb?.role ?? "";
+
+  const _id = userFromDb?._id;
 
   if (!role) {
     throw new AppError({
@@ -31,30 +32,34 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is customer
   authorizeRole({
-    allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) |
-      toRoleMask({ role: "MANAGER" }) |
-      toRoleMask({ role: "HR_MANAGER" }),
+    allowedRolesMask: toRoleMask({ role: "CUSTOMER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to delete shift",
+    message: "Unauthorized: do not have permission to create profile",
   });
 
-  const params = await context.params;
+  const body = await req.json();
+  body.user = _id.toString();
 
-  await ensureShiftExistById(params.id);
-  const shift = await deleteShiftById(params.id);
+  const customerData = validateBody<CreateCustomerBody>(
+    getCreateCustomerSchema(),
+    body,
+  );
+  const customer = await createCustomer({
+    _id,
+    customerData,
+  });
 
   return NextResponse.json(
     ApiResponse.created({
-      data: shift,
-      message: "Shift deleted successfully!",
+      data: customer,
+      message: "Profile created successfully!",
     }),
     {
-      status: HttpStatusCode.OK,
+      status: HttpStatusCode.CREATED,
     },
   );
 }
 
-export const DELETE = withErrorHandler(handler);
+export const POST = withErrorHandler(handler);

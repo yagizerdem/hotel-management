@@ -26,4 +26,20 @@ async function ensureUserExistByEmail(email: string) {
   return user;
 }
 
-export { ensureUserExistByUserName, ensureUserExistByEmail };
+async function ensureUserExistById(id: string) {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError({
+      message: `User with id ${id} not found`,
+      statusCode: HttpStatusCode.NOT_FOUND,
+      isOperational: true,
+    });
+  }
+  return user;
+}
+
+export {
+  ensureUserExistByUserName,
+  ensureUserExistByEmail,
+  ensureUserExistById,
+};
