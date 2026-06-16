@@ -1,7 +1,9 @@
+import { differenceInCalendarDays, startOfDay } from "date-fns";
 import { AppError } from "../lib/app-error";
 import HttpStatusCode from "../lib/http-status-code";
 import { CreateCustomerBody, UpdateCustomerBody } from "../lib/validators";
 import { Customer } from "../models/customer";
+import { Reservation } from "../models/reservation";
 import { User } from "../models/user";
 
 async function createCustomer({
@@ -102,6 +104,43 @@ async function updateCustomerById(
   return updatedCustomer;
 }
 
+async function cancelBooking(reservationId: string) {
+  const reservation = await Reservation.findById(reservationId);
+  if (!reservation) {
+    throw new AppError({
+      message: `Reservation does not exist`,
+      statusCode: HttpStatusCode.NOT_FOUND,
+      isOperational: true,
+    });
+  }
+
+  if (reservation.status === "CANCELLED") {
+    throw new AppError({
+      message: "Reservation is already cancelled",
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      isOperational: true,
+    });
+  }
+
+  const today = startOfDay(new Date());
+  const checkIn = startOfDay(reservation.checkInDate);
+
+  const daysUntilCheckIn = differenceInCalendarDays(checkIn, today);
+
+  if (daysUntilCheckIn <= 2) {
+    throw new AppError({
+      message:
+        "Reservation cannot be cancelled within the last 2 days before check-in",
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      isOperational: true,
+    });
+  }
+
+  reservation.status = "CANCELLED";
+  await reservation.save();
+  return reservation;
+}
+
 export {
   createCustomer,
   deleteCustomerById,
@@ -109,4 +148,5 @@ export {
   updateCustomerById,
   ensureCustomerExistByUserId,
   ensureCustomerNotExistByUserId,
+  cancelBooking,
 };

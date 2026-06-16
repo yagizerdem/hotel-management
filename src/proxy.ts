@@ -31,6 +31,8 @@ const protectedRoutePatterns = [
   /^\/api\/extra-expense\/get$/,
   /^\/api\/web\/create-customer$/,
   /^\/api\/web\/book$/,
+  /^\/api\/web\/cancel-book\/[^/]+$/,
+  /^\/api\/reception\/book$/,
 ];
 
 type AuthJwtPayload = {
@@ -126,5 +128,7 @@ export const config = {
     "/api/extra-expense/get",
     "/api/web/create-customer",
     "/api/web/book",
+    "/api/web/cancel-book/:id",
+    "/api/reception/book",
   ],
 };
