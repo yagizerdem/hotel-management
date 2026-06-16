@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { ApiResponse } from "./lib/api-response";
 import HttpStatusCode from "./lib/http-status-code";
+import { match } from "@formatjs/intl-localematcher";
+import Negotiator from "negotiator";
 
 const protectedRoutePatterns = [
   /^\/api\/auth\/me$/,
@@ -95,8 +97,37 @@ async function authenticationHandler(req: NextRequest) {
   }
 }
 
+// localization- internalization
+
+let locales = ["en", "tr"];
+
+function getLocale(req: NextRequest) {
+  const headers = {
+    "accept-language": req.headers.get("accept-language") ?? "en-US,en;q=0.5",
+  };
+  let languages = new Negotiator({ headers }).languages();
+  let defaultLocale = "en";
+
+  return match(languages, locales, defaultLocale);
+}
+
 export default async function proxy(req: NextRequest) {
-  return await authenticationHandler(req);
+  await authenticationHandler(req);
+
+  const { pathname } = req.nextUrl;
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+  );
+
+  if (pathnameHasLocale) return;
+
+  // Redirect if there is no locale
+  const locale = getLocale(req);
+  req.nextUrl.pathname = `/${locale}${pathname}`;
+  // e.g. incoming request is /products
+  // The new URL is now /en/products
+
+  return NextResponse.redirect(req.nextUrl);
 }
 
 export const config = {
@@ -128,5 +159,8 @@ export const config = {
     "/api/web/book",
     "/api/web/cancel-book/:id",
     "/api/reception/book",
+
+    // Skip all internal paths (_next)
+    "/((?!_next).*)",
   ],
 };

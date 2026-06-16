@@ -2,10 +2,10 @@
 
 import { createContext, useContext } from "react";
 import { ThemeProvider } from "./theme-provider";
+import { L10nProvider } from "./l10n-provider";
 
 type BaseProviderProps = {
   children: React.ReactNode;
-  params: Promise<{ lng: string }>;
 };
 
 type BaseProviderState = {};
@@ -16,7 +16,7 @@ const BaseProviderContext = createContext<BaseProviderState | undefined>(
   undefined,
 );
 
-export function BaseProvider({ children, params }: BaseProviderProps) {
+export function BaseProvider({ children }: BaseProviderProps) {
   const value: BaseProviderState = {};
 
   return (
