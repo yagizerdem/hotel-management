@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { ApiResponse } from "./lib/api-response";
 import HttpStatusCode from "./lib/http-status-code";
-import { createProxy } from "next-i18next/proxy";
 
 const protectedRoutePatterns = [
   /^\/api\/auth\/me$/,

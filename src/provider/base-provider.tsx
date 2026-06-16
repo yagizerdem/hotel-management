@@ -2,7 +2,6 @@
 
 import { createContext, useContext } from "react";
 import { ThemeProvider } from "./theme-provider";
-import { I18nProvider } from "./I18n-provider";
 
 type BaseProviderProps = {
   children: React.ReactNode;
