@@ -10,11 +10,14 @@ const customerSchema = new mongoose.Schema(
     },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    nationalId: { type: String },
-    passportNo: { type: String },
-    phone: String,
-    email: String,
-    address: String,
+    nationalId: { type: String, unique: true, required: true },
+    passportNo: { type: String, unique: true },
+    phone: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
   },
   { timestamps: true },
 );

@@ -1,3 +1,8 @@
+import {
+  validateBody,
+  CreateReceptionReservationBody,
+  getCreateReceptionReservationSchema,
+} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -7,26 +12,18 @@ import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
-import {
-  getUpdateShiftSchema,
-  UpdateShiftBody,
-  validateBody,
-} from "@/src/lib/validators";
-import {
-  ensureShiftExistById,
-  updateShiftById,
-} from "@/src/service/shift-service";
+import { createReservation } from "@/src/service/reservation-service";
+import type { ReservationDocument } from "@/src/models/reservation";
 
-async function handler(
-  req: NextRequest,
-  context: { params: Promise<Record<string, string>> },
-) {
+async function handler(req: NextRequest) {
   await dbConnect();
 
   const headerList = await headers();
   const email = headerList.get("x-user-email");
   const userFromDb = await ensureUserExistByEmail(email!);
   const role = userFromDb?.role ?? "";
+
+  const _id = userFromDb?._id;
 
   if (!role) {
     throw new AppError({
@@ -36,30 +33,33 @@ async function handler(
     });
   }
 
-  // ensure role is admin
+  // ensure role is receptionist
   authorizeRole({
-    allowedRolesMask:
-      toRoleMask({ role: "ADMIN" }) |
-      toRoleMask({ role: "MANAGER" }) |
-      toRoleMask({ role: "HR_MANAGER" }),
+    allowedRolesMask: toRoleMask({ role: "RECEPTIONIST" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to update shift",
+    message: "Unauthorized: do not have permission to reserve room",
   });
 
-  const params = await context.params;
-
-  await ensureShiftExistById(params.id);
   const body = await req.json();
-  const shiftData = validateBody<UpdateShiftBody>(getUpdateShiftSchema(), body);
-  const shift = await updateShiftById(params.id, shiftData);
+
+  validateBody<CreateReceptionReservationBody>(
+    getCreateReceptionReservationSchema(),
+    body,
+  );
+
+  body.source = "RECEPTION";
+  body.createdBy = _id; // user id
+  body.status = "CHECKED_IN"; // directly check in when receptionist creates reservation
+
+  const reservation = await createReservation(body as ReservationDocument);
 
   return NextResponse.json(
     ApiResponse.created({
-      data: shift,
-      message: "Shift updated successfully!",
+      data: reservation,
+      message: "Reservation created successfully!",
     }),
     {
-      status: HttpStatusCode.OK,
+      status: HttpStatusCode.CREATED,
     },
   );
 }

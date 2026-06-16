@@ -36,7 +36,7 @@ async function handler(
     });
   }
 
-  // ensure role is admin | manager
+  // ensure role is admin | manager | hr_manager
   authorizeRole({
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) |

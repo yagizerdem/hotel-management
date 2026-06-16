@@ -324,6 +324,103 @@ function getUpdateGovernorReportSchema() {
   return getCreateGovernorReportSchema().partial();
 }
 
+function getCreateCustomerSchema() {
+  return z.object({
+    user: z
+      .string()
+      .regex(mongoDbObjectIdRegexp, "User ID must be a valid MongoDB ObjectId"),
+
+    firstName: z
+      .string()
+      .trim()
+      .min(1, "First name is required")
+      .max(100, "First name cannot exceed 100 characters"),
+
+    lastName: z
+      .string()
+      .trim()
+      .min(1, "Last name is required")
+      .max(100, "Last name cannot exceed 100 characters"),
+
+    nationalId: z
+      .string()
+      .trim()
+      .max(50, "National ID cannot exceed 50 characters")
+      .optional(),
+
+    passportNo: z
+      .string()
+      .trim()
+      .max(50, "Passport number cannot exceed 50 characters")
+      .optional(),
+
+    phone: z
+      .string()
+      .trim()
+      .max(30, "Phone number cannot exceed 30 characters")
+      .optional(),
+
+    email: z.email("Email must be a valid email address").optional(),
+
+    address: z
+      .string()
+      .trim()
+      .max(500, "Address cannot exceed 500 characters")
+      .optional(),
+  });
+}
+
+function getUpdateCustomerSchema() {
+  return getCreateCustomerSchema().partial();
+}
+
+const getCreateWebReservationSchema = () =>
+  z
+    .object({
+      room: z
+        .string()
+        .regex(
+          mongoDbObjectIdRegexp,
+          "Room ID must be a valid MongoDB ObjectId",
+        ),
+
+      packageType: z.enum(["FULL_BOARD", "ALL_INCLUSIVE"]),
+
+      checkInDate: z.coerce.date(),
+      checkOutDate: z.coerce.date(),
+    })
+    .refine((data) => data.checkOutDate > data.checkInDate, {
+      message: "checkOutDate must be after checkInDate",
+      path: ["checkOutDate"],
+    });
+
+const getCreateReceptionReservationSchema = () =>
+  z
+    .object({
+      room: z
+        .string()
+        .regex(
+          mongoDbObjectIdRegexp,
+          "Room ID must be a valid MongoDB ObjectId",
+        ),
+
+      packageType: z.enum(["FULL_BOARD", "ALL_INCLUSIVE"]),
+
+      customer: z
+        .string()
+        .regex(
+          mongoDbObjectIdRegexp,
+          "Customer ID must be a valid MongoDB ObjectId",
+        ),
+
+      checkInDate: z.coerce.date(),
+      checkOutDate: z.coerce.date(),
+    })
+    .refine((data) => data.checkOutDate > data.checkInDate, {
+      message: "checkOutDate must be after checkInDate",
+      path: ["checkOutDate"],
+    });
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -365,6 +462,14 @@ type CreateGovernorReportBody = z.infer<
 type UpdateGovernorReportBody = z.infer<
   ReturnType<typeof getUpdateGovernorReportSchema>
 >;
+type CreateCustomerBody = z.infer<ReturnType<typeof getCreateCustomerSchema>>;
+type UpdateCustomerBody = z.infer<ReturnType<typeof getUpdateCustomerSchema>>;
+type CreateWebReservationBody = z.infer<
+  ReturnType<typeof getCreateWebReservationSchema>
+>;
+type CreateReceptionReservationBody = z.infer<
+  ReturnType<typeof getCreateReceptionReservationSchema>
+>;
 
 export {
   getRegisterSchema,
@@ -381,6 +486,10 @@ export {
   getUpdateExtraExpenseSchema,
   getCreateGovernorReportSchema,
   getUpdateGovernorReportSchema,
+  getCreateCustomerSchema,
+  getUpdateCustomerSchema,
+  getCreateWebReservationSchema,
+  getCreateReceptionReservationSchema,
   validateBody,
 };
 
@@ -399,4 +508,8 @@ export type {
   UpdateExtraExpenseBody,
   CreateGovernorReportBody,
   UpdateGovernorReportBody,
+  CreateCustomerBody,
+  UpdateCustomerBody,
+  CreateWebReservationBody,
+  CreateReceptionReservationBody,
 };
