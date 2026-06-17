@@ -46,7 +46,14 @@ function AppJumbotron({ className }: { className?: string }) {
 
   function navigateToRoomsAndSuites() {
     const segments = pathname.split("/");
-    segments.push("rooms_suites");
+    segments.push("rooms-suites");
+    router.push(segments.join("/"));
+  }
+
+  function navigateToAboutUs() {
+    console.log("jhity");
+    const segments = pathname.split("/");
+    segments.push("about-us");
     router.push(segments.join("/"));
   }
 
@@ -103,7 +110,10 @@ function AppJumbotron({ className }: { className?: string }) {
               <DropdownMenuItem className="cursor-pointer">
                 {t("home.blog")}
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onMouseUp={navigateToAboutUs}
+              >
                 {t("home.about_us")}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
@@ -143,7 +153,9 @@ function AppJumbotron({ className }: { className?: string }) {
         <li className={navItemClass}>{t("home.restaurant")}</li>
         <li className={navItemClass}>{t("home.gallery")}</li>
         <li className={navItemClass}>{t("home.blog")}</li>
-        <li className={navItemClass}>{t("home.about_us")}</li>
+        <li className={navItemClass} onMouseUp={navigateToAboutUs}>
+          {t("home.about_us")}
+        </li>
         <li className={navItemClass}>{t("home.contact_us")}</li>
         <li
           className={navItemClass}

@@ -41,5 +41,13 @@
   "room_suites": {
     "jumbutron_title": "Our Rooms",
     "description": "The rooms at Hotel Chatto, featuring modern and elegant design, are carefully prepared to provide a comfortable stay. With spacious and airy layouts, they are designed with every detail you might need during your business or leisure trip. Enjoy amenities such as free Wi-Fi, LCD TV, minibar, and cozy beds that make you feel at home. Some rooms offer sea views, allowing you to relax in a calm and peaceful atmosphere. At Hotel Chatto, we prioritize your comfort and look forward to providing you with an unforgettable stay!"
+  },
+  "about_us": {
+    "jumbutron_title": "About Us",
+    "description": "You will discover a world of historic grandeur, supported by the most modern comforts, from our exciting baronial façade to our stunning interiors.",
+    "our_story": "Established in 2009 as Tuzla’s first and only luxury boutique hotel, Chatto Hotel welcomes its guests with rooms designed for long-term stays, featuring a peaceful atmosphere. Each 45m² room is decorated in pastel and baronial styles. Bathrooms in all rooms, whether carpeted or with laminate flooring, are spacious and finished with local marble.\n\n24/7 room service and a rich buffet breakfast featuring fresh vegetables, fruits, and local breakfast items sourced from local suppliers are provided as standard.\n\nFor many years, our guests have chosen Chatto for several key reasons: the street leading to Tuzla Coast and its restaurants, local shops, art studios, patisseries, and other spots where they can enjoy free and pleasant leisure time; the seaside walking path for morning strolls; and its location within a 5-minute walk to Tuzla ViaPort Marina Shopping Center and Tuzla Port AVM, making it part of the city’s prime attractions.\n\nUpon request, airport transfers and personalized services by expert staff for room setup and service are provided, maintaining the boutique hotel’s standard of customized guest experience, reproduced every morning for the past 15 years."
+  },
+  "contact_us": {
+    "jumbutron_title": "Contact Us"
   }
 }
