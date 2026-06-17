@@ -1,0 +1,41 @@
+{
+  "home": {
+    "home": "Home",
+    "rooms_and_suites": "Rooms and Suites",
+    "restaurant": "Restaurant",
+    "gallery": "Gallery",
+    "blog": "Blog",
+    "about_us": "About Us",
+    "contact_us": "Contact Us",
+    "our_rooms": "Our Rooms",
+    "jumbutron_card": "Exclusive to our website only\nBook your reservation now\nUse the coupon code CHATTO10\nand enjoy a 10% discount!",
+    "booking_discount_card": "Enjoy a 10% discount on all reservations made\nthrough our website. Secure your spot now for an\nexclusive accommodation experience!",
+    "book_now": "Book Now",
+    "hotel_intro": "You will discover a world of historic grandeur supported by the most modern\ncomforts at Chatto Hotel, from the exciting baronial façade to our stunning\ninteriors among the hotels in Tuzla.\n\nWith generous décor, exquisite cuisine, magnificent views, and elegant\nbedrooms, you will feel right where you belong, like royalty.",
+    "peaceful_moments": "Peaceful Moments",
+    "peaceful_moments_desc": "Chatto Hotel is located on a beautiful bay along the pine-covered coastline of Istanbul’s \nAnatolian side.",
+    "unique_atmosphere": "Unique Atmosphere",
+    "unique_atmosphere_desc": "Immerse yourself in the unique atmosphere of our lobby,\nwhere historical elements blend seamlessly with modern design and contemporary art.\nEnjoy drinks and snacks accompanied by homemade cakes,\npies, and pastries in a warm and welcoming setting.",
+    "rich_cuisine": "Rich Cuisine",
+    "rich_cuisine_desc": "Hotel Chatto offers a carefully curated menu featuring exquisite desserts and pastries crafted by our chef.\n\nDiscover croissants, cookies, kebabs, snacks, and many other delicious specialties prepared with passion and creativity.\n\nEvery bite is designed to create unforgettable memories filled with flavor, making your experience truly exceptional.",
+    "free_cancellation": "Free Cancellation",
+    "free_cancellation_desc": "Contact us to easily cancel your reservation without additional charges, in accordance with our cancellation policy.",
+    "high_rating": "High Rating",
+    "high_rating_desc": "Our hotel has received excellent reviews from guests, reflecting our commitment to providing exceptional service and a memorable experience.",
+    "special_offers": "Special Offers",
+    "special_offers_desc": "Don’t miss our exclusive reservation offers…",
+    "rooms_suites": "Rooms & Suites",
+    "single_room": "Single Room",
+    "double_twin_room": "Double Twin Room",
+    "double_room": "Double Room",
+    "triple_single_room": "Triple Single Room",
+    "triple_mixed_room": "Triple Mixed Room",
+    "quad_room": "Quad Room",
+    "king_suite": "King Suite",
+    "more_details": "MORE DETAILS",
+    "tuzla_hotel": "Tuzla Hotel"
+  },
+  "room": {
+    "intro": "The rooms at Hotel Chatto, featuring modern and elegant design, are carefully prepared to provide a comfortable stay. With spacious and airy layouts, they are designed with every detail you might need during your business or leisure trip.Enjoy amenities such as free Wi-Fi, LCD TV, minibar, and cozy beds that make you feel at home. Some rooms offer sea views, allowing you to relax in a calm and peaceful atmosphere. At Hotel Chatto, we prioritize your comfort and look forward to providing you with an unforgettable stay!"
+  }
+}
