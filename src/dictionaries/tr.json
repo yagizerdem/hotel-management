@@ -6,6 +6,36 @@
     "gallery": "Galeri",
     "blog": "Blog",
     "about_us": "Hakkımızda",
-    "contact_us": "İletişim"
+    "contact_us": "İletişim",
+    "our_rooms": "Odalarımız",
+    "jumbutron_card": "Sadece web sitemize özel\nRezervasyonunuzu hemen yapın\nCHATTO10 kupon kodunu kullanın\nve %10 indirimden yararlanın!",
+    "booking_discount_card": "Web sitemiz üzerinden yapılan tüm rezervasyonlarda\n%10 indirim fırsatını yakalayın. Yerinizı hemen ayırtın\nve ayrıcalıklı bir konaklama deneyimi yaşayın!",
+    "book_now": "Hemen Rezervasyon Yap",
+    "hotel_intro": "Chatto Hotel'de modern konforun desteklediği tarihi ihtişamı keşfedeceksiniz.\nTuzla'nın en seçkin otellerinden biri olan tesisimiz, etkileyici mimarisi ve göz alıcı iç mekânlarıyla sizi karşılıyor.\n\nZengin dekorasyonu, seçkin mutfağı, muhteşem manzaraları ve zarif odalarıyla,\nkendinizi ait olduğunuz yerde, adeta bir kraliyet mensubu gibi hissedeceksiniz.",
+    "peaceful_moments": "Huzurlu Anlar",
+    "peaceful_moments_desc": "Chatto Hotel, İstanbul'un Anadolu yakasında, çam ağaçlarıyla çevrili sahil şeridinde yer alan eşsiz bir koyda konumlanmıştır.",
+    "unique_atmosphere": "Eşsiz Atmosfer",
+    "unique_atmosphere_desc": "Tarihi dokunun modern tasarım ve çağdaş sanatla buluştuğu lobimizin eşsiz atmosferine kendinizi bırakın.\nEv yapımı kekler, turtalar ve hamur işleri eşliğinde içeceklerinizi ve atıştırmalıklarınızı keyifle yudumlayın.",
+    "rich_cuisine": "Zengin Mutfak",
+    "rich_cuisine_desc": "Chatto Hotel, şefimizin özenle hazırladığı seçkin tatlılar ve hamur işlerinden oluşan özel bir menü sunmaktadır.\n\nKruvasanlardan kurabiyelere, kebaplardan çeşitli atıştırmalıklara kadar birçok lezzeti keşfedebilirsiniz.\n\nHer lokma, unutulmaz anılar yaratmak ve damaklarda iz bırakmak için özenle hazırlanmıştır.",
+    "free_cancellation": "Ücretsiz İptal",
+    "free_cancellation_desc": "İptal politikamız kapsamında rezervasyonunuzu ek ücret ödemeden kolayca iptal etmek için bizimle iletişime geçebilirsiniz.",
+    "high_rating": "Yüksek Misafir Memnuniyeti",
+    "high_rating_desc": "Otelimiz, sunduğu üstün hizmet kalitesi ve unutulmaz konaklama deneyimi sayesinde misafirlerinden mükemmel değerlendirmeler almaktadır.",
+    "special_offers": "Özel Fırsatlar",
+    "special_offers_desc": "Size özel hazırladığımız ayrıcalıklı rezervasyon fırsatlarını kaçırmayın.",
+    "rooms_suites": "Odalar ve Süitler",
+    "single_room": "Tek Kişilik Oda",
+    "double_twin_room": "İki Yataklı Oda",
+    "double_room": "Çift Kişilik Oda",
+    "triple_single_room": "Üç Kişilik Tek Yataklı Oda",
+    "triple_mixed_room": "Üç Kişilik Karma Oda",
+    "quad_room": "Dört Kişilik Oda",
+    "king_suite": "King Süit",
+    "more_details": "DETAYLARI GÖR",
+    "tuzla_hotel": "Tuzla Otel"
+  },
+  "room": {
+    "intro": "Modern ve zarif tasarımıyla öne çıkan Hotel Chatto odaları, konforlu bir konaklama deneyimi sunmak için özenle hazırlanmıştır. Geniş ve ferah yaşam alanlarına sahip odalarımız, iş veya tatil amaçlı seyahatleriniz boyunca ihtiyaç duyabileceğiniz tüm detaylar düşünülerek tasarlanmıştır. Ücretsiz Wi-Fi, LCD TV, minibar ve evinizin rahatlığını aratmayacak konforlu yatakların keyfini çıkarabilirsiniz. Bazı odalarımız sakin ve huzurlu bir atmosfer sunan deniz manzarasına sahiptir. Hotel Chatto olarak konforunuzu ön planda tutuyor ve size unutulmaz bir konaklama deneyimi yaşatmayı hedefliyoruz."
   }
 }
