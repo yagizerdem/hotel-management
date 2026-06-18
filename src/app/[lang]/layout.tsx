@@ -5,6 +5,7 @@ import { BaseProvider } from "@/src/provider/base-provider";
 import { L10nProvider } from "@/src/provider/l10n-provider";
 import { getDictionary, hasLocale } from "@/src/dictionaries/dictionaries";
 import { notFound } from "next/navigation";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default async function RootLayout({
           <BaseProvider>
             <L10nProvider lang={lang} dictionary={dict}>
               {children}
+              <Toaster />
             </L10nProvider>
           </BaseProvider>
         }

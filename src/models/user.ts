@@ -1,10 +1,34 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+interface IUser {
+  username: string;
+  email?: string;
+  password: string;
+  role:
+    | "ADMIN"
+    | "CUSTOMER"
+    | "RECEPTIONIST"
+    | "MANAGER"
+    | "HR_MANAGER"
+    | "SALES_MANAGER"
+    | "IT_SUPPORT"
+    | "CLEANER"
+    | "COOK"
+    | "WAITER"
+    | "ELECTRICIAN";
+  isActive: boolean;
+}
+
+interface IUserCredentials {
+  username: string;
+  email: string;
+}
+
 const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true, unique: true },
-    email: { type: String, unique: true, sparse: true },
+    email: { type: String, unique: true, sparse: true, required: true },
     password: { type: String, required: true },
     role: {
       type: String,
@@ -45,3 +69,5 @@ userSchema.pre("save", async function () {
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export { User };
+
+export type { IUser, IUserCredentials };

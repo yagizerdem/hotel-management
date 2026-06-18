@@ -470,7 +470,8 @@ function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
 
   if (!result.success) {
     throw new AppError({
-      message: result.error.issues[0]?.message ?? "Validation failed",
+      message: "Validation failed",
+      errors: result.error.issues.map((issue) => issue.message),
       statusCode: HttpStatusCode.BAD_REQUEST,
       isOperational: true,
     });
