@@ -1,8 +1,3 @@
-import {
-  validateBody,
-  CreateBlogBody,
-  getCreateBlogSchema,
-} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -12,9 +7,16 @@ import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
-import { createBlog, uploadBlogImage } from "@/src/service/blog-service";
+import {
+  deleteBlogImageByBlogId,
+  ensureBlogExistById,
+  updateBlogById,
+} from "@/src/service/blog-service";
 
-async function handler(req: NextRequest) {
+async function handler(
+  req: NextRequest,
+  context: { params: Promise<Record<string, string>> },
+) {
   await dbConnect();
 
   const headerList = await headers();
@@ -40,42 +42,20 @@ async function handler(req: NextRequest) {
     message: "Unauthorized: do not have permission to create blog",
   });
 
-  const formData = await req.formData();
+  const params = await context.params;
+  const blogId = params.id;
 
-  const body = {
-    user: userFromDb._id.toString(),
-    title: formData.get("title"),
-    content: formData.get("content"),
-    author: formData.get("author"),
-    publishedDate: formData.get("publishedDate"),
-    releaseDate: formData.get("releaseDate"),
-  };
+  const blogFromDb = await ensureBlogExistById(blogId);
 
-  const blogData = validateBody<CreateBlogBody>(getCreateBlogSchema(), body);
+  await deleteBlogImageByBlogId(blogId);
 
-  const imageFile = formData.get("image") as Blob | null;
-  let uploadedImageUrl: string | null = null;
-
-  if (imageFile) {
-    uploadedImageUrl = await uploadBlogImage(imageFile);
-  }
-
-  const { image, ...blogDataWithoutImage } = blogData;
-
-  const blogDataWithImagePath = {
-    ...blogDataWithoutImage,
-    imagePath: uploadedImageUrl,
-  };
-
-  const blog = await createBlog({
-    _id: userFromDb._id,
-    blogData: blogDataWithImagePath,
-  });
+  blogFromDb.imagePath = undefined;
+  await updateBlogById(blogId, { ...blogFromDb });
 
   return NextResponse.json(
     ApiResponse.created({
-      data: blog,
-      message: "Blog created successfully!",
+      data: blogFromDb,
+      message: "Blog image deleted successfully!",
     }),
     {
       status: HttpStatusCode.CREATED,

@@ -1,3 +1,8 @@
+import {
+  validateBody,
+  UpdateBlogBody,
+  getUpdateBlogSchema,
+} from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
 import HttpStatusCode from "@/src/lib/http-status-code";
@@ -8,13 +13,11 @@ import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
 import {
-  getUpdateBlogSchema,
-  UpdateBlogBody,
-  validateBody,
-} from "@/src/lib/validators";
-import {
+  createBlog,
+  deleteBlogImageByBlogId,
   ensureBlogExistById,
   updateBlogById,
+  uploadBlogImage,
 } from "@/src/service/blog-service";
 
 async function handler(
@@ -36,30 +39,63 @@ async function handler(
     });
   }
 
-  // ensure role is admin | manager | hr_manager
+  // ensure role is admin | hr_manager | manager
   authorizeRole({
     allowedRolesMask:
       toRoleMask({ role: "ADMIN" }) |
-      toRoleMask({ role: "MANAGER" }) |
-      toRoleMask({ role: "HR_MANAGER" }),
+      toRoleMask({ role: "HR_MANAGER" }) |
+      toRoleMask({ role: "MANAGER" }),
     role: toRoleMask({ role }),
-    message: "Unauthorized: do not have permission to update governor report",
+    message: "Unauthorized: do not have permission to create blog",
   });
 
   const params = await context.params;
+  const blogId = params.id;
 
-  await ensureBlogExistById(params.id);
-  const body = await req.json();
+  const blogFromDb = await ensureBlogExistById(blogId);
+
+  const formData = await req.formData();
+
+  const body = {
+    user: userFromDb._id.toString(),
+    title: formData.get("title"),
+    content: formData.get("content"),
+    author: formData.get("author"),
+    publishedDate: formData.get("publishedDate"),
+    releaseDate: formData.get("releaseDate"),
+  };
+
   const blogData = validateBody<UpdateBlogBody>(getUpdateBlogSchema(), body);
-  const blog = await updateBlogById(params.id, blogData);
+
+  const imageFile = formData.get("image") as Blob | null;
+  let uploadedImagePath: string | null = null;
+
+  if (imageFile) {
+    // delete old img
+    if (blogFromDb.imagePath) {
+      await deleteBlogImageByBlogId(blogId);
+    }
+
+    // upload new img
+    uploadedImagePath = await uploadBlogImage(imageFile);
+  }
+
+  const { image, ...blogDataWithoutImage } = blogData;
+
+  const blogDataWithImagePath = {
+    ...blogDataWithoutImage,
+    imagePath: uploadedImagePath,
+  };
+
+  const blog = await updateBlogById(blogId, blogDataWithImagePath);
 
   return NextResponse.json(
-    ApiResponse.ok({
+    ApiResponse.created({
       data: blog,
       message: "Blog updated successfully!",
     }),
     {
-      status: HttpStatusCode.OK,
+      status: HttpStatusCode.CREATED,
     },
   );
 }

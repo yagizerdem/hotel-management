@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import { ThemeProvider } from "./theme-provider";
-import { L10nProvider } from "./l10n-provider";
+import { AuthProvider } from "./auth-provider";
 
 type BaseProviderProps = {
   children: React.ReactNode;
@@ -21,9 +21,11 @@ export function BaseProvider({ children }: BaseProviderProps) {
 
   return (
     <ThemeProvider>
-      <BaseProviderContext.Provider value={value}>
-        {children}
-      </BaseProviderContext.Provider>
+      <AuthProvider>
+        <BaseProviderContext.Provider value={value}>
+          {children}
+        </BaseProviderContext.Provider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -423,10 +423,6 @@ const getCreateReceptionReservationSchema = () =>
 
 function getCreateBlogSchema() {
   return z.object({
-    user: z
-      .string()
-      .regex(mongoDbObjectIdRegexp, "User ID must be a valid MongoDB ObjectId"),
-
     title: z
       .string("Title is required")
       .trim()
@@ -474,7 +470,8 @@ function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
 
   if (!result.success) {
     throw new AppError({
-      message: result.error.issues[0]?.message ?? "Validation failed",
+      message: "Validation failed",
+      errors: result.error.issues.map((issue) => issue.message),
       statusCode: HttpStatusCode.BAD_REQUEST,
       isOperational: true,
     });

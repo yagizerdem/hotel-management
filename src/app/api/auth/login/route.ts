@@ -45,6 +45,9 @@ async function handler(req: NextRequest) {
     ApiResponse.created({
       data: {
         token,
+        email: userFromDb.email,
+        username: userFromDb.username,
+        role: userFromDb.role,
       },
       message: "User logged in successfully!",
     }),
