@@ -421,6 +421,53 @@ const getCreateReceptionReservationSchema = () =>
       path: ["checkOutDate"],
     });
 
+function getCreateBlogSchema() {
+  return z.object({
+    user: z
+      .string()
+      .regex(mongoDbObjectIdRegexp, "User ID must be a valid MongoDB ObjectId"),
+
+    title: z
+      .string("Title is required")
+      .trim()
+      .min(1, "Title is required")
+      .max(200, "Title cannot exceed 200 characters"),
+
+    content: z
+      .string("Content is required")
+      .trim()
+      .min(1, "Content is required")
+      .max(10000, "Content cannot exceed 10000 characters"),
+
+    author: z
+      .string("Author is required")
+      .trim()
+      .min(1, "Author is required")
+      .max(100, "Author cannot exceed 100 characters"),
+
+    publishedDate: z.coerce
+      .date({
+        message: "Published date must be a valid date",
+      })
+      .optional(),
+
+    releaseDate: z.coerce
+      .date({
+        message: "Release date must be a valid date",
+      })
+      .optional(),
+
+    image: z
+      .file()
+      .max(5 * 1024 * 1024, "Image size must be less than 5MB")
+      .optional(),
+  });
+}
+
+function getUpdateBlogSchema() {
+  return getCreateBlogSchema().partial();
+}
+
 // wrapper for zod schema validation
 function validateBody<T>(schema: ZodSchema<T>, body: unknown): T {
   const result = schema.safeParse(body);
@@ -470,6 +517,8 @@ type CreateWebReservationBody = z.infer<
 type CreateReceptionReservationBody = z.infer<
   ReturnType<typeof getCreateReceptionReservationSchema>
 >;
+type CreateBlogBody = z.infer<ReturnType<typeof getCreateBlogSchema>>;
+type UpdateBlogBody = z.infer<ReturnType<typeof getUpdateBlogSchema>>;
 
 export {
   getRegisterSchema,
@@ -490,6 +539,8 @@ export {
   getUpdateCustomerSchema,
   getCreateWebReservationSchema,
   getCreateReceptionReservationSchema,
+  getCreateBlogSchema,
+  getUpdateBlogSchema,
   validateBody,
 };
 
@@ -512,4 +563,6 @@ export type {
   UpdateCustomerBody,
   CreateWebReservationBody,
   CreateReceptionReservationBody,
+  CreateBlogBody,
+  UpdateBlogBody,
 };

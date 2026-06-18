@@ -44,6 +44,19 @@ function AppJumbotron({ className }: { className?: string }) {
   const navItemClass =
     "relative cursor-pointer after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full";
 
+  function navigateToRoomsAndSuites() {
+    const segments = pathname.split("/");
+    segments.push("rooms-suites");
+    router.push(segments.join("/"));
+  }
+
+  function navigateToAboutUs() {
+    console.log("jhity");
+    const segments = pathname.split("/");
+    segments.push("about-us");
+    router.push(segments.join("/"));
+  }
+
   return (
     <div
       className={twMerge(
@@ -82,7 +95,10 @@ function AppJumbotron({ className }: { className?: string }) {
               <DropdownMenuItem className="cursor-pointer">
                 {t("home.home")}
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onMouseUp={navigateToRoomsAndSuites}
+              >
                 {t("home.rooms_and_suites")}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
@@ -94,7 +110,10 @@ function AppJumbotron({ className }: { className?: string }) {
               <DropdownMenuItem className="cursor-pointer">
                 {t("home.blog")}
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onMouseUp={navigateToAboutUs}
+              >
                 {t("home.about_us")}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
@@ -128,11 +147,15 @@ function AppJumbotron({ className }: { className?: string }) {
       </div>
       <ul className="collapse sm:visible flex items-center gap-8 mx-auto select-none w-full justify-center my-9 font-bold text-white text-xl">
         <li className={navItemClass}>{t("home.home")}</li>
-        <li className={navItemClass}>{t("home.rooms_and_suites")}</li>
+        <li className={navItemClass} onMouseUp={navigateToRoomsAndSuites}>
+          {t("home.rooms_and_suites")}
+        </li>
         <li className={navItemClass}>{t("home.restaurant")}</li>
         <li className={navItemClass}>{t("home.gallery")}</li>
         <li className={navItemClass}>{t("home.blog")}</li>
-        <li className={navItemClass}>{t("home.about_us")}</li>
+        <li className={navItemClass} onMouseUp={navigateToAboutUs}>
+          {t("home.about_us")}
+        </li>
         <li className={navItemClass}>{t("home.contact_us")}</li>
         <li
           className={navItemClass}

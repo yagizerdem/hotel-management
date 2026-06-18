@@ -6,6 +6,7 @@ import { FeatureCatalog } from "./app-feature-catalog";
 import { AppJumbotron } from "./app-jumbutron";
 import { AppRoomsSuites } from "./app-rooms-suites";
 import { BankingLogoList } from "./banking-logo-list";
+import BookingFooter from "./booking-footer";
 
 export default async function Home() {
   return (
@@ -18,6 +19,8 @@ export default async function Home() {
       <AppDemo />
       <BankingLogoList />
       <Footer />
+      <div className="pb-30"></div>
+      <BookingFooter />
     </div>
   );
 }
