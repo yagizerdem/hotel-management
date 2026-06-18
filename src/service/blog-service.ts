@@ -1,4 +1,6 @@
+import { randomUUID } from "crypto";
 import { AppError } from "../lib/app-error";
+import { bucket } from "../lib/firebase-admin";
 import HttpStatusCode from "../lib/http-status-code";
 import { CreateBlogBody, UpdateBlogBody } from "../lib/validators";
 import { Blog } from "../models/blog";
@@ -68,4 +70,34 @@ async function updateBlogById(blogId: string, blogData: UpdateBlogBody) {
   return updatedBlog;
 }
 
-export { createBlog, deleteBlogById, ensureBlogExistById, updateBlogById };
+async function uploadBlogImage(blob: Blob) {
+  try {
+    const buffer = Buffer.from(await blob.arrayBuffer());
+
+    const fileName = `${process.env.FIREBASE_ADMIN_STORAGE_BUCKET_NAME}/${randomUUID()}.png`;
+
+    await bucket.file(fileName).save(buffer, {
+      metadata: {
+        contentType: blob.type || "image/png",
+      },
+    });
+
+    return `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+  } catch (error) {
+    console.log("Error uploading image:", error);
+
+    throw new AppError({
+      message: "Failed to upload image",
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      isOperational: true,
+    });
+  }
+}
+
+export {
+  createBlog,
+  deleteBlogById,
+  ensureBlogExistById,
+  updateBlogById,
+  uploadBlogImage,
+};

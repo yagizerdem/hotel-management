@@ -457,10 +457,9 @@ function getCreateBlogSchema() {
       })
       .optional(),
 
-    imageUri: z
-      .string("Image URI must be a string")
-      .trim()
-      .max(2000, "Image URI cannot exceed 2000 characters")
+    image: z
+      .file()
+      .max(5 * 1024 * 1024, "Image size must be less than 5MB")
       .optional(),
   });
 }
