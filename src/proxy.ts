@@ -36,6 +36,7 @@ const protectedRoutePatterns = [
   /^\/api\/blog\/create$/,
   /^\/api\/blog\/update\/[^/]+$/,
   /^\/api\/blog\/delete\/[^/]+$/,
+  /^\/api\/blog\/get-blog-img-uri\/[^/]+$/,
 ];
 
 type AuthJwtPayload = {
@@ -172,6 +173,7 @@ export const config = {
     "/api/blog/create",
     "/api/blog/update/:id",
     "/api/blog/delete/:id",
+    "/api/blog/get-blog-img-uri/:id",
 
     // Skip all internal paths (_next)
     "/((?!_next).*)",

@@ -94,6 +94,46 @@ async function uploadBlogImage(blob: Blob) {
   }
 }
 
+async function deleteBlogImageByPath(imagePath: string) {
+  try {
+    const file = bucket.file(imagePath);
+    await file.delete();
+  } catch (error) {
+    console.log("Error deleting image:", error);
+
+    throw new AppError({
+      message: "Failed to delete image",
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      isOperational: true,
+    });
+  }
+}
+
+async function deleteBlogImageByBlogId(blogId: string) {
+  try {
+    const blog = await ensureBlogExistById(blogId);
+
+    if (!blog.imagePath || blog.imagePath === "") {
+      throw new AppError({
+        message: "Blog does not have an image",
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        isOperational: true,
+      });
+    }
+
+    const file = bucket.file(blog.imagePath);
+    await file.delete();
+  } catch (error) {
+    console.log("Error deleting image:", error);
+
+    throw new AppError({
+      message: "Failed to delete image",
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      isOperational: true,
+    });
+  }
+}
+
 async function getBlogImage(blogId: string) {
   const blog = await ensureBlogExistById(blogId);
 
@@ -114,4 +154,6 @@ export {
   updateBlogById,
   uploadBlogImage,
   getBlogImage,
+  deleteBlogImageByPath,
+  deleteBlogImageByBlogId,
 };

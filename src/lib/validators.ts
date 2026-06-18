@@ -423,10 +423,6 @@ const getCreateReceptionReservationSchema = () =>
 
 function getCreateBlogSchema() {
   return z.object({
-    user: z
-      .string()
-      .regex(mongoDbObjectIdRegexp, "User ID must be a valid MongoDB ObjectId"),
-
     title: z
       .string("Title is required")
       .trim()
