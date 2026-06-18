@@ -1,6 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
-const blogSchema = new mongoose.Schema(
+export interface IBlog extends Document {
+  user: Types.ObjectId;
+  title: string;
+  content: string;
+  author: string;
+  publishedDate: Date;
+  releaseDate: Date;
+  imagePath?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const blogSchema = new mongoose.Schema<IBlog>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,7 +24,7 @@ const blogSchema = new mongoose.Schema(
     author: { type: String, required: true },
     publishedDate: { type: Date, default: Date.now },
     releaseDate: { type: Date, default: Date.now },
-    imageUri: { type: String, required: false },
+    imagePath: { type: String, required: false },
   },
   { timestamps: true },
 );

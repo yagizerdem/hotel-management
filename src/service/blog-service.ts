@@ -3,7 +3,7 @@ import { AppError } from "../lib/app-error";
 import { bucket } from "../lib/firebase-admin";
 import HttpStatusCode from "../lib/http-status-code";
 import { CreateBlogBody, UpdateBlogBody } from "../lib/validators";
-import { Blog } from "../models/blog";
+import { Blog, IBlog } from "../models/blog";
 import { User } from "../models/user";
 
 async function createBlog({
@@ -35,7 +35,7 @@ async function deleteBlogById(blogId: string) {
   return deletedBlog;
 }
 
-async function ensureBlogExistById(blogId: string) {
+async function ensureBlogExistById(blogId: string): Promise<IBlog> {
   const blog = await Blog.findById(blogId);
 
   if (!blog) {
@@ -74,7 +74,7 @@ async function uploadBlogImage(blob: Blob) {
   try {
     const buffer = Buffer.from(await blob.arrayBuffer());
 
-    const fileName = `${process.env.FIREBASE_ADMIN_STORAGE_BUCKET_NAME}/${randomUUID()}.png`;
+    const fileName = `blog-images/${randomUUID()}.png`;
 
     await bucket.file(fileName).save(buffer, {
       metadata: {
@@ -82,7 +82,7 @@ async function uploadBlogImage(blob: Blob) {
       },
     });
 
-    return `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+    return fileName;
   } catch (error) {
     console.log("Error uploading image:", error);
 
@@ -94,10 +94,24 @@ async function uploadBlogImage(blob: Blob) {
   }
 }
 
+async function getBlogImage(blogId: string) {
+  const blog = await ensureBlogExistById(blogId);
+
+  const file = bucket.file(blog.imagePath);
+
+  const [url] = await file.getSignedUrl({
+    action: "read",
+    expires: Date.now() + 1000 * 60 * 60, // 1 hour
+  });
+
+  return url;
+}
+
 export {
   createBlog,
   deleteBlogById,
   ensureBlogExistById,
   updateBlogById,
   uploadBlogImage,
+  getBlogImage,
 };

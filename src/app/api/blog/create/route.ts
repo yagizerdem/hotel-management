@@ -12,7 +12,7 @@ import { AppError } from "@/src/lib/app-error";
 import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
-import { createBlog } from "@/src/service/blog-service";
+import { createBlog, uploadBlogImage } from "@/src/service/blog-service";
 
 async function handler(req: NextRequest) {
   await dbConnect();
@@ -40,9 +40,37 @@ async function handler(req: NextRequest) {
     message: "Unauthorized: do not have permission to create blog",
   });
 
-  const body = await req.json();
+  const formData = await req.formData();
+
+  const body = {
+    user: formData.get("user"),
+    title: formData.get("title"),
+    content: formData.get("content"),
+    author: formData.get("author"),
+    publishedDate: formData.get("publishedDate"),
+    releaseDate: formData.get("releaseDate"),
+  };
+
   const blogData = validateBody<CreateBlogBody>(getCreateBlogSchema(), body);
-  const blog = await createBlog({ _id: userFromDb._id, blogData });
+
+  const imageFile = formData.get("image") as Blob | null;
+  let uploadedImageUrl: string | null = null;
+
+  if (imageFile) {
+    uploadedImageUrl = await uploadBlogImage(imageFile);
+  }
+
+  const { image, ...blogDataWithoutImage } = blogData;
+
+  const blogDataWithImagePath = {
+    ...blogDataWithoutImage,
+    imagePath: uploadedImageUrl,
+  };
+
+  const blog = await createBlog({
+    _id: userFromDb._id,
+    blogData: blogDataWithImagePath,
+  });
 
   return NextResponse.json(
     ApiResponse.created({

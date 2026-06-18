@@ -33,6 +33,9 @@ const protectedRoutePatterns = [
   /^\/api\/web\/book$/,
   /^\/api\/web\/cancel-book\/[^/]+$/,
   /^\/api\/reception\/book$/,
+  /^\/api\/blog\/create$/,
+  /^\/api\/blog\/update\/[^/]+$/,
+  /^\/api\/blog\/delete\/[^/]+$/,
 ];
 
 type AuthJwtPayload = {
@@ -112,9 +115,16 @@ function getLocale(req: NextRequest) {
 }
 
 export default async function proxy(req: NextRequest) {
-  await authenticationHandler(req);
+  const authReq = await authenticationHandler(req);
 
   const { pathname } = req.nextUrl;
+
+  // do not localize API routes, only localize page routes
+  if (pathname.startsWith("/api/")) {
+    return authReq;
+  }
+
+  // Localization - Internalization
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
   );
@@ -159,6 +169,9 @@ export const config = {
     "/api/web/book",
     "/api/web/cancel-book/:id",
     "/api/reception/book",
+    "/api/blog/create",
+    "/api/blog/update/:id",
+    "/api/blog/delete/:id",
 
     // Skip all internal paths (_next)
     "/((?!_next).*)",
