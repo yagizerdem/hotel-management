@@ -259,4 +259,9 @@ async function cancelBooking(reservationId: string) {
   return reservation;
 }
 
-export { createReservation, cancelBooking, createReservationBulk };
+export {
+  createReservation,
+  cancelBooking,
+  createReservationBulk,
+  calculateExpense,
+};

@@ -4,6 +4,17 @@ import { createContext, useContext, useState } from "react";
 import { api } from "../lib/axios-api";
 import { ApiResponse } from "../lib/api-response";
 import { IRoom } from "../models/room";
+import { toast } from "sonner";
+import { ExpenseResponse } from "../app/api/web/calculate-reservation-price-bulk/route";
+
+export type PackageType = "FULL_BOARD" | "ALL_INCLUSIVE";
+
+export interface BookingRecord {
+  checkInDate: Date;
+  checkOutDate: Date;
+  packageType: PackageType;
+  room: IRoom;
+}
 
 type BookingProviderProps = {
   children: React.ReactNode;
@@ -16,6 +27,10 @@ type BookingProviderState = {
   adultCount: number;
   childCount: number;
   rooms: IRoom[];
+  bookingRecords: BookingRecord[];
+  isCalculatingExpenses: boolean;
+  expenseData: ExpenseResponse[];
+  setBookingRecords: React.Dispatch<React.SetStateAction<BookingRecord[]>>;
   setCheckInDate: (date: Date | null) => void;
   setCheckOutDate: (date: Date | null) => void;
   setRoomCount: (count: number) => void;
@@ -23,6 +38,9 @@ type BookingProviderState = {
   setChildCount: (count: number) => void;
   getAvailableRooms: () => Promise<ApiResponse<IRoom[]>>;
   setRooms: (rooms: IRoom[]) => void;
+  addToBookingRecords: (record: BookingRecord) => void;
+  removeBookingRecord: (roomId: string) => void;
+  setIsCalculatingExpenses: (isCalculating: boolean) => void;
 };
 
 const BookingProviderContext = createContext<BookingProviderState | undefined>(
@@ -36,6 +54,10 @@ export function BookingProvider({ children }: BookingProviderProps) {
   const [adultCount, setAdultCount] = useState<number>(2);
   const [childCount, setChildCount] = useState<number>(0);
   const [rooms, setRooms] = useState<IRoom[]>([]);
+  const [bookingRecords, setBookingRecords] = useState<BookingRecord[]>([]);
+  const [isCalculatingExpenses, setIsCalculatingExpenses] =
+    useState<boolean>(false);
+  const [expenseData, setExpenseData] = useState<ExpenseResponse[]>([]);
 
   async function getAvailableRooms(): Promise<ApiResponse<IRoom[]>> {
     const apiResponse: ApiResponse<IRoom[]> = (
@@ -51,6 +73,86 @@ export function BookingProvider({ children }: BookingProviderProps) {
     return apiResponse;
   }
 
+  async function addToBookingRecords(record: BookingRecord) {
+    try {
+      setIsCalculatingExpenses(true);
+
+      const newCheckIn = new Date(record.checkInDate).getTime();
+      const newCheckOut = new Date(record.checkOutDate).getTime();
+
+      const isOverlapping = bookingRecords.some((existingRecord) => {
+        if (record.room._id !== existingRecord.room._id) {
+          return false;
+        }
+
+        const existingCheckIn = new Date(existingRecord.checkInDate).getTime();
+        const existingCheckOut = new Date(
+          existingRecord.checkOutDate,
+        ).getTime();
+
+        return newCheckIn < existingCheckOut && newCheckOut > existingCheckIn;
+      });
+
+      if (isOverlapping) {
+        toast.error("This room is already booked for the selected dates.", {
+          position: "top-right",
+        });
+        return;
+      }
+
+      const newRecords = [...bookingRecords, record];
+
+      setBookingRecords(newRecords);
+
+      const payload = newRecords.map((rec) => ({
+        checkInDate: rec.checkInDate.toISOString(),
+        checkOutDate: rec.checkOutDate.toISOString(),
+        packageType: rec.packageType,
+        room: rec.room._id.toString(),
+      }));
+
+      const response: ApiResponse<ExpenseResponse[]> = (
+        await api.post("/web/calculate-reservation-price-bulk", {
+          reservations: payload,
+        })
+      ).data;
+
+      if (response.status.toString().startsWith("2")) {
+        const expenseData = response.data;
+        setExpenseData(expenseData ?? []);
+        console.log(expenseData);
+        toast.success("Room added to booking records.", {
+          position: "top-right",
+        });
+      } else {
+        console.log(
+          response.message ?? "Failed to calculate reservation prices",
+        );
+      }
+    } catch (error) {
+      console.error("Error adding booking record:", error);
+      toast.error("An error occurred while adding the booking record.", {
+        position: "top-right",
+      });
+    } finally {
+      setIsCalculatingExpenses(false);
+    }
+  }
+
+  function removeBookingRecord(roomId: string) {
+    // remove record
+    const updatedRecords = bookingRecords.filter(
+      (record) => record.room._id !== roomId,
+    );
+    setBookingRecords(updatedRecords);
+
+    // remove expense data
+    const updatedExpenseData = expenseData.filter(
+      (expense) => expense.roomId !== roomId,
+    );
+    setExpenseData(updatedExpenseData);
+  }
+
   const value: BookingProviderState = {
     checkInDate,
     checkOutDate,
@@ -58,6 +160,12 @@ export function BookingProvider({ children }: BookingProviderProps) {
     adultCount,
     childCount,
     rooms,
+    bookingRecords,
+    isCalculatingExpenses,
+    expenseData,
+    setIsCalculatingExpenses,
+    setBookingRecords,
+    addToBookingRecords,
     setCheckInDate,
     setCheckOutDate,
     setRoomCount,
@@ -65,6 +173,7 @@ export function BookingProvider({ children }: BookingProviderProps) {
     setChildCount,
     getAvailableRooms,
     setRooms,
+    removeBookingRecord,
   };
 
   return (
