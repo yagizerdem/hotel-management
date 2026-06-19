@@ -29,6 +29,7 @@ type BookingProviderState = {
   rooms: IRoom[];
   bookingRecords: BookingRecord[];
   isCalculatingExpenses: boolean;
+  expenseData: ExpenseResponse[];
   setBookingRecords: React.Dispatch<React.SetStateAction<BookingRecord[]>>;
   setCheckInDate: (date: Date | null) => void;
   setCheckOutDate: (date: Date | null) => void;
@@ -38,6 +39,7 @@ type BookingProviderState = {
   getAvailableRooms: () => Promise<ApiResponse<IRoom[]>>;
   setRooms: (rooms: IRoom[]) => void;
   addToBookingRecords: (record: BookingRecord) => void;
+  removeBookingRecord: (roomId: string) => void;
   setIsCalculatingExpenses: (isCalculating: boolean) => void;
 };
 
@@ -74,7 +76,6 @@ export function BookingProvider({ children }: BookingProviderProps) {
   async function addToBookingRecords(record: BookingRecord) {
     try {
       setIsCalculatingExpenses(true);
-      setExpenseData([]); // Clear previous expense data
 
       const newCheckIn = new Date(record.checkInDate).getTime();
       const newCheckOut = new Date(record.checkOutDate).getTime();
@@ -120,6 +121,9 @@ export function BookingProvider({ children }: BookingProviderProps) {
         const expenseData = response.data;
         setExpenseData(expenseData ?? []);
         console.log(expenseData);
+        toast.success("Room added to booking records.", {
+          position: "top-right",
+        });
       } else {
         console.log(
           response.message ?? "Failed to calculate reservation prices",
@@ -135,6 +139,20 @@ export function BookingProvider({ children }: BookingProviderProps) {
     }
   }
 
+  function removeBookingRecord(roomId: string) {
+    // remove record
+    const updatedRecords = bookingRecords.filter(
+      (record) => record.room._id !== roomId,
+    );
+    setBookingRecords(updatedRecords);
+
+    // remove expense data
+    const updatedExpenseData = expenseData.filter(
+      (expense) => expense.roomId !== roomId,
+    );
+    setExpenseData(updatedExpenseData);
+  }
+
   const value: BookingProviderState = {
     checkInDate,
     checkOutDate,
@@ -144,6 +162,7 @@ export function BookingProvider({ children }: BookingProviderProps) {
     rooms,
     bookingRecords,
     isCalculatingExpenses,
+    expenseData,
     setIsCalculatingExpenses,
     setBookingRecords,
     addToBookingRecords,
@@ -154,6 +173,7 @@ export function BookingProvider({ children }: BookingProviderProps) {
     setChildCount,
     getAvailableRooms,
     setRooms,
+    removeBookingRecord,
   };
 
   return (

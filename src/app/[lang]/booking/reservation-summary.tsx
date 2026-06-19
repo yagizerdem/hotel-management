@@ -1,17 +1,30 @@
 "use client";
 
-import { ChevronRight, Globe2, PhoneOff, WifiOff } from "lucide-react";
+import {
+  ChevronRight,
+  Globe2,
+  PhoneOff,
+  SeparatorVertical,
+  WifiOff,
+} from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { twMerge } from "tailwind-merge";
 import { useBooking } from "@/src/provider/booking-provider";
 import { AppLoader } from "@/src/components/shared/app-spinner";
+import { Separator } from "@/src/components/ui/separator";
 
 export default function ReservationSummary({
   className,
 }: {
   className?: string;
 }) {
-  const { bookingRecords, isCalculatingExpenses } = useBooking();
+  const {
+    bookingRecords,
+    isCalculatingExpenses,
+    rooms,
+    expenseData,
+    removeBookingRecord,
+  } = useBooking();
 
   function handleReservation() {
     console.log("hafljakj");
@@ -54,17 +67,37 @@ export default function ReservationSummary({
             <p>
               Check-out: {new Date(record.checkOutDate).toLocaleDateString()}
             </p>
-            {/* <p>
-              Total: {record.totalPrice} {record.currency}
+            <p>
+              Total:{" "}
+              {expenseData.find((expense) => expense.roomId === record.room._id)
+                ?.totalExpense ?? 0}
             </p>
-            <p>Status: {record.status}</p> */}
+            <p>
+              Nightly:{" "}
+              {expenseData.find((expense) => expense.roomId === record.room._id)
+                ?.nightlyExpense ?? 0}
+            </p>
+            <button
+              className="mt-2 text-sm text-red-500 underline cursor-pointer"
+              onClick={() => removeBookingRecord(record.room._id)}
+            >
+              Remove
+            </button>
+            <Separator />
           </div>
         ))}
       </div>
 
       <div className="mt-3 text-center">
         <p className="text-base">
-          Toplam*: <b>0 €</b>
+          Toplam*:{" "}
+          <b>
+            {expenseData.reduce(
+              (total, expense) => total + expense.totalExpense,
+              0,
+            )}{" "}
+            €
+          </b>
         </p>
 
         <div className="mx-5 mt-1 border-t border-gray-300 pt-2">
@@ -78,7 +111,7 @@ export default function ReservationSummary({
           </Button>
         </div>
 
-        <button className="mt-3 text-base underline">
+        <button className="mt-3 text-base underline cursor-pointer">
           Promosyon kodu girmek istiyorum
         </button>
       </div>
