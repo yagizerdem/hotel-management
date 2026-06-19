@@ -19,6 +19,7 @@ import { ApiResponse } from "@/src/lib/api-response";
 import { IUser, IUserCredentials } from "@/src/models/user";
 import { toast } from "sonner";
 import { useAuth } from "@/src/provider/auth-provider";
+import { useApp } from "@/src/provider/app-provider";
 
 type JwtToken = { token: string };
 type Role = { role: string };
@@ -32,8 +33,11 @@ export default function Header() {
   const { setCredentials, setIsLoggedIn, setRole, isLoggedIn, credentials } =
     useAuth();
 
+  const { setIsLoading } = useApp();
+
   async function registerUser() {
     try {
+      setIsLoading(true);
       const apiResponse: ApiResponse<IUser> = (
         await api.post("/auth/register", {
           username,
@@ -61,11 +65,13 @@ export default function Header() {
         position: "top-right",
       });
     } finally {
+      setIsLoading(false);
     }
   }
 
   async function loginUser() {
     try {
+      setIsLoading(true);
       const apiResponse: ApiResponse<IUserCredentials & JwtToken & Role> = (
         await api.post("/auth/login", {
           email,
@@ -99,11 +105,13 @@ export default function Header() {
         position: "top-right",
       });
     } finally {
+      setIsLoading(false);
     }
   }
 
   async function logoutUser() {
     try {
+      setIsLoading(true);
       const apiResponse: ApiResponse<null> = (await api.post("/auth/logout"))
         .data;
 
@@ -129,6 +137,7 @@ export default function Header() {
         position: "top-right",
       });
     } finally {
+      setIsLoading(false);
     }
   }
 
