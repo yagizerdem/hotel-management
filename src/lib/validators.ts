@@ -326,10 +326,6 @@ function getUpdateGovernorReportSchema() {
 
 function getCreateCustomerSchema() {
   return z.object({
-    user: z
-      .string()
-      .regex(mongoDbObjectIdRegexp, "User ID must be a valid MongoDB ObjectId"),
-
     firstName: z
       .string()
       .trim()
@@ -393,6 +389,28 @@ const getCreateWebReservationSchema = () =>
       message: "checkOutDate must be after checkInDate",
       path: ["checkOutDate"],
     });
+
+const getCreateWebReservationBulkSchema = () =>
+  z.object({
+    reservations: z.array(getCreateWebReservationSchema()).refine(
+      (data) => {
+        const hasOverlappingReservations = data.some((reservation, index) => {
+          return data.some((otherReservation, otherIndex) => {
+            if (index === otherIndex) return false;
+            return (
+              reservation.room === otherReservation.room &&
+              reservation.checkInDate < otherReservation.checkOutDate &&
+              reservation.checkOutDate > otherReservation.checkInDate
+            );
+          });
+        });
+        return !hasOverlappingReservations;
+      },
+      {
+        message: "Reservations cannot overlap for the same room",
+      },
+    ),
+  });
 
 const getCreateReceptionReservationSchema = () =>
   z
@@ -514,6 +532,10 @@ type CreateWebReservationBody = z.infer<
 type CreateReceptionReservationBody = z.infer<
   ReturnType<typeof getCreateReceptionReservationSchema>
 >;
+type CreateWebReservationBulkBody = z.infer<
+  ReturnType<typeof getCreateWebReservationBulkSchema>
+>;
+
 type CreateBlogBody = z.infer<ReturnType<typeof getCreateBlogSchema>>;
 type UpdateBlogBody = z.infer<ReturnType<typeof getUpdateBlogSchema>>;
 
@@ -535,6 +557,7 @@ export {
   getCreateCustomerSchema,
   getUpdateCustomerSchema,
   getCreateWebReservationSchema,
+  getCreateWebReservationBulkSchema,
   getCreateReceptionReservationSchema,
   getCreateBlogSchema,
   getUpdateBlogSchema,
@@ -559,6 +582,7 @@ export type {
   CreateCustomerBody,
   UpdateCustomerBody,
   CreateWebReservationBody,
+  CreateWebReservationBulkBody,
   CreateReceptionReservationBody,
   CreateBlogBody,
   UpdateBlogBody,
