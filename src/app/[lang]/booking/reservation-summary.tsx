@@ -1,12 +1,19 @@
+"use client";
+
 import { ChevronRight, Globe2, PhoneOff, WifiOff } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { twMerge } from "tailwind-merge";
+import { useBooking } from "@/src/provider/booking-provider";
 
 export default function ReservationSummary({
   className,
 }: {
   className?: string;
 }) {
+  const { bookingRecords } = useBooking();
+
+  console.log(bookingRecords);
+
   return (
     <aside
       className={twMerge(
@@ -22,7 +29,25 @@ export default function ReservationSummary({
       </p>
 
       <div className="mt-2 bg-white px-3 py-4 text-base text-slate-900">
-        Lütfen bir oda seçin
+        {bookingRecords.length === 0 && <span>Lütfen bir oda seçin</span>}
+        {bookingRecords.map((record, index) => (
+          <div
+            key={record.room._id ?? index}
+            className="mb-2 rounded-md border p-3"
+          >
+            <p className="font-medium">Booking #{index + 1}</p>
+
+            <p>Package: {record.packageType}</p>
+            <p>Check-in: {new Date(record.checkInDate).toLocaleDateString()}</p>
+            <p>
+              Check-out: {new Date(record.checkOutDate).toLocaleDateString()}
+            </p>
+            {/* <p>
+              Total: {record.totalPrice} {record.currency}
+            </p>
+            <p>Status: {record.status}</p> */}
+          </div>
+        ))}
       </div>
 
       <div className="mt-3 text-center">

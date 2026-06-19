@@ -1,7 +1,7 @@
 import {
   validateBody,
-  CreateWebReservationBody,
-  getCreateWebReservationSchema,
+  CreateWebReservationBulkBody,
+  getCreateWebReservationBulkSchema,
 } from "@/src/lib/validators";
 import { withErrorHandler } from "@/src/lib/with-error-handler";
 import { NextRequest, NextResponse } from "next/server";
@@ -46,19 +46,34 @@ async function handler(req: NextRequest) {
 
   const body = await req.json();
 
-  validateBody<CreateWebReservationBody>(getCreateWebReservationSchema(), body);
+  validateBody<CreateWebReservationBulkBody>(
+    getCreateWebReservationBulkSchema(),
+    body,
+  );
 
-  const reservation = await calculateExpense(body as ReservationDocument);
-  const totalExpense = reservation.totalPrice;
-  const nighlyExpense = reservation.nightlyPrice;
+  const expense: {
+    roomId: string;
+    totalExpense: number;
+    nightlyExpense: number;
+  }[] = [];
+
+  for (let i = 0; i < body.reservations.length; i++) {
+    const reservation = body.reservations[i] as ReservationDocument;
+
+    const calculatedReservation: ReservationDocument =
+      await calculateExpense(reservation);
+
+    expense.push({
+      roomId: reservation.room.toString(),
+      totalExpense: calculatedReservation.totalPrice,
+      nightlyExpense: calculatedReservation.nightlyPrice,
+    });
+  }
 
   return NextResponse.json(
     ApiResponse.ok({
-      data: {
-        totalExpense,
-        nighlyExpense,
-      },
-      message: "Successfully calculated reservation price",
+      data: expense,
+      message: "Successfully calculated reservation prices",
     }),
     {
       status: HttpStatusCode.OK,

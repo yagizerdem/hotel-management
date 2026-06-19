@@ -54,8 +54,6 @@ export default function SearchBar() {
     setCheckOutDate(new Date(checkOut));
   }, [checkIn, checkOut, setCheckInDate, setCheckOutDate]);
 
-  console.log(rooms);
-
   async function handleSearch() {
     try {
       setIsLoading(true);

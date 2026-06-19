@@ -20,10 +20,11 @@ import {
 } from "lucide-react";
 import { IRoom } from "@/src/models/room";
 import { Button } from "@base-ui/react";
-import { useBooking } from "@/src/provider/booking-provider";
+import { BookingRecord, useBooking } from "@/src/provider/booking-provider";
 import { twMerge } from "tailwind-merge";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { toast } from "sonner";
 
 function RoomList({ className }: { className?: string }) {
   const { rooms } = useBooking();
@@ -49,6 +50,29 @@ interface RoomCardProps {
 function RoomCard({ room }: RoomCardProps) {
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [packageType, setPackageType] = useState<
+    "FULL_BOARD" | "ALL_INCLUSIVE"
+  >("FULL_BOARD");
+  const { addToBookingRecords, checkInDate, checkOutDate } = useBooking();
+
+  function handleBook() {
+    if (checkInDate === null || checkOutDate === null) {
+      toast.error("Please select check-in and check-out dates.", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    const bookingRecord: BookingRecord = {
+      checkInDate: checkInDate,
+      checkOutDate: checkOutDate,
+      packageType,
+      room,
+    };
+
+    addToBookingRecords(bookingRecord);
+  }
 
   useEffect(() => {
     const el = contentRef.current;
@@ -170,9 +194,49 @@ function RoomCard({ room }: RoomCardProps) {
         <Button
           className="w-full h-fit p-2 mx-auto rounded-sm cursor-pointer 
          bg-text-foreground hover:bg-text-foreground-dark transition-colors duration-300"
+          onClick={() => setBookingOpen((prev) => !prev)}
         >
           Book Now
         </Button>
+
+        {bookingOpen && (
+          <div className="rounded-lg border p-3 space-y-3">
+            <label className="text-sm font-semibold">Select Package Type</label>
+            <hr />
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                onClick={() => setPackageType("FULL_BOARD")}
+                className={twMerge(
+                  "border-gray-300 border-2 rounded-md cursor-pointer",
+                  packageType === "FULL_BOARD" &&
+                    "bg-text-foreground text-white hover:bg-text-foreground-dark",
+                )}
+              >
+                Full Board
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => setPackageType("ALL_INCLUSIVE")}
+                className={twMerge(
+                  "border-gray-300 border-2 rounded-md cursor-pointer",
+                  packageType === "ALL_INCLUSIVE" &&
+                    "bg-text-foreground text-white hover:bg-text-foreground-dark",
+                )}
+              >
+                All Inclusive
+              </Button>
+            </div>
+            <br />
+            <Button
+              className="font-bold w-full bg-text-foreground hover:bg-text-foreground-dark transition-colors duration-300 cursor-pointer p-4 rounded-sm"
+              onClick={handleBook}
+            >
+              Continue Booking
+            </Button>
+          </div>
+        )}
 
         <div ref={contentRef} className="h-0 overflow-hidden opacity-0">
           {room.description && (
