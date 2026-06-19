@@ -32,6 +32,7 @@ const protectedRoutePatterns = [
   /^\/api\/web\/create-customer$/,
   /^\/api\/web\/update-customer$/,
   /^\/api\/web\/book$/,
+  /^\/api\/web\/get-profile$/,
   /^\/api\/web\/cancel-book\/[^/]+$/,
   /^\/api\/web\/update-customer$/,
   /^\/api\/web\/calculate-reservation-price$/,

@@ -15,6 +15,12 @@ import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { calculateExpense } from "@/src/service/reservation-service";
 import type { ReservationDocument } from "@/src/models/reservation";
 
+interface ExpenseResponse {
+  roomId: string;
+  totalExpense: number;
+  nightlyExpense: number;
+}
+
 async function handler(req: NextRequest) {
   await dbConnect();
 
@@ -82,3 +88,5 @@ async function handler(req: NextRequest) {
 }
 
 export const POST = withErrorHandler(handler);
+
+export type { ExpenseResponse };

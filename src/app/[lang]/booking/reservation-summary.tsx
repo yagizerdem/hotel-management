@@ -4,15 +4,18 @@ import { ChevronRight, Globe2, PhoneOff, WifiOff } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { twMerge } from "tailwind-merge";
 import { useBooking } from "@/src/provider/booking-provider";
+import { AppLoader } from "@/src/components/shared/app-spinner";
 
 export default function ReservationSummary({
   className,
 }: {
   className?: string;
 }) {
-  const { bookingRecords } = useBooking();
+  const { bookingRecords, isCalculatingExpenses } = useBooking();
 
-  console.log(bookingRecords);
+  function handleReservation() {
+    console.log("hafljakj");
+  }
 
   return (
     <aside
@@ -28,7 +31,16 @@ export default function ReservationSummary({
         <b>(1 Gece)</b>
       </p>
 
-      <div className="mt-2 bg-white px-3 py-4 text-base text-slate-900">
+      <div className="relative mt-2 bg-white px-3 py-4 text-base text-slate-900">
+        {isCalculatingExpenses && (
+          <div className="w-full h-full absolute top-0 left-0 inset-0">
+            <div className="absolute top-0 left-0 inset-0 bg-black opacity-50"></div>
+            <div className="flex items-center justify-center h-full">
+              <AppLoader />
+            </div>
+          </div>
+        )}
+
         {bookingRecords.length === 0 && <span>Lütfen bir oda seçin</span>}
         {bookingRecords.map((record, index) => (
           <div
@@ -58,7 +70,10 @@ export default function ReservationSummary({
         <div className="mx-5 mt-1 border-t border-gray-300 pt-2">
           <p className="text-xs">*Bütün vergi ve ücretler toplam ücret dahil</p>
 
-          <Button className="mt-2 bg-[#d4b37e] text-white hover:bg-[#c7a46c]">
+          <Button
+            className="mt-2 bg-[#d4b37e] text-white hover:bg-[#c7a46c] cursor-pointer"
+            onMouseUp={handleReservation}
+          >
             Devam <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
