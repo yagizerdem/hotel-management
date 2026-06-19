@@ -16,6 +16,11 @@ const maintenanceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+maintenanceSchema.index(
+  { room: 1, startDate: 1, endDate: 1 },
+  { unique: false },
+);
+
 const Maintenance =
   mongoose.models.Maintenance ||
   mongoose.model("Maintenance", maintenanceSchema);

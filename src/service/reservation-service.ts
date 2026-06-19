@@ -113,6 +113,17 @@ async function createReservation(reservationData: ReservationDocument) {
   return reservation;
 }
 
+async function createReservationBulk(reservationsData: ReservationDocument[]) {
+  const createdReservations: ReservationDocument[] = [];
+
+  for (const reservationData of reservationsData) {
+    const createdReservation = await createReservation(reservationData);
+    createdReservations.push(createdReservation);
+  }
+
+  return createdReservations;
+}
+
 async function calculateExpense(
   reservation: ReservationDocument,
 ): Promise<ReservationDocument> {
@@ -248,4 +259,4 @@ async function cancelBooking(reservationId: string) {
   return reservation;
 }
 
-export { createReservation, cancelBooking };
+export { createReservation, cancelBooking, createReservationBulk };

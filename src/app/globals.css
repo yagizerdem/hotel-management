@@ -47,6 +47,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --color-text-foreground: var(--text-foreground);
+  --color-text-foreground-dark: var(--text-foreground-dark);
 }
 
 :root {
@@ -83,6 +84,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --text-foreground: #c29a5c;
+  --text-foreground-dark: #946a2b;
 }
 
 .dark {

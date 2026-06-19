@@ -6,6 +6,7 @@ import { L10nProvider } from "@/src/provider/l10n-provider";
 import { getDictionary, hasLocale } from "@/src/dictionaries/dictionaries";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
+import { Fragment } from "react/jsx-runtime";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
