@@ -27,6 +27,7 @@ interface IRoom {
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  description: string;
 }
 
 const roomSchema = new mongoose.Schema(
@@ -63,6 +64,7 @@ const roomSchema = new mongoose.Schema(
       default: "AVAILABLE",
     },
     isActive: { type: Boolean, default: true },
+    description: { type: String, default: "" },
   },
   { timestamps: true },
 );

@@ -93,6 +93,11 @@ function getCreateRoomSchema() {
     hasTv: z.boolean().optional(),
     hasHairDryer: z.boolean().optional(),
     hasWifi: z.boolean().optional(),
+    description: z
+      .string()
+      .trim()
+      .max(1000, "Description must be at most 1000 characters")
+      .optional(),
 
     status: z.enum(roomStatuses, "invalid room status").optional(),
     isActive: z.boolean().optional(),
