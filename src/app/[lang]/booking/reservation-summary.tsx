@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useApp } from "@/src/provider/app-provider";
 import { ApiResponse } from "@/src/lib/api-response";
 import { api } from "@/src/lib/axios-api";
+import { CreateWebReservationBulkBodyResponse } from "../../api/web/book-bulk/route";
 
 export default function ReservationSummary({
   className,
@@ -39,7 +40,7 @@ export default function ReservationSummary({
         return;
       }
 
-      const apiResponse: ApiResponse<null> = (
+      const apiResponse: ApiResponse<CreateWebReservationBulkBodyResponse> = (
         await api.post("/web/book-bulk", {
           reservations: bookingRecords.map((record) => ({
             room: record.room._id,
@@ -50,7 +51,9 @@ export default function ReservationSummary({
         })
       ).data;
 
-      console.log(apiResponse);
+      const checkoutUrl = apiResponse!.data!.checkoutUrl;
+
+      window.location.href = checkoutUrl;
 
       if (apiResponse.status.toString().startsWith("2")) {
         toast.success(apiResponse.message || "Reservation confirmed", {

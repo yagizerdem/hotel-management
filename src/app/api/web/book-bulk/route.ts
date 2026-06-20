@@ -15,6 +15,13 @@ import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { ensureCustomerExistByUserId } from "@/src/service/customer-service";
 import { createReservationBulk } from "@/src/service/reservation-service";
 import { ReservationDocument } from "@/src/models/reservation";
+import { stripe } from "@/src/lib/stripe-wrapper";
+
+export interface CreateWebReservationBulkBodyResponse {
+  reservations: ReservationDocument[];
+  checkoutUrl: string;
+  sessionId: string;
+}
 
 async function handler(req: NextRequest) {
   await dbConnect();
@@ -63,9 +70,44 @@ async function handler(req: NextRequest) {
 
   const response = await createReservationBulk(reservationsData);
 
+  const totalPrice = response.reduce(
+    (acc, reservation) => acc + reservation.totalPrice,
+    0,
+  );
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Room Reservation #${response.map((r) => r._id).join(", ")}`, // reservation ids as product name
+          },
+          unit_amount: totalPrice * 100, // usd
+        },
+        quantity: 1,
+      },
+    ],
+
+    success_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/reservation/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/reservation/cancel`,
+
+    metadata: {
+      reservationIds: response.map((r) => r._id.toString()).join(", "),
+      userId: _id!.toString(),
+      customerId: customer._id.toString(),
+    },
+  });
+
   return NextResponse.json(
     ApiResponse.created({
-      data: response,
+      data: {
+        reservations: response,
+        checkoutUrl: session.url,
+        sessionId: session.id,
+      },
       message: "Reservations created successfully!",
     }),
     {
