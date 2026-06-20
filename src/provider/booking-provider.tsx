@@ -6,6 +6,7 @@ import { ApiResponse } from "../lib/api-response";
 import { IRoom } from "../models/room";
 import { toast } from "sonner";
 import { ExpenseResponse } from "../app/api/web/calculate-reservation-price-bulk/route";
+import { useAuth } from "./auth-provider";
 
 export type PackageType = "FULL_BOARD" | "ALL_INCLUSIVE";
 
@@ -58,6 +59,7 @@ export function BookingProvider({ children }: BookingProviderProps) {
   const [isCalculatingExpenses, setIsCalculatingExpenses] =
     useState<boolean>(false);
   const [expenseData, setExpenseData] = useState<ExpenseResponse[]>([]);
+  const { isLoggedIn } = useAuth();
 
   async function getAvailableRooms(): Promise<ApiResponse<IRoom[]>> {
     const apiResponse: ApiResponse<IRoom[]> = (
@@ -75,6 +77,13 @@ export function BookingProvider({ children }: BookingProviderProps) {
 
   async function addToBookingRecords(record: BookingRecord) {
     try {
+      if (!isLoggedIn) {
+        toast.error("You must be logged in to add a booking record.", {
+          position: "top-right",
+        });
+        return;
+      }
+
       setIsCalculatingExpenses(true);
 
       const newCheckIn = new Date(record.checkInDate).getTime();
