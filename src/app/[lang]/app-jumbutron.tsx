@@ -18,21 +18,22 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuGroup,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuPortal,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuSub,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
 } from "@/src/components/ui/dropdown-menu";
+import { useAuth } from "@/src/provider/auth-provider";
+import { useApp } from "@/src/provider/app-provider";
+import { toast } from "sonner";
+import { ApiResponse } from "@/src/lib/api-response";
+import { api } from "@/src/lib/axios-api";
 
 function AppJumbotron({ className }: { className?: string }) {
   const { t, lang } = useL10n();
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoggedIn } = useAuth();
+  const { setIsLoading } = useApp();
+  const { setIsLoggedIn, setCredentials, setRole } = useAuth();
 
   function changeLang(nextLang: "en" | "tr") {
     const segments = pathname.split("/");
@@ -51,10 +52,50 @@ function AppJumbotron({ className }: { className?: string }) {
   }
 
   function navigateToAboutUs() {
-    console.log("jhity");
     const segments = pathname.split("/");
     segments.push("about-us");
     router.push(segments.join("/"));
+  }
+
+  function navigateToRegister() {
+    const segments = pathname.split("/");
+    segments.push("auth/register");
+    router.push(segments.join("/"));
+  }
+
+  function navigateToLogin() {
+    const segments = pathname.split("/");
+    segments.push("auth/login");
+    router.push(segments.join("/"));
+  }
+
+  async function logoutUser() {
+    try {
+      setIsLoading(true);
+      const apiResponse: ApiResponse<null> = (await api.post("/auth/logout"))
+        .data;
+
+      if (apiResponse.status.toString().startsWith("2")) {
+        toast.success(apiResponse.message || "User logged out successfully", {
+          position: "top-right",
+        });
+        setCredentials(null);
+        setRole(null);
+        setIsLoggedIn(false);
+      } else {
+        console.log(apiResponse);
+        toast.error(apiResponse.message || "Failed to log out user", {
+          position: "top-right",
+        });
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.message || "Failed to log out user", {
+        position: "top-right",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -157,6 +198,16 @@ function AppJumbotron({ className }: { className?: string }) {
           {t("home.about_us")}
         </li>
         <li className={navItemClass}>{t("home.contact_us")}</li>
+        {!isLoggedIn && (
+          <li className={navItemClass} onMouseUp={navigateToRegister}>
+            {t("home.register")}
+          </li>
+        )}
+        {isLoggedIn && (
+          <li className={navItemClass} onMouseUp={logoutUser}>
+            {t("home.logout")}
+          </li>
+        )}
         <li
           className={navItemClass}
           onClick={() => changeLang(lang === "tr" ? "en" : "tr")}
