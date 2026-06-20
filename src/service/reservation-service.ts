@@ -17,13 +17,39 @@ import { ensureUserExistById } from "./user-service";
 import { Price } from "../models/price";
 
 async function createReservation(reservationData: ReservationDocument) {
+  await validateReservation(reservationData);
+
+  const reservation = new Reservation({ ...reservationData });
+  await calculateExpense(reservation);
+  await reservation.save();
+  return reservation;
+}
+
+async function createReservationBulk(reservationsData: ReservationDocument[]) {
+  for (const reservationData of reservationsData) {
+    await validateReservation(reservationData);
+  }
+
+  const reservations: ReservationDocument[] = [];
+
+  for (const reservationData of reservationsData) {
+    const reservation = new Reservation({ ...reservationData });
+    await calculateExpense(reservation);
+    reservations.push(reservation);
+  }
+
+  await Reservation.insertMany(reservations);
+
+  return reservations;
+}
+
+async function validateReservation(reservationData: ReservationDocument) {
   const roomId = reservationData.room.toString();
-  // check room exist
+
   await ensureRoomExistById(roomId);
   await ensureCustomerExistById(reservationData.customer.toString());
   await ensureUserExistById(reservationData.createdBy.toString());
 
-  // validate dates
   const startDate = reservationData.checkInDate;
   const endDate = reservationData.checkOutDate;
 
@@ -63,9 +89,8 @@ async function createReservation(reservationData: ReservationDocument) {
     });
   }
 
-  // reservation duration must be between 1 and 15 days
-
   const stayAmount = differenceInCalendarDays(endDate, startDate);
+
   if (stayAmount <= 0 || stayAmount > 15) {
     throw new AppError({
       message: "Reservation duration must be between 1 and 15 days",
@@ -74,7 +99,6 @@ async function createReservation(reservationData: ReservationDocument) {
     });
   }
 
-  // check already reserved for the selected dates
   const existReservation = await Reservation.exists({
     status: { $in: ["PENDING", "CONFIRMED", "CHECKED_IN"] },
     room: reservationData.room,
@@ -90,8 +114,6 @@ async function createReservation(reservationData: ReservationDocument) {
     });
   }
 
-  // check maintenance status of the room
-
   const existMaintenance = await Maintenance.exists({
     room: roomId,
     status: { $in: ["PLANNED", "ACTIVE"] },
@@ -106,22 +128,6 @@ async function createReservation(reservationData: ReservationDocument) {
       isOperational: true,
     });
   }
-
-  const reservation = new Reservation({ ...reservationData });
-  await calculateExpense(reservation);
-  await reservation.save();
-  return reservation;
-}
-
-async function createReservationBulk(reservationsData: ReservationDocument[]) {
-  const createdReservations: ReservationDocument[] = [];
-
-  for (const reservationData of reservationsData) {
-    const createdReservation = await createReservation(reservationData);
-    createdReservations.push(createdReservation);
-  }
-
-  return createdReservations;
 }
 
 async function calculateExpense(

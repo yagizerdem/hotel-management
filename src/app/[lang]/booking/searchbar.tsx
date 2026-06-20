@@ -24,6 +24,7 @@ import { addDays } from "date-fns";
 import { useEffect, useState } from "react";
 import { IRoom } from "@/src/models/room";
 import { ApiResponse } from "@/src/lib/api-response";
+import { toast } from "sonner";
 
 export default function SearchBar() {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +61,18 @@ export default function SearchBar() {
       setRooms([]); // Clear previous rooms before fetching new ones
 
       const apiResopnse: ApiResponse<IRoom[]> = await getAvailableRooms();
+
+      if (!apiResopnse.status.toString().startsWith("2")) {
+        toast.error(
+          apiResopnse.message ||
+            "Oda bulunamadı. Lütfen tarihleri kontrol edin.",
+          {
+            position: "top-right",
+          },
+        );
+        return;
+      }
+
       if (apiResopnse.data) {
         setRooms(apiResopnse.data);
       }

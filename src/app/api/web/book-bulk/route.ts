@@ -13,6 +13,8 @@ import { headers } from "next/headers";
 import { authorizeRole, toRoleMask } from "@/src/lib/role-validator";
 import { ensureUserExistByEmail } from "@/src/service/user-service";
 import { ensureCustomerExistByUserId } from "@/src/service/customer-service";
+import { createReservationBulk } from "@/src/service/reservation-service";
+import { ReservationDocument } from "@/src/models/reservation";
 
 async function handler(req: NextRequest) {
   await dbConnect();
@@ -43,23 +45,27 @@ async function handler(req: NextRequest) {
 
   const body = await req.json();
 
-  validateBody<CreateWebReservationBulkBody>(
+  const validated = validateBody<CreateWebReservationBulkBody>(
     getCreateWebReservationBulkSchema(),
     body,
   );
+
+  const reservationsData: ReservationDocument[] = [];
 
   for (let reservation of body.reservations) {
     reservation.source = "WEB";
     reservation.customer = customer?._id; // customer that reserves the room
     reservation.createdBy = _id; // user id
     reservation.status = "PENDING"; // default status is pending when customer creates reservation
+
+    reservationsData.push(reservation as ReservationDocument);
   }
 
-  // const reservation = await createReservation(body as ReservationDocument);
+  const response = await createReservationBulk(reservationsData);
 
   return NextResponse.json(
     ApiResponse.created({
-      data: null,
+      data: response,
       message: "Reservations created successfully!",
     }),
     {

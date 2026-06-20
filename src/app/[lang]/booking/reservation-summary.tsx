@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  ChevronRight,
-  Globe2,
-  PhoneOff,
-  SeparatorVertical,
-  WifiOff,
-} from "lucide-react";
+import { ChevronRight, Globe2, PhoneOff, WifiOff } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { twMerge } from "tailwind-merge";
 import { useBooking } from "@/src/provider/booking-provider";
 import { AppLoader } from "@/src/components/shared/app-spinner";
 import { Separator } from "@/src/components/ui/separator";
+import { toast } from "sonner";
+import { useApp } from "@/src/provider/app-provider";
+import { ApiResponse } from "@/src/lib/api-response";
+import { api } from "@/src/lib/axios-api";
 
 export default function ReservationSummary({
   className,
@@ -25,9 +23,49 @@ export default function ReservationSummary({
     expenseData,
     removeBookingRecord,
   } = useBooking();
+  const { setIsLoading } = useApp();
 
-  function handleReservation() {
-    console.log("hafljakj");
+  async function handleReservation() {
+    try {
+      setIsLoading(true);
+
+      if (bookingRecords.length === 0) {
+        toast.error(
+          "Select at least one room to proceed with the reservation.",
+          {
+            position: "top-right",
+          },
+        );
+        return;
+      }
+
+      const apiResponse: ApiResponse<null> = (
+        await api.post("/web/book-bulk", {
+          reservations: bookingRecords.map((record) => ({
+            room: record.room._id,
+            checkInDate: record.checkInDate,
+            checkOutDate: record.checkOutDate,
+            packageType: record.packageType,
+          })),
+        })
+      ).data;
+
+      console.log(apiResponse);
+
+      if (apiResponse.status.toString().startsWith("2")) {
+        toast.success(apiResponse.message || "Reservation confirmed", {
+          position: "top-right",
+        });
+      } else {
+        toast.error(apiResponse.message || "Failed to create reservation", {
+          position: "top-right",
+        });
+      }
+    } catch (error) {
+      console.error("Error during reservation:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

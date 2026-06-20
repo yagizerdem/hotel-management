@@ -8,6 +8,7 @@ import { APIFeatures } from "@/src/lib/api-features";
 import { Reservation } from "@/src/models/reservation";
 import { AppError } from "@/src/lib/app-error";
 import { Maintenance } from "@/src/models/maintenance";
+import { isAfter } from "date-fns";
 
 async function handler(
   req: NextRequest,
@@ -29,11 +30,19 @@ async function handler(
     });
   }
 
+  if (isAfter(checkInDate, checkOutDate)) {
+    throw new AppError({
+      message: "checkInDate must be before checkOutDate",
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      isOperational: true,
+    });
+  }
+
   const reservedRoomIds = (
     await Reservation.find({
       checkInDate: { $lt: new Date(checkOutDate) },
       checkOutDate: { $gt: new Date(checkInDate) },
-      status: { $nin: ["PENDING", "CONFIRMED", "CHECKED_IN"] },
+      status: { $in: ["PENDING", "CONFIRMED", "CHECKED_IN"] },
     })
   ).map((reservation) => reservation.room.toString());
 
