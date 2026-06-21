@@ -5,5 +5,11 @@ export default async function BookingLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <DefaultLayout>{children}</DefaultLayout>;
+  return (
+    <DefaultLayout>
+      <div className="admin-area w-screen h-screen flex flex-col overflow-hidden">
+        {children}
+      </div>
+    </DefaultLayout>
+  );
 }

@@ -58,7 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    if (isLoggedIn) {
+    if (!isLoggedIn) {
       helper();
     }
   }, []);

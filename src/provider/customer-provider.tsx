@@ -20,7 +20,7 @@ const CustomerProviderContext = createContext<
 >(undefined);
 
 export function CustomerProvider({ children }: CustomerProviderProps) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role } = useAuth();
 
   const [profile, setProfile] = useState<ICustomer | null>(null);
 
@@ -43,12 +43,12 @@ export function CustomerProvider({ children }: CustomerProviderProps) {
       }
     }
 
-    if (isLoggedIn) {
+    if (isLoggedIn && role === "CUSTOMER") {
       helper();
     } else {
       setProfile(null);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, role]);
 
   return (
     <CustomerProviderContext.Provider value={value}>
