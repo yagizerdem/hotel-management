@@ -32,6 +32,7 @@ const protectedRoutePatterns = [
   /^\/api\/web\/create-customer$/,
   /^\/api\/web\/update-customer$/,
   /^\/api\/web\/book$/,
+  /^\/api\/web\/book-bulk$/,
   /^\/api\/web\/get-profile$/,
   /^\/api\/web\/cancel-book\/[^/]+$/,
   /^\/api\/web\/update-customer$/,
@@ -43,6 +44,8 @@ const protectedRoutePatterns = [
   /^\/api\/blog\/delete\/[^/]+$/,
   /^\/api\/blog\/get-blog-img-uri\/[^/]+$/,
 ];
+
+const employeeRoutePatterns = [/^.*\/dashboard\/?$/, /^.*\/dashboard\/.*$/];
 
 type AuthJwtPayload = {
   _id: string;
@@ -64,21 +67,26 @@ function jsonUnauthorized(message = "Unauthorized") {
   );
 }
 
-async function authenticationHandler(req: NextRequest) {
-  const path = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutePatterns.some((pattern) =>
-    pattern.test(path),
-  );
+const employeeRoles = [
+  "ADMIN",
+  "CUSTOMER",
+  "RECEPTIONIST",
+  "MANAGER",
+  "HR_MANAGER",
+  "SALES_MANAGER",
+  "IT_SUPPORT",
+  "CLEANER",
+  "COOK",
+  "WAITER",
+  "ELECTRICIAN",
+];
 
-  if (!isProtectedRoute) {
-    return NextResponse.next();
-  }
-
+async function getAuthPayload(
+  req: NextRequest,
+): Promise<AuthJwtPayload | null> {
   const token = req.cookies.get("jwt")?.value;
 
-  if (!token) {
-    return jsonUnauthorized("Authentication token is missing");
-  }
+  if (!token) return null;
 
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
@@ -87,22 +95,9 @@ async function authenticationHandler(req: NextRequest) {
       algorithms: ["HS256"],
     });
 
-    const { _id, role, username, email } = payload as AuthJwtPayload;
-
-    const requestHeaders = new Headers(req.headers);
-
-    requestHeaders.set("x-user-id", String(_id));
-    requestHeaders.set("x-user-email", String(email));
-    requestHeaders.set("x-user-username", String(username));
-    requestHeaders.set("x-user-role", String(role));
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return payload as AuthJwtPayload;
   } catch {
-    return jsonUnauthorized("Invalid or expired token");
+    return null;
   }
 }
 
@@ -121,27 +116,78 @@ function getLocale(req: NextRequest) {
 }
 
 export default async function proxy(req: NextRequest) {
-  const authReq = await authenticationHandler(req);
-
   const { pathname } = req.nextUrl;
 
-  // do not localize API routes, only localize page routes
-  if (pathname.startsWith("/api/")) {
-    return authReq;
+  const isProtectedApi = protectedRoutePatterns.some((pattern) =>
+    pattern.test(pathname),
+  );
+
+  const isEmployeeRoute = employeeRoutePatterns.some((pattern) =>
+    pattern.test(pathname),
+  );
+
+  let payload: AuthJwtPayload | null = null;
+
+  if (isProtectedApi || isEmployeeRoute) {
+    payload = await getAuthPayload(req);
+
+    if (!payload) {
+      if (pathname.startsWith("/api/")) {
+        return jsonUnauthorized("Invalid or missing token");
+      }
+
+      return NextResponse.redirect(new URL("/auth/login", req.url)); // TODO add login / register page
+    }
   }
 
-  // Localization - Internalization
+  if (isEmployeeRoute) {
+    const employeeRoles = [
+      "ADMIN",
+      "RECEPTIONIST",
+      "MANAGER",
+      "HR_MANAGER",
+      "SALES_MANAGER",
+      "IT_SUPPORT",
+      "CLEANER",
+      "COOK",
+      "WAITER",
+      "ELECTRICIAN",
+    ];
+
+    if (!employeeRoles.includes(payload!.role)) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+  }
+
+  if (isProtectedApi) {
+    const requestHeaders = new Headers(req.headers);
+
+    requestHeaders.set("x-user-id", payload!._id);
+    requestHeaders.set("x-user-email", payload!.email);
+    requestHeaders.set("x-user-username", payload!.username);
+    requestHeaders.set("x-user-role", payload!.role);
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
   );
 
-  if (pathnameHasLocale) return;
+  if (pathnameHasLocale) {
+    return NextResponse.next();
+  }
 
-  // Redirect if there is no locale
   const locale = getLocale(req);
   req.nextUrl.pathname = `/${locale}${pathname}`;
-  // e.g. incoming request is /products
-  // The new URL is now /en/products
 
   return NextResponse.redirect(req.nextUrl);
 }
@@ -173,6 +219,7 @@ export const config = {
     "/api/extra-expense/get",
     "/api/web/create-customer",
     "/api/web/book",
+    "/api/web/book-bulk",
     "/api/web/cancel-book/:id",
     "/api/web/get-profile",
     "/api/web/calculate-reservation-price",

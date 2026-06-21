@@ -18,6 +18,7 @@ import {
   ensureCustomerExistByUserId,
 } from "@/src/service/customer-service";
 import type { ReservationDocument } from "@/src/models/reservation";
+import { stripe } from "@/src/lib/stripe-wrapper";
 
 async function handler(req: NextRequest) {
   await dbConnect();
@@ -57,9 +58,39 @@ async function handler(req: NextRequest) {
 
   const reservation = await createReservation(body as ReservationDocument);
 
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+
+    line_items: [
+      {
+        price_data: {
+          currency: "try",
+          product_data: {
+            name: `Room Reservation #${reservation._id}`,
+          },
+          unit_amount: reservation.totalPrice * 100, // kuruş
+        },
+        quantity: 1,
+      },
+    ],
+
+    success_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/reservation/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/reservation/cancel`,
+
+    metadata: {
+      reservationId: reservation._id.toString(),
+      userId: _id!.toString(),
+      customerId: customer._id.toString(),
+    },
+  });
+
   return NextResponse.json(
     ApiResponse.created({
-      data: reservation,
+      data: {
+        reservation,
+        checkoutUrl: session.url,
+        sessionId: session.id,
+      },
       message: "Reservation created successfully!",
     }),
     {
