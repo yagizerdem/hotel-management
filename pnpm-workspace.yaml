@@ -3,3 +3,6 @@ packages:
   - "apps/*"
 
 linkWorkspacePackages: true
+
+allowBuilds:
+  esbuild: true
