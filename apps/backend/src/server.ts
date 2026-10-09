@@ -4,10 +4,13 @@ import express, {
   type Response,
 } from "express";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
 if (process?.env?.NODE_ENV === "dev") {
   dotenv.config({
-    path: "../env.dev",
+    path: path.resolve(fileURLToPath(import.meta.url), "../../.env.dev"),
   });
 }
 const app = express();
@@ -31,3 +34,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+if (process.env.MONGO_URI) {
+  await mongoose.connect(process.env.MONGO_URI).finally(() => {
+    console.log("Connected to MongoDB");
+  });
+} else {
+  throw Error("MONGO_URI is not defined");
+}
