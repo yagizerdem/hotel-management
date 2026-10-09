@@ -199,6 +199,9 @@ importers:
 
   apps/backend:
     dependencies:
+      '@hotel-management/models':
+        specifier: workspace:*
+        version: link:../../packages/models
       '@hotel-management/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -319,10 +322,19 @@ importers:
         specifier: ^8.3.0
         version: 8.3.3(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15)
 
-  packages/shared: {}
+  packages/models: {}
+
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/validator:
     dependencies:
+      '@hotel-management/models':
+        specifier: workspace:*
+        version: link:../models
       zod:
         specifier: ^4.6.5
         version: 4.6.5

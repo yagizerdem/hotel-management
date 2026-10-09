@@ -83,4 +83,16 @@ router.post("/login", asyncWrapper(authController.login));
  */
 router.post("/refresh", asyncWrapper(authController.refresh));
 
+/**
+ * @openapi
+ * /api/auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Log out the current user
+ *     responses:
+ *       "200":
+ *         description: Logout successful, accessToken and refreshToken cookies cleared
+ */
+router.post("/logout", asyncWrapper(authController.logout));
+
 export default router;

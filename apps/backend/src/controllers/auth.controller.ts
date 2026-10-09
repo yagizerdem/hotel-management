@@ -10,7 +10,7 @@ import { createHash, createSecretKey, randomUUID } from "crypto";
 import { z } from "zod";
 import type { RegisterResopnseDTO } from "@hotel-management/shared";
 import { UserModel } from "@/models/user.model.js";
-import { UserRole } from "@/models/enums.js";
+import { UserRole } from "@hotel-management/models";
 import * as jose from "jose";
 import bcrypt from "bcrypt";
 import { RefreshTokenModel } from "@/models/refresh-token.model.js";
@@ -185,7 +185,7 @@ export async function refresh(req: Request, res: Response) {
     .send(ApiResponse.ok({}, "access token refreshed"));
 }
 
-export function logout(req: Request, res: Response) {
+export async function logout(req: Request, res: Response) {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken", { path: "/api/auth" });
   res.status(HttpStatusCode.OK).send(ApiResponse.ok({}, "logout successful"));

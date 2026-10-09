@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hotel-management/models": "workspace:*",
     "@hotel-management/shared": "workspace:*",
     "@hotel-management/validator": "workspace:*",
     "@types/bcrypt": "^6.0.0",

@@ -4,10 +4,12 @@
   "type": "module",
   "private": "true",
   "dependencies": {
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@hotel-management/models": "workspace:*"
   },
   "exports": {
     "./register": "./register.validator.ts",
+    "./room": "./room.validator.ts",
     ".": {
       "types": "./index.d.ts"
     }
