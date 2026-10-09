@@ -9,7 +9,7 @@ import authRouter from "@router/auth.router.js";
 import { swaggerSpec } from "@util/swagger.js";
 import { errorHandler, notFoundHandler } from "@middleware/error-handler.js";
 
-if (process?.env?.NODE_ENV === "dev") {
+if (process?.env?.NODE_ENV === "development") {
   dotenv.config({
     path: path.resolve(fileURLToPath(import.meta.url), "../../.env.dev"),
   });

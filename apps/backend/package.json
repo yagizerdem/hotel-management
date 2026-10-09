@@ -4,19 +4,22 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=dev tsx watch src/server.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hotel/shared": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cross-env": "^10.1.0",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
+    "i": "^0.3.7",
     "jose": "^6.2.12",
+    "moment": "^2.31.0",
     "mongoose": "^9.11.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
