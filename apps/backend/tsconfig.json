@@ -21,7 +21,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@util/*": ["./src/util/*"],
-      "@models/*": ["./src/models/*"]
+      "@models/*": ["./src/models/*"],
+      "@controllers/*": ["./src/controllers/*"],
+      "@router/*": ["./src/router/*"]
     }
   },
   "include": ["src"]
