@@ -23,15 +23,50 @@ import * as authController from "@controllers/auth.controller.js";
  *               email:
  *                 type: string
  *                 format: email
- *                 default: ""
+ *                 default: "test@gmail.com"
  *               password:
  *                 type: string
  *                 format: password
- *                 default: ""
+ *                 default: "12345aA!"
  *     responses:
  *       "201":
  *         description: User registered successfully
  */
 router.post("/register", asyncWrapper(authController.register));
+
+/**
+ * @openapi
+ * /api/auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Log in a user
+ *     requestBody:
+ *       description: The user credentials
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 default: "test@gmail.com"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 default: "12345aA!"
+ *     responses:
+ *       "200":
+ *         description: Login successful, accessToken and refreshToken cookies set
+ *       "400":
+ *         description: Invalid request body
+ *       "401":
+ *         description: Invalid credentials
+ */
+router.post("/login", asyncWrapper(authController.login));
 
 export default router;

@@ -5,6 +5,7 @@ export * from "./pricing.model.js";
 export * from "./discount-rule.model.js";
 export * from "./customer.model.js";
 export * from "./user.model.js";
+export * from "./refresh-token.model.js";
 export * from "./staff.model.js";
 export * from "./shift.model.js";
 export * from "./reservation.model.js";
