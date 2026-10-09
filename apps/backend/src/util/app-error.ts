@@ -29,4 +29,8 @@ export class AppError extends Error {
     this.isOperational = isOperational;
     Error.captureStackTrace(this, AppError);
   }
+
+  static from(options: AppErrorOptions): AppError {
+    return new AppError(options);
+  }
 }
