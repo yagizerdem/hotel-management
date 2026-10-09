@@ -5,4 +5,5 @@ packages:
 linkWorkspacePackages: true
 
 allowBuilds:
+  '@scarf/scarf': set this to true or false
   esbuild: true
