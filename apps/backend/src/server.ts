@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from "express";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
@@ -17,6 +18,7 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRouter);
 
