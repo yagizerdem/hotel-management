@@ -1,12 +1,9 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from "express";
+import express, { type Request, type Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
+import authRouter from "@router/auth.router.js";
 
 if (process?.env?.NODE_ENV === "dev") {
   dotenv.config({
@@ -17,18 +14,10 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+app.use("/api/auth", authRouter);
 
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
-});
-
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
 });
 
 app.listen(PORT, () => {
@@ -36,9 +25,15 @@ app.listen(PORT, () => {
 });
 
 if (process.env.MONGO_URI) {
-  await mongoose.connect(process.env.MONGO_URI).finally(() => {
-    console.log("Connected to MongoDB");
-  });
+  await mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+      console.log("Connected to MongoDB");
+    })
+    .catch((err) => {
+      console.error("Failed to connect to MongoDB", err);
+      process.exit(1);
+    });
 } else {
   throw Error("MONGO_URI is not defined");
 }
