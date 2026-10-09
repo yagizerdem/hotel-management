@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "cross-env NODE_ENV=dev tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "mongoose": "^9.11.1"
   },

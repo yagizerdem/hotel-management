@@ -3,7 +3,13 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import dotenv from "dotenv";
 
+if (process?.env?.NODE_ENV === "dev") {
+  dotenv.config({
+    path: "../env.dev",
+  });
+}
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
