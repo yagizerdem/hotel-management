@@ -14,6 +14,7 @@
    - **Blank line(required only-if Body is present):** Always include a blank line after the summary.
    - **Body (wrapped at 72 characters)(optional):** Explain what and why, not how.
    - **Footer (optional):** Reference issues with `Fixes #123` or `Refs #456`.
+   - **Author:** : use author name as yagiz erdem
 
 4. Header Format
    - Scope(commit-type): message
