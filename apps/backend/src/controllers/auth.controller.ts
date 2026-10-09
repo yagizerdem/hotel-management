@@ -64,13 +64,8 @@ export async function register(req: Request, res: Response) {
 }
 
 export async function login(req: Request, res: Response) {
-  const {
-    secretKey,
-    issuer,
-    audience,
-    accessTokenExpirationTime,
-    refreshTokenExpirationTime,
-  } = getJwtConfig();
+  const { accessTokenExpirationTime, refreshTokenExpirationTime } =
+    getJwtConfig();
 
   const loginValidator = getClientLoginValidator();
   const userData = await loginValidator.safeParseAsync(req.body);
@@ -111,30 +106,8 @@ export async function login(req: Request, res: Response) {
   const accessTokenMs = parseDurationMs(accessTokenExpirationTime);
   const refreshTokenMs = parseDurationMs(refreshTokenExpirationTime);
 
-  const refreshToken = await new jose.SignJWT({
-    id: userFromDb._id.toString(),
-    role: userFromDb.role,
-    email: userFromDb.email,
-  }) // payload
-    .setProtectedHeader({ alg: "HS256" }) // algorithm
-    .setIssuedAt()
-    .setJti(randomUUID()) // unique per token, keeps tokenHash unique
-    .setIssuer(issuer) // issuer
-    .setAudience(audience) // audience
-    .setExpirationTime(refreshTokenExpirationTime) // token expiration time, e.g., "30d"
-    .sign(secretKey); // secretKey generated from previous step
-
-  const accessToken = await new jose.SignJWT({
-    id: userFromDb._id.toString(),
-    role: userFromDb.role,
-    email: userFromDb.email,
-  }) // payload
-    .setProtectedHeader({ alg: "HS256" }) // algorithm
-    .setIssuedAt()
-    .setIssuer(issuer) // issuer
-    .setAudience(audience) // audience
-    .setExpirationTime(accessTokenExpirationTime) // token expiration time, e.g., "15m"
-    .sign(secretKey); // secretKey generated from previous step
+  const refreshToken = await signRefreshToken(userFromDb, getJwtConfig());
+  const accessToken = await signAccessToken(userFromDb, getJwtConfig());
 
   // set refresh token to db
   await RefreshTokenModel.create({
@@ -162,6 +135,97 @@ export async function login(req: Request, res: Response) {
   res.status(HttpStatusCode.OK).send(ApiResponse.ok({}, "login successful"));
 }
 
+export async function refresh(req: Request, res: Response) {
+  const config = getJwtConfig();
+  const path = "/api/auth/refresh";
+
+  const invalid = () =>
+    AppError.from({
+      httpStatusCode: HttpStatusCode.UNAUTHORIZED,
+      message: "invalid refresh token",
+      path,
+    });
+
+  const refreshToken: unknown = req.cookies?.refreshToken;
+  if (typeof refreshToken !== "string" || !refreshToken) throw invalid();
+
+  try {
+    await jose.jwtVerify(refreshToken, config.secretKey, {
+      issuer: config.issuer,
+      audience: config.audience,
+    });
+  } catch {
+    throw invalid();
+  }
+
+  // The signature alone is not enough: the token must still be stored,
+  // not revoked and not expired.
+  const stored = await RefreshTokenModel.findOne({
+    tokenHash: createHash("sha256").update(refreshToken).digest("hex"),
+    revokedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+  if (!stored) throw invalid();
+
+  // Load the user again so role changes and deactivation apply immediately.
+  const user = await UserModel.findById(stored.user);
+  if (!user || !user.isActive) throw invalid();
+
+  const accessToken = await signAccessToken(user, config);
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: parseDurationMs(config.accessTokenExpirationTime),
+  });
+
+  res
+    .status(HttpStatusCode.OK)
+    .send(ApiResponse.ok({}, "access token refreshed"));
+}
+
+export function logout(req: Request, res: Response) {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken", { path: "/api/auth" });
+  res.status(HttpStatusCode.OK).send(ApiResponse.ok({}, "logout successful"));
+}
+
+function signAccessToken(
+  user: { _id: { toString(): string }; role: string; email: string },
+  config: ReturnType<typeof getJwtConfig>,
+): Promise<string> {
+  return new jose.SignJWT({
+    id: user._id.toString(),
+    role: user.role,
+    email: user.email,
+  }) // payload
+    .setProtectedHeader({ alg: "HS256" }) // algorithm
+    .setIssuedAt()
+    .setIssuer(config.issuer) // issuer
+    .setAudience(config.audience) // audience
+    .setExpirationTime(config.accessTokenExpirationTime) // token expiration time, e.g., "15m"
+    .sign(config.secretKey); // secretKey generated from previous step
+}
+
+function signRefreshToken(
+  user: { _id: { toString(): string }; role: string; email: string },
+  config: ReturnType<typeof getJwtConfig>,
+): Promise<string> {
+  return new jose.SignJWT({
+    id: user._id.toString(),
+    role: user.role,
+    email: user.email,
+  }) // payload
+    .setProtectedHeader({ alg: "HS256" }) // algorithm
+    .setIssuedAt()
+    .setJti(randomUUID()) // unique per token, keeps tokenHash unique
+    .setIssuer(config.issuer) // issuer
+    .setAudience(config.audience) // audience
+    .setExpirationTime(config.refreshTokenExpirationTime) // token expiration time, e.g., "30d"
+    .sign(config.secretKey); // secretKey generated from previous step
+}
+
 const DURATION_UNIT_MS = {
   s: 1000,
   m: 60 * 1000,
@@ -179,7 +243,10 @@ function parseDurationMs(value: string): number {
       isOperational: false,
     });
   }
-  return Number(match[1]) * DURATION_UNIT_MS[match[2] as keyof typeof DURATION_UNIT_MS];
+  return (
+    Number(match[1]) *
+    DURATION_UNIT_MS[match[2] as keyof typeof DURATION_UNIT_MS]
+  );
 }
 
 function getJwtConfig() {

@@ -69,4 +69,18 @@ router.post("/register", asyncWrapper(authController.register));
  */
 router.post("/login", asyncWrapper(authController.login));
 
+/**
+ * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Issue a new access token using the refreshToken cookie
+ *     responses:
+ *       "200":
+ *         description: New accessToken cookie set
+ *       "401":
+ *         description: Missing, invalid, expired or revoked refresh token
+ */
+router.post("/refresh", asyncWrapper(authController.refresh));
+
 export default router;
