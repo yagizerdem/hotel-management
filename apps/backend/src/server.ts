@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
+import swaggerUi from "swagger-ui-express";
 import authRouter from "@router/auth.router.js";
+import { swaggerSpec } from "@util/swagger.js";
 
 if (process?.env?.NODE_ENV === "dev") {
   dotenv.config({
@@ -14,6 +16,7 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRouter);
 
 app.get("/api/health", (_req: Request, res: Response) => {
