@@ -10,6 +10,18 @@
   "exports": {
     "./register": "./register.validator.ts",
     "./room": "./room.validator.ts",
+    "./room-block": "./room-block.validator.ts",
+    "./pricing": "./pricing.validator.ts",
+    "./discount-rule": "./discount-rule.validator.ts",
+    "./customer": "./customer.validator.ts",
+    "./user": "./user.validator.ts",
+    "./staff": "./staff.validator.ts",
+    "./shift": "./shift.validator.ts",
+    "./reservation": "./reservation.validator.ts",
+    "./extra-charge": "./extra-charge.validator.ts",
+    "./exchange-rate": "./exchange-rate.validator.ts",
+    "./governorate-report": "./governorate-report.validator.ts",
+    "./backup-log": "./backup-log.validator.ts",
     ".": {
       "types": "./index.d.ts"
     }
