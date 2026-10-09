@@ -17,6 +17,10 @@ export function getClientRegisterValidator() {
   return validator;
 }
 
+export type RegisterDTO = z.infer<
+  ReturnType<typeof getClientRegisterValidator>
+>;
+
 export function getClientLoginValidator() {
   const validator = z.object({
     email: email(),
@@ -28,3 +32,5 @@ export function getClientLoginValidator() {
 
   return validator;
 }
+
+export type LoginDTO = z.infer<ReturnType<typeof getClientLoginValidator>>;

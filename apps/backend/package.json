@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hotel/shared": "workspace:*",
+    "@hotel-management/shared": "workspace:*",
+    "@hotel-management/validator": "workspace:*",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

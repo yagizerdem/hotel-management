@@ -4,11 +4,11 @@ import HttpStatusCode from "@/util/http-status-codes.js";
 import {
   getClientLoginValidator,
   getClientRegisterValidator,
-} from "@validator/register.validator.js";
+} from "@hotel-management/validator/register";
 import type { Request, Response } from "express";
 import { createHash, createSecretKey, randomUUID } from "crypto";
 import { z } from "zod";
-import type { RegisterResopnseDTO } from "@hotel/shared";
+import type { RegisterResopnseDTO } from "@hotel-management/shared";
 import { UserModel } from "@/models/user.model.js";
 import { UserRole } from "@/models/enums.js";
 import * as jose from "jose";
