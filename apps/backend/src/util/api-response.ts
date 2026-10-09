@@ -1,4 +1,4 @@
-import type HttpStatusCode from "./http-status-codes.js";
+import type HttpStatusCode from "@util/http-status-codes.js";
 
 export class ApiResponse<T> {
   public data: T;
