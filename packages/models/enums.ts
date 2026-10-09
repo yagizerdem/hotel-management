@@ -38,16 +38,12 @@ export enum UserRole {
   RECEPTIONIST = "RECEPTIONIST",
   IT_ADMIN = "IT_ADMIN",
   CUSTOMER = "CUSTOMER",
-}
-
-export enum StaffPosition {
-  MANAGER = "MANAGER",
-  RECEPTIONIST = "RECEPTIONIST",
   HOUSEKEEPER = "HOUSEKEEPER",
   COOK = "COOK",
   WAITER = "WAITER",
   ELECTRICIAN = "ELECTRICIAN",
   IT_SPECIALIST = "IT_SPECIALIST",
+  ADMIN = "ADMIN",
 }
 
 export enum PayType {

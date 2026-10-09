@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import { faker } from "@faker-js/faker";
 import { connectToDatabase } from "@/db.js";
-import { CleaningStatus, RoomType } from "@/models/enums.js";
+import { CleaningStatus, RoomType } from "@hotel-management/models";
 import { RoomModel } from "@/models/room.model.js";
 
 dotenv.config({

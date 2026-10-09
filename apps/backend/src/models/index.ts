@@ -1,4 +1,3 @@
-export * from "./enums.js";
 export * from "./room.model.js";
 export * from "./room-block.model.js";
 export * from "./pricing.model.js";

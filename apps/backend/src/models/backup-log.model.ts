@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { BackupAction } from "@models/enums.js";
+import { BackupAction } from "@hotel-management/models";
 
 const backupLogSchema = new Schema(
   {

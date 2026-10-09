@@ -4,7 +4,7 @@ import {
   Currency,
   ReservationSource,
   ReservationStatus,
-} from "./enums.js";
+} from "@hotel-management/models";
 
 const guestSchema = new Schema(
   {

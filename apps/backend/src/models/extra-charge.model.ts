@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { ExtraChargeCategory } from "./enums.js";
+import { ExtraChargeCategory } from "@hotel-management/models";
 
 const extraChargeSchema = new Schema(
   {

@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { BoardType } from "./enums.js";
+import { BoardType } from "@hotel-management/models";
 
 const discountRuleSchema = new Schema(
   {

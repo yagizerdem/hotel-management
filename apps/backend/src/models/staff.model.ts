@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { PayType, StaffPosition } from "./enums.js";
+import { PayType } from "@hotel-management/models";
 
 const staffSchema = new Schema(
   {
@@ -14,11 +14,6 @@ const staffSchema = new Schema(
     },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
-    position: {
-      type: String,
-      enum: Object.values(StaffPosition),
-      required: true,
-    },
     payType: { type: String, enum: Object.values(PayType), required: true },
     hourlyWage: { type: Number, min: 0 },
     monthlySalary: { type: Number, min: 0 },
