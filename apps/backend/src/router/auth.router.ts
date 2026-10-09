@@ -1,4 +1,5 @@
 import express from "express";
+import { asyncWrapper } from "@/util/async-wrapper.js";
 const router = express.Router();
 import * as authController from "@controllers/auth.controller.js";
 
@@ -31,6 +32,6 @@ import * as authController from "@controllers/auth.controller.js";
  *       "201":
  *         description: User registered successfully
  */
-router.post("/register", authController.register);
+router.post("/register", asyncWrapper(authController.register));
 
 export default router;

@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
 import authRouter from "@router/auth.router.js";
 import { swaggerSpec } from "@util/swagger.js";
+import { errorHandler, notFoundHandler } from "@middleware/error-handler.js";
 
 if (process?.env?.NODE_ENV === "dev") {
   dotenv.config({
@@ -22,6 +23,9 @@ app.use("/api/auth", authRouter);
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

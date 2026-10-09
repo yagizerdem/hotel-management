@@ -24,7 +24,8 @@
       "@models/*": ["./src/models/*"],
       "@controllers/*": ["./src/controllers/*"],
       "@router/*": ["./src/router/*"],
-      "@validator/*": ["./src/validator/*"]
+      "@validator/*": ["./src/validator/*"],
+      "@middleware/*": ["./src/middleware/*"]
     }
   },
   "include": ["src"]
