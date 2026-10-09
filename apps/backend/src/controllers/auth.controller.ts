@@ -4,6 +4,7 @@ import HttpStatusCode from "@/util/http-status-codes.js";
 import { getClientRegisterValidator } from "@validator/register.validator.js";
 import type { Request, Response } from "express";
 import { z } from "zod";
+import type { RegisterResopnseDTO } from "@hotel/shared";
 
 export async function register(req: Request, res: Response) {
   const registerValidator = getClientRegisterValidator();
@@ -25,5 +26,9 @@ export async function register(req: Request, res: Response) {
     });
   }
 
-  res.status(HttpStatusCode.CREATED).send(ApiResponse.created(userData));
+  res.status(HttpStatusCode.CREATED).send(
+    ApiResponse.created<RegisterResopnseDTO>({
+      email: userData.data.email,
+    }),
+  );
 }
