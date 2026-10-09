@@ -23,7 +23,8 @@
       "@util/*": ["./src/util/*"],
       "@models/*": ["./src/models/*"],
       "@controllers/*": ["./src/controllers/*"],
-      "@router/*": ["./src/router/*"]
+      "@router/*": ["./src/router/*"],
+      "@validator/*": ["./src/validator/*"]
     }
   },
   "include": ["src"]
