@@ -5,10 +5,20 @@ const staffSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
-    tcKimlikNo: { type: String, match: /^\d{11}$/, unique: true, sparse: true },
+    tcKimlikNo: {
+      type: String,
+      required: true,
+      trim: true,
+      match: /^\d{11}$/,
+      unique: true,
+    },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
-    position: { type: String, enum: Object.values(StaffPosition), required: true },
+    position: {
+      type: String,
+      enum: Object.values(StaffPosition),
+      required: true,
+    },
     payType: { type: String, enum: Object.values(PayType), required: true },
     hourlyWage: { type: Number, min: 0 },
     monthlySalary: { type: Number, min: 0 },
@@ -23,7 +33,10 @@ staffSchema.pre("validate", function () {
     this.invalidate("hourlyWage", "hourlyWage is required for hourly staff");
   }
   if (this.payType === PayType.MONTHLY && this.monthlySalary == null) {
-    this.invalidate("monthlySalary", "monthlySalary is required for monthly staff");
+    this.invalidate(
+      "monthlySalary",
+      "monthlySalary is required for monthly staff",
+    );
   }
 });
 
