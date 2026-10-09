@@ -1,26 +1,18 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from "express";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import app from "@/app.js";
+import { connectToDatabase } from "@/db.js";
 
-const app = express();
+if (process?.env?.NODE_ENV === "development") {
+  dotenv.config({
+    path: path.resolve(fileURLToPath(import.meta.url), "../../.env.dev"),
+  });
+}
+
+await connectToDatabase();
+
 const PORT = Number(process.env.PORT) || 3000;
-
-app.use(express.json());
-
-app.get("/api/health", (_req: Request, res: Response) => {
-  res.json({ status: "ok" });
-});
-
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

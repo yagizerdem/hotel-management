@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { ShiftType } from "./enums.js";
+import { ShiftType } from "@hotel-management/models";
 
 const shiftSchema = new Schema(
   {

@@ -4,7 +4,7 @@ import {
   Currency,
   ReservationSource,
   ReservationStatus,
-} from "./enums.js";
+} from "@hotel-management/models";
 
 const guestSchema = new Schema(
   {
@@ -26,13 +26,21 @@ const reservationSchema = new Schema(
     checkInDate: { type: Date, required: true },
     checkOutDate: { type: Date, required: true },
     boardType: { type: String, enum: Object.values(BoardType), required: true },
-    source: { type: String, enum: Object.values(ReservationSource), required: true },
+    source: {
+      type: String,
+      enum: Object.values(ReservationSource),
+      required: true,
+    },
     status: {
       type: String,
       enum: Object.values(ReservationStatus),
       default: ReservationStatus.CONFIRMED,
     },
-    currency: { type: String, enum: Object.values(Currency), default: Currency.TRY },
+    currency: {
+      type: String,
+      enum: Object.values(Currency),
+      default: Currency.TRY,
+    },
     nights: { type: Number, required: true, min: 1 },
     nightlyPrice: { type: Number, required: true, min: 0 },
     discountPercent: { type: Number, default: 0, min: 0, max: 100 },

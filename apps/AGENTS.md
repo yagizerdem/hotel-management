@@ -21,10 +21,10 @@
 
 ### Scopes
 
-| Scope    | Description                                                                                                                              |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Backend  | Changes to the backend application, including APIs, business logic, database interactions, and server-side functionality (apps/backend). |
-| Frontend | Changes to the frontend application, including UI components, pages, styling, client-side logic, and user interactions (apps/frontend).  |
+| Scope   | Description                                                                                                                              |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| backend | Changes to the backend application, including APIs, business logic, database interactions, and server-side functionality (apps/backend). |
+| web     | Changes to the frontend application, including UI components, pages, styling, client-side logic, and user interactions (apps/frontend).  |
 
 ### Commit type
 

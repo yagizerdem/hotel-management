@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { Currency } from "./enums.js";
+import { Currency } from "@hotel-management/models";
 
 const exchangeRateSchema = new Schema(
   {

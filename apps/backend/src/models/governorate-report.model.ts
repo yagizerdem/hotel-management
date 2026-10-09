@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { ReportStatus } from "./enums.js";
+import { ReportStatus } from "@hotel-management/models";
 
 const governorateReportSchema = new Schema(
   {

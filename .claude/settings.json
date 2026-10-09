@@ -1,0 +1,11 @@
+{
+  "attribution": {
+    "commit": "Authored-By: yagiz erdem yagizerdem819@gmail.com",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "deny": ["git push --force"],
+    "defaultMode": "auto"
+  }
+}
