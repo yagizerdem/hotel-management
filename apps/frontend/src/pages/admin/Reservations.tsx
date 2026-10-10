@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import Icon from '../../components/Icon'
-import ReservationDetail from '../../components/admin/reservations/ReservationDetail'
-import ReservationRow from '../../components/admin/reservations/ReservationRow'
-import { useHotel } from '../../context/hotelContext'
-import { initialReservations, type LedgerStatus } from '../../data/hotel'
+import Icon from '@/components/Icon'
+import ReservationDetail from '@/components/admin/reservations/ReservationDetail'
+import ReservationRow from '@/components/admin/reservations/ReservationRow'
+import { useHotel } from '@/context/HotelProvider'
+import { initialReservations, type LedgerStatus } from '@/data/hotel'
 
 type Tab = 'all' | LedgerStatus
 
@@ -18,28 +18,28 @@ const BASE_COUNTS: Record<Tab, number> = {
 }
 
 const SOURCES: { value: string; label: string; match: string[] }[] = [
-  { value: '', label: 'Tüm Kaynaklar (Hepsi)', match: [] },
-  { value: 'web', label: 'Resmi Web Sitesi (Booking Engine)', match: ['Web Sitesi'] },
-  { value: 'resepsiyon', label: 'Resepsiyon Doğrudan / Telefon', match: ['Resepsiyon Direkt'] },
-  { value: 'acente', label: 'Acente (ETS Tur / Coral Travel)', match: ['TUI Deutschland'] },
+  { value: '', label: 'All Sources', match: [] },
+  { value: 'web', label: 'Official Website (Booking Engine)', match: ['Website'] },
+  { value: 'resepsiyon', label: 'Front Desk Direct / Phone', match: ['Front Desk Direct'] },
+  { value: 'acente', label: 'Agency (ETS Tur / Coral Travel)', match: ['TUI Deutschland'] },
   { value: 'b2b', label: 'B2B Global (Booking.com / Expedia)', match: [] },
 ]
 
 const BOARDS: { value: string; label: string; match: string }[] = [
-  { value: '', label: 'Tüm Pansiyon Tipleri', match: '' },
-  { value: 'ai', label: 'Ultra Her Şey Dahil (UAI)', match: 'ULTRA HER ŞEY DAHİL' },
-  { value: 'hsd', label: 'Her Şey Dahil (AI)', match: 'HER ŞEY DAHİL' },
-  { value: 'tp', label: 'Tam Pansiyon Plus (FB+)', match: 'TAM PANSİYON PLUS' },
-  { value: 'yp', label: 'Yarım Pansiyon (HB)', match: 'YARIM PANSİYON' },
+  { value: '', label: 'All Board Types', match: '' },
+  { value: 'ai', label: 'Ultra All Inclusive (UAI)', match: 'ULTRA ALL INCLUSIVE' },
+  { value: 'hsd', label: 'All Inclusive (AI)', match: 'ALL INCLUSIVE' },
+  { value: 'tp', label: 'Full Board Plus (FB+)', match: 'FULL BOARD PLUS' },
+  { value: 'yp', label: 'Half Board (HB)', match: 'HALF BOARD' },
 ]
 
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'all', label: 'Tümü' },
-  { key: 'confirmed', label: 'Onaylandı' },
-  { key: 'checkedIn', label: 'Giriş Yapıldı' },
-  { key: 'pending', label: 'Beklemede' },
-  { key: 'checkedOut', label: 'Çıkış Yapıldı' },
-  { key: 'cancelled', label: 'İptal Edilenler' },
+  { key: 'all', label: 'All' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'checkedIn', label: 'Checked In' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'checkedOut', label: 'Checked Out' },
+  { key: 'cancelled', label: 'Cancelled' },
 ]
 
 const filterLabel = 'block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1'
@@ -94,39 +94,39 @@ export default function Reservations() {
   }
 
   const kpis: { label: string; value: number; note: string; tone: string; border: string }[] = [
-    { label: 'TÜM KAYITLAR', value: counts.all, note: '%100', tone: 'text-primary', border: 'border-primary' },
+    { label: 'ALL RECORDS', value: counts.all, note: '%100', tone: 'text-primary', border: 'border-primary' },
     {
-      label: 'ONAYLANDI',
+      label: 'CONFIRMED',
       value: counts.confirmed,
-      note: 'Giriş Bekliyor',
+      note: 'Awaiting Check-in',
       tone: 'text-primary',
       border: 'border-outline',
     },
     {
-      label: 'KONAKLIYOR (IN-HOUSE)',
+      label: 'IN-HOUSE',
       value: counts.checkedIn,
-      note: '%80.5 Dolu',
+      note: '80.5% Full',
       tone: 'text-[#38866C]',
       border: 'border-[#38866C]',
     },
     {
-      label: 'BEKLEMEDE / ÖN KAYIT',
+      label: 'PENDING / PRE-REGISTERED',
       value: counts.pending,
-      note: 'Opsiyonlu',
+      note: 'On Option',
       tone: 'text-[#D49B43]',
       border: 'border-[#D49B43]',
     },
     {
-      label: 'ÇIKIŞ YAPILDI',
+      label: 'CHECKED OUT',
       value: counts.checkedOut,
-      note: 'Bugün',
+      note: 'Today',
       tone: 'text-on-surface',
       border: 'border-outline-variant',
     },
     {
-      label: 'İPTAL / NO-SHOW',
+      label: 'CANCELLED / NO-SHOW',
       value: counts.cancelled,
-      note: '%2.1 Oran',
+      note: '2.1% Rate',
       tone: 'text-error',
       border: 'border-error',
     },
@@ -138,7 +138,7 @@ export default function Reservations() {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-label-sm text-label-sm text-secondary tracking-widest uppercase">
-              PMS ÖN BÜRO KONSOLU
+              PMS FRONT OFFICE CONSOLE
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
             <span className="font-mono-data text-mono-data text-on-surface-variant">
@@ -146,7 +146,7 @@ export default function Reservations() {
             </span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-primary tracking-tight mt-0.5">
-            Rezervasyon Yönetimi
+            Reservation Management
           </h1>
         </div>
         <div className="flex items-center flex-wrap gap-2">
@@ -155,21 +155,21 @@ export default function Reservations() {
             type="button"
           >
             <Icon name="file_download" className="text-[16px] text-on-surface-variant" />
-            <span>Excel / CSV Dışa Aktar</span>
+            <span>Export Excel / CSV</span>
           </button>
           <button
             className="h-8 px-3 bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm flex items-center gap-1.5 transition-colors"
             type="button"
           >
             <Icon name="print" className="text-[16px] text-on-surface-variant" />
-            <span>Günlük Giriş Listesi</span>
+            <span>Daily Arrivals List</span>
           </button>
           <button
             className="h-8 px-4 bg-secondary hover:bg-on-secondary-container text-on-secondary font-label-sm text-label-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
             type="button"
           >
             <Icon name="add_circle" className="text-[18px]" />
-            <span>Yeni Rezervasyon Oluştur</span>
+            <span>Create New Reservation</span>
           </button>
         </div>
       </div>
@@ -214,7 +214,7 @@ export default function Reservations() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
           <div className="relative">
-            <label className={filterLabel}>Arama</label>
+            <label className={filterLabel}>Search</label>
             <div className="relative">
               <Icon
                 name="search"
@@ -222,7 +222,7 @@ export default function Reservations() {
               />
               <input
                 className="w-full h-8 pl-7 pr-2 bg-surface-container-low text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-secondary"
-                placeholder="Rez No, Ad, Pasaport..."
+                placeholder="Res No, Name, Passport..."
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -230,7 +230,7 @@ export default function Reservations() {
             </div>
           </div>
           <div>
-            <label className={filterLabel}>Tarih Aralığı</label>
+            <label className={filterLabel}>Date Range</label>
             <input
               className="w-full h-8 px-2 bg-surface-container-low text-body-sm font-body-sm text-on-surface focus:bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-secondary font-mono-data"
               type="text"
@@ -238,7 +238,7 @@ export default function Reservations() {
             />
           </div>
           <div>
-            <label className={filterLabel}>Rezervasyon Kaynağı</label>
+            <label className={filterLabel}>Reservation Source</label>
             <select className={selectClass} value={source} onChange={(e) => setSource(e.target.value)}>
               {SOURCES.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -248,7 +248,7 @@ export default function Reservations() {
             </select>
           </div>
           <div>
-            <label className={filterLabel}>Pansiyon Tipi</label>
+            <label className={filterLabel}>Board Type</label>
             <select className={selectClass} value={board} onChange={(e) => setBoard(e.target.value)}>
               {BOARDS.map((b) => (
                 <option key={b.value} value={b.value}>
@@ -258,12 +258,12 @@ export default function Reservations() {
             </select>
           </div>
           <div>
-            <label className={filterLabel}>Oda Kategorisi</label>
+            <label className={filterLabel}>Room Category</label>
             <select className={selectClass} defaultValue="">
-              <option value="">Tüm Odalar</option>
-              <option value="std">Standart Deniz Manzaralı</option>
-              <option value="deluxe">Deluxe Aile Süiti</option>
-              <option value="swim">Swim-Up Bahçe Oda</option>
+              <option value="">All Rooms</option>
+              <option value="std">Standard Sea View</option>
+              <option value="deluxe">Deluxe Family Suite</option>
+              <option value="swim">Swim-Up Garden Room</option>
               <option value="pres">Kemer Presidential Villa</option>
             </select>
           </div>
@@ -273,11 +273,11 @@ export default function Reservations() {
               type="button"
             >
               <Icon name="tune" className="text-[16px]" />
-              <span>Filtrele</span>
+              <span>Filter</span>
             </button>
             <button
               className="h-8 w-8 bg-surface-container hover:bg-surface-variant text-on-surface-variant flex items-center justify-center transition-colors"
-              title="Filtreleri Sıfırla"
+              title="Reset Filters"
               type="button"
               onClick={resetFilters}
             >
@@ -293,16 +293,16 @@ export default function Reservations() {
             <thead>
               <tr className="bg-surface-container text-on-surface font-label-sm text-label-sm tracking-wider uppercase select-none">
                 {[
-                  'REZ NO',
-                  'MİSAFİR BİLGİSİ',
-                  'ODA & KAT',
-                  'KONAKLAMA TARİHİ',
-                  'KİŞİ',
-                  'PANSİYON',
+                  'RES NO',
+                  'GUEST INFO',
+                  'ROOM & FLOOR',
+                  'STAY DATES',
+                  'GUESTS',
+                  'BOARD',
                   'KAYNAK',
-                  'TOPLAM / TAHSİLAT',
+                  'TOTAL / PAYMENT',
                   'DURUM',
-                  'İŞLEMLER',
+                  'ACTIONS',
                 ].map((h, i, all) => (
                   <th
                     key={h}
@@ -328,7 +328,7 @@ export default function Reservations() {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="py-8 text-center text-on-surface-variant">
-                    Filtrelere uyan rezervasyon bulunamadı.
+                    No reservations match the filters.
                   </td>
                 </tr>
               )}
@@ -336,7 +336,7 @@ export default function Reservations() {
           </table>
           <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface font-label-sm text-label-sm">
             <div className="flex items-center gap-2">
-              <span>Sayfa Başına Kayıt:</span>
+              <span>Records per page:</span>
               <select
                 className="h-7 px-2 bg-surface-container-lowest text-on-surface border-0 focus:ring-1 focus:ring-secondary font-mono-data text-mono-data"
                 defaultValue="50"
@@ -346,7 +346,7 @@ export default function Reservations() {
                 <option>100</option>
               </select>
               <span className="text-on-surface-variant">
-                Toplam {counts.all} rezervasyondan {rows.length ? `1 - ${rows.length}` : '0'} arası
+                Showing {rows.length ? `1 - ${rows.length}` : '0'} of {counts.all} reservations
                 listeleniyor
               </span>
             </div>

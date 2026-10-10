@@ -1,11 +1,11 @@
-import type { LedgerStatus, Reservation } from '../../../data/hotel'
+import type { LedgerStatus, Reservation } from '@/data/hotel'
 
 export const statusLabel: Record<LedgerStatus, string> = {
-  checkedIn: 'GİRİŞ YAPILDI',
-  confirmed: 'ONAYLANDI',
-  pending: 'BEKLEMEDE',
-  checkedOut: 'ÇIKIŞ YAPILDI',
-  cancelled: 'İPTAL EDİLDİ',
+  checkedIn: 'CHECKED IN',
+  confirmed: 'CONFIRMED',
+  pending: 'PENDING',
+  checkedOut: 'CHECKED OUT',
+  cancelled: 'CANCELLED',
 }
 
 export const statusTone: Record<LedgerStatus, string> = {
@@ -17,11 +17,11 @@ export const statusTone: Record<LedgerStatus, string> = {
 }
 
 export const detailChip: Record<LedgerStatus, string> = {
-  checkedIn: 'AKTİF KONAKLAMA',
-  confirmed: 'GİRİŞ BEKLİYOR',
-  pending: 'ÖN KAYIT',
-  checkedOut: 'TAMAMLANDI',
-  cancelled: 'İPTAL',
+  checkedIn: 'ACTIVE STAY',
+  confirmed: 'AWAITING CHECK-IN',
+  pending: 'PRE-REGISTERED',
+  checkedOut: 'COMPLETED',
+  cancelled: 'CANCELLED',
 }
 
 export const paymentTone: Record<Reservation['paymentTone'], string> = {

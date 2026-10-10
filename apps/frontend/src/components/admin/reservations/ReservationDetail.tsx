@@ -1,6 +1,6 @@
-import type { LedgerStatus, Reservation } from '../../../data/hotel'
-import Icon from '../../Icon'
-import { detailChip, paymentTone, statusTone } from './statusStyles'
+import type { LedgerStatus, Reservation } from '@/data/hotel'
+import Icon from '@/components/Icon'
+import { detailChip, paymentTone, statusTone } from '@/components/admin/reservations/statusStyles'
 
 type Props = {
   reservation: Reservation
@@ -24,7 +24,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
         <div>
           <div className="flex items-center gap-2">
             <span className="font-label-sm text-label-sm text-secondary-container uppercase tracking-wider font-semibold">
-              SEÇİLİ DETAY KARTI
+              SELECTED DETAIL CARD
             </span>
             <span
               className={`px-1.5 py-0.2 ${statusTone[r.status]} font-label-sm text-[10px] font-bold uppercase`}
@@ -39,14 +39,14 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
         <div className="flex items-center gap-1">
           <button
             className="p-1 hover:bg-primary-container text-surface-variant transition-colors"
-            title="Yazdır"
+            title="Print"
             type="button"
           >
             <Icon name="print" className="text-[18px]" />
           </button>
           <button
             className="p-1 hover:bg-primary-container text-surface-variant transition-colors"
-            title="Kapat"
+            title="Close"
             type="button"
             onClick={onClose}
           >
@@ -69,40 +69,40 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
           className="h-6 px-2 bg-surface-container-lowest text-on-surface hover:bg-surface-variant text-[11px] font-label-sm uppercase font-semibold transition-colors"
           type="button"
         >
-          Oda Değiştir
+          Change Room
         </button>
       </div>
 
       <div className="p-space-md space-y-4">
         <div className="space-y-1">
-          <span className={sectionTitle}>MİSAFİR BİLGİLERİ</span>
+          <span className={sectionTitle}>GUEST INFORMATION</span>
           <div className="grid grid-cols-2 gap-2 text-body-sm font-body-sm bg-surface-container-low p-2.5">
             {d && (
               <div>
-                <span className="text-on-surface-variant block text-[11px]">T.C. / Pasaport No:</span>
+                <span className="text-on-surface-variant block text-[11px]">ID / Passport No:</span>
                 <span className="font-mono-data text-mono-data font-semibold text-on-surface">
                   {d.idNumber}
                 </span>
               </div>
             )}
             <div>
-              <span className="text-on-surface-variant block text-[11px]">Telefon:</span>
+              <span className="text-on-surface-variant block text-[11px]">Phone:</span>
               <span className="font-mono-data text-mono-data text-on-surface">{r.phone}</span>
             </div>
             {d && (
               <>
                 <div>
-                  <span className="text-on-surface-variant block text-[11px]">E-Posta:</span>
+                  <span className="text-on-surface-variant block text-[11px]">Email:</span>
                   <span className="truncate block text-on-surface">{d.email}</span>
                 </div>
                 <div>
-                  <span className="text-on-surface-variant block text-[11px]">Uyruk / Dil:</span>
+                  <span className="text-on-surface-variant block text-[11px]">Nationality / Language:</span>
                   <span className="text-on-surface font-medium">{d.nationality}</span>
                 </div>
               </>
             )}
             <div>
-              <span className="text-on-surface-variant block text-[11px]">Kişi / Pansiyon:</span>
+              <span className="text-on-surface-variant block text-[11px]">Guests / Board:</span>
               <span className="text-on-surface font-medium">
                 {r.pax} • {r.board}
               </span>
@@ -113,7 +113,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
         {d ? (
           <div className="grid grid-cols-3 gap-2 text-center bg-surface-container-low p-2">
             <div>
-              <span className="block text-[10px] text-on-surface-variant font-label-sm uppercase">GİRİŞ</span>
+              <span className="block text-[10px] text-on-surface-variant font-label-sm uppercase">CHECK-IN</span>
               <span className="font-mono-data text-mono-data font-bold text-primary">{d.checkIn}</span>
               <span className="block text-[10px] text-on-surface-variant">{d.checkInTime}</span>
             </div>
@@ -124,7 +124,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
               </span>
             </div>
             <div>
-              <span className="block text-[10px] text-on-surface-variant font-label-sm uppercase">ÇIKIŞ</span>
+              <span className="block text-[10px] text-on-surface-variant font-label-sm uppercase">CHECK-OUT</span>
               <span className="font-mono-data text-mono-data font-bold text-primary">{d.checkOut}</span>
               <span className="block text-[10px] text-on-surface-variant">{d.checkOutTime}</span>
             </div>
@@ -138,7 +138,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className={sectionTitle}>HESAP DÖKÜMÜ & FOLYO</span>
+            <span className={sectionTitle}>ACCOUNT STATEMENT & FOLIO</span>
             {d && (
               <span className="font-mono-data text-mono-data text-[11px] text-secondary font-medium">
                 Folyo No: {d.folioNo}
@@ -161,21 +161,21 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
             ))}
             {d && <div className="h-px bg-outline-variant/40 my-1"></div>}
             <div className="flex items-center justify-between text-base font-bold text-primary pt-1">
-              <span className="font-headline-sm text-headline-sm">Genel Toplam:</span>
+              <span className="font-headline-sm text-headline-sm">Grand Total:</span>
               <span className="text-headline-sm text-secondary">{r.total}</span>
             </div>
             <div className="flex items-center justify-between text-[11px] font-semibold pt-0.5">
-              <span className="text-on-surface-variant">Ödeme Durumu:</span>
+              <span className="text-on-surface-variant">Payment Status:</span>
               <span className={`px-1.5 ${paymentTone[r.paymentTone]} uppercase`}>{r.payment}</span>
             </div>
             {d && (
               <>
                 <div className="flex items-center justify-between text-[11px] text-[#38866C] font-semibold">
-                  <span>Tahsil Edilen (Kredi Kartı / Sanal POS):</span>
+                  <span>Collected (Credit Card / Virtual POS):</span>
                   <span>{d.paid}</span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-on-surface-variant">
-                  <span>Kalan Bakiye:</span>
+                  <span>Remaining Balance:</span>
                   <span className="font-bold text-[#38866C]">{d.balance}</span>
                 </div>
               </>
@@ -185,12 +185,12 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
 
         {d && (
           <div className="space-y-1">
-            <span className={sectionTitle}>REZERVASYON & RESEPSİYON NOTLARI</span>
+            <span className={sectionTitle}>RESERVATION & FRONT DESK NOTES</span>
             <div className="bg-surface-container-low p-2.5 space-y-1.5 text-body-sm font-body-sm text-on-surface">
               <div className="flex items-start gap-1.5">
                 <Icon name="child_care" className="text-[16px] text-secondary mt-0.5" />
                 <p>
-                  <strong className="font-semibold text-primary">Misafir Notu:</strong> "{d.guestNote}"
+                  <strong className="font-semibold text-primary">Guest Note:</strong> "{d.guestNote}"
                 </p>
               </div>
               <div className="flex items-start gap-1.5 text-on-surface-variant text-[11px] pt-1">
@@ -204,11 +204,11 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button className={secondaryAction} type="button">
             <Icon name="receipt_long" className="text-[16px]" />
-            <span>Folyo İncele</span>
+            <span>Review Folio</span>
           </button>
           <button className={secondaryAction} type="button">
             <Icon name="key" className="text-[16px]" />
-            <span>Oda Kartı Kodla</span>
+            <span>Encode Room Key</span>
           </button>
           {r.status === 'confirmed' && (
             <button
@@ -217,7 +217,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
               onClick={() => onStatusChange(r.id, 'checkedIn')}
             >
               <Icon name="login" className="text-[16px]" />
-              <span>Check-In Yap</span>
+              <span>Check In</span>
             </button>
           )}
           {r.status === 'pending' && (
@@ -227,7 +227,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
               onClick={() => onStatusChange(r.id, 'confirmed')}
             >
               <Icon name="check_box" className="text-[16px]" />
-              <span>Rezervasyonu Onayla</span>
+              <span>Confirm Reservation</span>
             </button>
           )}
           {r.status === 'checkedIn' && (
@@ -237,7 +237,7 @@ export default function ReservationDetail({ reservation: r, onClose, onStatusCha
               onClick={() => onStatusChange(r.id, 'checkedOut')}
             >
               <Icon name="logout" className="text-[16px]" />
-              <span>Check-Out Yap</span>
+              <span>Check Out</span>
             </button>
           )}
         </div>

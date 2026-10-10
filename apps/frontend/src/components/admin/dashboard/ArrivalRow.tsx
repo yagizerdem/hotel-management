@@ -1,5 +1,5 @@
-import type { Arrival } from '../../../data/hotel'
-import Icon from '../../Icon'
+import type { Arrival } from '@/data/hotel'
+import Icon from '@/components/Icon'
 
 const rowTone: Record<Arrival['status'], string> = {
   pending: 'bg-surface-container-lowest',
@@ -8,9 +8,9 @@ const rowTone: Record<Arrival['status'], string> = {
 }
 
 const statusBadge: Record<Arrival['status'], { label: string; className: string }> = {
-  pending: { label: 'BEKLİYOR', className: 'bg-surface-container-high text-on-surface' },
-  vip: { label: 'VIP BEKLENİYOR', className: 'bg-tertiary-fixed-dim text-on-tertiary' },
-  checkedIn: { label: 'GİRİŞ YAPILDI', className: 'bg-secondary text-on-secondary' },
+  pending: { label: 'PENDING', className: 'bg-surface-container-high text-on-surface' },
+  vip: { label: 'VIP EXPECTED', className: 'bg-tertiary-fixed-dim text-on-tertiary' },
+  checkedIn: { label: 'CHECKED IN', className: 'bg-secondary text-on-secondary' },
 }
 
 const boardTone: Record<Arrival['boardTone'], string> = {
@@ -93,7 +93,7 @@ export default function ArrivalRow({ arrival, onCheckIn }: Props) {
       <td className="py-2 px-2.5 text-center">
         {done ? (
           <span className="text-secondary font-label-sm text-label-sm flex items-center justify-center gap-0.5">
-            <Icon name="check_circle" className="text-[14px]" /> Odaya Geçti
+            <Icon name="check_circle" className="text-[14px]" /> In Room
           </span>
         ) : (
           <button

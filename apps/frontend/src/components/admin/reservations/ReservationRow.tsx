@@ -1,6 +1,6 @@
-import type { LedgerStatus, Reservation } from '../../../data/hotel'
-import Icon from '../../Icon'
-import { paymentTone, statusLabel, statusTone } from './statusStyles'
+import type { LedgerStatus, Reservation } from '@/data/hotel'
+import Icon from '@/components/Icon'
+import { paymentTone, statusLabel, statusTone } from '@/components/admin/reservations/statusStyles'
 
 const iconButton = 'p-1 bg-surface-container hover:bg-surface-variant text-on-surface transition-colors'
 const textButton =
@@ -84,13 +84,13 @@ export default function ReservationRow({ reservation: r, selected, onSelect, onS
         <div className="flex items-center justify-center gap-1">
           {r.status === 'checkedIn' && (
             <>
-              <button className={iconButton} title="İncele & Folyo" type="button" onClick={select}>
+              <button className={iconButton} title="Review & Folio" type="button" onClick={select}>
                 <Icon name="visibility" className="text-[16px]" />
               </button>
-              <button className={iconButton} title="Düzenle" type="button">
+              <button className={iconButton} title="Edit" type="button">
                 <Icon name="edit" className="text-[16px]" />
               </button>
-              <button className={iconButton} title="Yazdır" type="button">
+              <button className={iconButton} title="Print" type="button">
                 <Icon name="print" className="text-[16px]" />
               </button>
             </>
@@ -110,7 +110,7 @@ export default function ReservationRow({ reservation: r, selected, onSelect, onS
                   Detay
                 </button>
               )}
-              <button className={iconButton} title="Düzenle" type="button">
+              <button className={iconButton} title="Edit" type="button">
                 <Icon name="edit" className="text-[16px]" />
               </button>
             </>
@@ -126,7 +126,7 @@ export default function ReservationRow({ reservation: r, selected, onSelect, onS
               </button>
               <button
                 className="p-1 text-error hover:bg-error-container transition-colors"
-                title="İptal Et"
+                title="Cancel"
                 type="button"
                 onClick={() => onStatusChange(r.id, 'cancelled')}
               >
@@ -139,7 +139,7 @@ export default function ReservationRow({ reservation: r, selected, onSelect, onS
               <button className={neutralText} type="button">
                 Fatura
               </button>
-              <button className={iconButton} title="Arşiv" type="button">
+              <button className={iconButton} title="Archive" type="button">
                 <Icon name="folder" className="text-[16px]" />
               </button>
             </>

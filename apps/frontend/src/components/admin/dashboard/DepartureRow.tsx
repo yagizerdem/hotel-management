@@ -1,5 +1,5 @@
-import type { Departure } from '../../../data/hotel'
-import Icon from '../../Icon'
+import type { Departure } from '@/data/hotel'
+import Icon from '@/components/Icon'
 
 const badgeTone: Record<Departure['status'], string> = {
   waiting: 'bg-tertiary-fixed text-on-tertiary-fixed',
@@ -67,7 +67,7 @@ export default function DepartureRow({ departure, onCheckOut }: Props) {
       <td className="py-2 px-2.5 text-center">
         {left ? (
           <span className="text-outline font-label-sm text-label-sm flex items-center justify-center gap-1">
-            <Icon name="receipt_long" className="text-[14px]" /> Yazdırıldı
+            <Icon name="receipt_long" className="text-[14px]" /> Printed
           </span>
         ) : (
           <button

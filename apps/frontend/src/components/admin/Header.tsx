@@ -1,5 +1,5 @@
-import { useHotel } from '../../context/hotelContext'
-import Icon from '../Icon'
+import { useHotel } from '@/context/HotelProvider'
+import Icon from '@/components/Icon'
 
 export default function Header() {
   const { search, setSearch, roomCounts } = useHotel()
@@ -15,7 +15,7 @@ export default function Header() {
           />
           <input
             className="w-full h-8 pl-8 pr-3 text-body-sm font-body-sm bg-surface-container-low border border-outline-variant/40 rounded focus:border-secondary focus:bg-surface-container-lowest focus:outline-none transition-colors text-on-surface placeholder:text-outline"
-            placeholder="Oda, misafir veya rezervasyon no ara... [Ctrl+K]"
+            placeholder="Search room, guest or reservation no... [Ctrl+K]"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -25,15 +25,15 @@ export default function Header() {
       <div className="flex items-center gap-space-md">
         <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 bg-surface-container-low border border-outline-variant/30 rounded text-on-surface font-mono-data text-mono-data">
           <Icon name="domain" className="text-secondary text-[16px]" />
-          <span>Bugün: 24 Mayıs 2025</span>
+          <span>Today: 24 May 2025</span>
           <span className="text-outline-variant">|</span>
           <span className="font-medium text-secondary">
-            Doluluk: %{occupancy} ({roomCounts.occupied}/{roomCounts.total} Oda)
+            Occupancy: {occupancy}% ({roomCounts.occupied}/{roomCounts.total} Rooms)
           </span>
         </div>
         <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-low border border-outline-variant/30 rounded text-on-surface font-label-sm text-label-sm">
           <Icon name="schedule" className="text-outline text-[16px]" />
-          <span>Vardiya: Sabah (08:00 - 16:00)</span>
+          <span>Shift: Morning (08:00 - 16:00)</span>
         </div>
         <button
           className="relative p-1.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
@@ -49,7 +49,7 @@ export default function Header() {
           className="h-8 px-space-md bg-secondary hover:bg-secondary/90 text-on-secondary font-label-sm text-label-sm font-semibold rounded flex items-center gap-1.5 transition-colors shadow-sm"
           type="button"
         >
-          <span>+ Hızlı Rezervasyon</span>
+          <span>+ Quick Reservation</span>
         </button>
         <div className="h-6 w-px bg-outline-variant/30"></div>
         <div className="flex items-center gap-2 pl-1 cursor-pointer">
@@ -58,10 +58,10 @@ export default function Header() {
           </div>
           <div className="hidden sm:flex flex-col text-left">
             <span className="font-label-sm text-label-sm text-on-surface font-medium leading-none">
-              Selin Yılmaz
+              Selin Yilmaz
             </span>
             <span className="font-body-sm text-[10px] text-outline leading-tight">
-              Ön Büro Şefi / Resepsiyon
+              Front Office Manager / Reception
             </span>
           </div>
           <Icon name="expand_more" className="text-outline text-[16px]" />

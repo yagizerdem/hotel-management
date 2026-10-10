@@ -3,43 +3,43 @@ export type NavSection = { title: string; items: NavItem[] }
 
 export const navigation: NavSection[] = [
   {
-    title: 'GENEL',
+    title: 'GENERAL',
     items: [
-      { label: 'Genel Bakış', icon: 'dashboard', to: '/admin/genel-bakis' },
-      { label: 'Resepsiyon', icon: 'desk', to: '/admin' },
+      { label: 'Overview', icon: 'dashboard', to: '/admin/overview' },
+      { label: 'Front Desk', icon: 'desk', to: '/admin' },
     ],
   },
   {
-    title: 'REZERVASYON',
+    title: 'RESERVATIONS',
     items: [
-      { label: 'Rezervasyonlar', icon: 'book_online', to: '/admin/rezervasyonlar' },
-      { label: 'Rezervasyon Takvimi', icon: 'calendar_month', to: '/admin/rezervasyon-takvimi' },
-      { label: 'Oda Yönetimi', icon: 'hotel', to: '/admin/oda-yonetimi' },
-      { label: 'Misafirler', icon: 'groups', to: '/admin/misafirler' },
+      { label: 'Reservations', icon: 'book_online', to: '/admin/reservations' },
+      { label: 'Reservation Calendar', icon: 'calendar_month', to: '/admin/calendar' },
+      { label: 'Room Management', icon: 'hotel', to: '/admin/rooms' },
+      { label: 'Guests', icon: 'groups', to: '/admin/guests' },
     ],
   },
   {
-    title: 'OPERASYON',
+    title: 'OPERATIONS',
     items: [
-      { label: 'Temizlik ve Bakım', icon: 'cleaning_services', to: '/admin/temizlik-ve-bakim' },
-      { label: 'Personel', icon: 'badge', to: '/admin/personel' },
-      { label: 'Vardiya Planlama', icon: 'schedule', to: '/admin/vardiya-planlama' },
+      { label: 'Housekeeping & Maintenance', icon: 'cleaning_services', to: '/admin/housekeeping' },
+      { label: 'Staff', icon: 'badge', to: '/admin/staff' },
+      { label: 'Shift Planning', icon: 'schedule', to: '/admin/shift-planning' },
     ],
   },
   {
-    title: 'FİNANS',
+    title: 'FINANCE',
     items: [
-      { label: 'Fiyatlandırma', icon: 'payments', to: '/admin/fiyatlandirma' },
-      { label: 'Gelirler', icon: 'trending_up', to: '/admin/gelirler' },
-      { label: 'Maaş Yönetimi', icon: 'account_balance_wallet', to: '/admin/maas-yonetimi' },
+      { label: 'Pricing', icon: 'payments', to: '/admin/pricing' },
+      { label: 'Revenue', icon: 'trending_up', to: '/admin/revenue' },
+      { label: 'Payroll', icon: 'account_balance_wallet', to: '/admin/payroll' },
     ],
   },
   {
-    title: 'YÖNETİM',
+    title: 'MANAGEMENT',
     items: [
-      { label: 'Kampanyalar', icon: 'campaign', to: '/admin/kampanyalar' },
-      { label: 'Raporlar', icon: 'bar_chart', to: '/admin/raporlar' },
-      { label: 'Sistem Ayarları', icon: 'settings', to: '/admin/sistem-ayarlari' },
+      { label: 'Campaigns', icon: 'campaign', to: '/admin/campaigns' },
+      { label: 'Reports', icon: 'bar_chart', to: '/admin/reports' },
+      { label: 'System Settings', icon: 'settings', to: '/admin/settings' },
     ],
   },
 ]

@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom'
-import { navigation } from '../../data/navigation'
-import Icon from '../../components/Icon'
+import { navigation } from '@/data/navigation'
+import Icon from '@/components/Icon'
 
 export default function ComingSoon() {
   const { pathname } = useLocation()
@@ -9,8 +9,8 @@ export default function ComingSoon() {
   return (
     <div className="py-space-xl flex flex-col items-center justify-center gap-2 text-outline">
       <Icon name={item?.icon ?? 'construction'} className="text-[40px]" />
-      <h1 className="font-headline-lg text-headline-lg text-primary">{item?.label ?? 'Sayfa'}</h1>
-      <p className="font-body-md text-body-md">Bu modül henüz tasarlanmadı.</p>
+      <h1 className="font-headline-lg text-headline-lg text-primary">{item?.label ?? 'Page'}</h1>
+      <p className="font-body-md text-body-md">This module has not been designed yet.</p>
     </div>
   )
 }

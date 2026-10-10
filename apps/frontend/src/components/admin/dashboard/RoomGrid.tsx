@@ -1,5 +1,5 @@
-import { useHotel } from '../../../context/hotelContext'
-import type { RoomStatus } from '../../../data/hotel'
+import { useHotel } from '@/context/HotelProvider'
+import type { RoomStatus } from '@/data/hotel'
 
 const cellTone: Record<RoomStatus, string> = {
   occupied: 'bg-secondary text-on-secondary',
@@ -48,10 +48,10 @@ export function FloorSummary({ floor }: { floor: Floor }) {
   const count = (...statuses: RoomStatus[]) =>
     floorRooms.filter((room) => statuses.includes(room.status)).length
   const parts = [
-    `${count('occupied', 'arrival')} Dolu`,
-    `${count('available')} Boş`,
-    count('dirty') ? `${count('dirty')} Temizlik` : '',
-    count('maintenance') ? `${count('maintenance')} Bakım` : '',
+    `${count('occupied', 'arrival')} Occupied`,
+    `${count('available')} Vacant`,
+    count('dirty') ? `${count('dirty')} Cleaning` : '',
+    count('maintenance') ? `${count('maintenance')} Maintenance` : '',
   ].filter(Boolean)
 
   return <span className="font-mono-data text-[10px] text-outline">{parts.join(' / ')}</span>

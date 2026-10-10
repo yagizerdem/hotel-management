@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import { navigation } from '../../data/navigation'
-import Icon from '../Icon'
+import { navigation } from '@/data/navigation'
+import Icon from '@/components/Icon'
 
 const LOGO =
   '/images/img-1.png'

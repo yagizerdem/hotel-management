@@ -278,6 +278,15 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@hotel-management/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      '@hotel-management/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@hotel-management/validator':
+        specifier: workspace:*
+        version: link:../../packages/validator
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.3(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
