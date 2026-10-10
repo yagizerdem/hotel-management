@@ -9,7 +9,7 @@ import {
 const guestValidator = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim().min(1),
-  birthDate: z.coerce.date().optional(),
+  birthDate: z.string().datetime().optional(),
   nationality: z.string().trim().min(1).default("TR"),
   tcKimlikNo: z
     .string()
@@ -23,8 +23,8 @@ export function getInsertReservationValidator() {
     customer: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
     room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
     guests: z.array(guestValidator).optional(),
-    checkInDate: z.coerce.date(),
-    checkOutDate: z.coerce.date(),
+    checkInDate: z.string().datetime(),
+    checkOutDate: z.string().datetime(),
     boardType: z.enum(BoardType),
     source: z.enum(ReservationSource),
     status: z.enum(ReservationStatus).optional(),

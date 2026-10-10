@@ -1,9 +1,5 @@
-export type RegisterResopnseDTO = {
-  email: string;
-};
-
-export type RoomDTO = {
-  _id: string;
+export type ClientRoomResponseDTO = {
+  id: string;
   number: string;
   floor: number;
   type: string;
@@ -11,7 +7,6 @@ export type RoomDTO = {
   hasBalcony: boolean;
   hasMinibar: boolean;
   amenities: string[];
-  cleaningStatus: string;
 };
 
 export type DeleteRoomResponseDTO = {

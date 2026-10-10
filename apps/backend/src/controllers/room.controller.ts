@@ -2,13 +2,17 @@ import { ApiResponse } from "@/util/api-response.js";
 import { RoomModel } from "@/models/room.model.js";
 import type { Request, Response } from "express";
 import { ApiFeatures } from "@/util/api-features.js";
-import { getInsertRoomValidator } from "@hotel-management/validator/room";
+import {
+  getCheckInCheckOutValidator,
+  getInsertRoomValidator,
+} from "@hotel-management/validator/room";
 import {
   getRoomIdParamValidator,
   getUpdateRoomValidator,
 } from "@hotel-management/validator/room";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
 import * as roomService from "@/services/room.service.js";
+import type { ClientRoomResponseDTO } from "@hotel-management/shared";
 
 export async function getRooms(req: Request, res: Response) {
   console.log(req.query);
@@ -64,4 +68,36 @@ export async function deleteRoom(req: Request, res: Response) {
   await roomService.deleteRoomById(id);
 
   res.send(ApiResponse.ok({ id }, "room deleted successfully"));
+}
+
+export async function getAvailableRooms(req: Request, res: Response) {
+  const path = "/api/rooms/available";
+  const { checkInDate, checkOutDate } = parseOrThrow(
+    await getCheckInCheckOutValidator().safeParseAsync(req.query),
+    "get available rooms failed",
+    path,
+  );
+
+  const rooms = await roomService.getAvailableRooms(checkInDate, checkOutDate);
+
+  res.send(ApiResponse.ok(rooms, "available rooms fetched successfully"));
+}
+
+export async function clientGetAllRooms(req: Request, res: Response) {
+  const rooms = await RoomModel.find();
+  const roomData: ClientRoomResponseDTO[] = rooms.map((room) => ({
+    id: room._id.toString(),
+    number: room.number,
+    floor: room.floor,
+    type: room.type,
+    beds: {
+      single: room.beds?.single ?? 0,
+      double: room.beds?.double ?? 0,
+    },
+    hasBalcony: room.hasBalcony,
+    hasMinibar: room.hasMinibar,
+    amenities: room.amenities,
+  }));
+
+  res.send(ApiResponse.ok(roomData, "all rooms fetched successfully"));
 }

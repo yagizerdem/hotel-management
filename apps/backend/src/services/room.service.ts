@@ -1,3 +1,5 @@
+import { ReservationModel } from "@/models/reservation.model.js";
+import { RoomBlockModel } from "@/models/room-block.model.js";
 import { RoomModel } from "@/models/room.model.js";
 import { AppError } from "@/util/app-error.js";
 import HttpStatusCode from "@/util/http-status-codes.js";
@@ -114,4 +116,30 @@ export async function deleteRoomById(
   }
 
   return room;
+}
+
+export async function getAvailableRooms(
+  checkInDate: string,
+  checkOutDate: string,
+  session?: mongoose.ClientSession,
+) {
+  const occupiedRoomIds = await ReservationModel.find({
+    checkInDate: { $lte: checkOutDate },
+    checkOutDate: { $gte: checkInDate },
+  }).distinct("room");
+
+  const blockedRoomIds = await RoomBlockModel.find({
+    startDate: { $lte: checkOutDate },
+    endDate: { $gte: checkInDate },
+  }).distinct("roomId");
+
+  const unavailableRoomIds = [...occupiedRoomIds, ...blockedRoomIds];
+
+  const rooms = await RoomModel.find({
+    _id: {
+      $nin: unavailableRoomIds,
+    },
+  }).session(session ?? null);
+
+  return rooms;
 }

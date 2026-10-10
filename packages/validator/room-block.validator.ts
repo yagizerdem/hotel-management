@@ -3,8 +3,8 @@ import { z } from "zod";
 export function getInsertRoomBlockValidator() {
   const validator = z.object({
     room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
     reason: z.string().trim().min(1),
   });
 
@@ -21,14 +21,18 @@ export function getUpdateRoomBlockValidator() {
   return z
     .object({
       room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
-      startDate: z.coerce.date(),
-      endDate: z.coerce.date(),
+      startDate: z.string().datetime(),
+      endDate: z.string().datetime(),
       reason: z.string().trim().min(1),
     })
     .partial()
     .refine((roomBlock) => Object.keys(roomBlock).length > 0, {
       message: "At least one field is required.",
     });
+}
+
+export function ISOTimeStringValidator() {
+  return z.string().datetime();
 }
 
 export type RoomBlockIdParamDTO = z.infer<

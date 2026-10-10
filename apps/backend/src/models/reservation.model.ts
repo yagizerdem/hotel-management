@@ -1,4 +1,4 @@
-import { Schema, model, type InferSchemaType, type Types } from "mongoose";
+import { Schema, model, type InferSchemaType } from "mongoose";
 import {
   BoardType,
   Currency,

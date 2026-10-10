@@ -37,6 +37,10 @@ export async function insertReservation(
   const reservationFromDb = await ReservationModel.insertOne(
     {
       ...dto,
+      guests: dto.guests?.map((guest) => ({
+        ...guest,
+        birthDate: guest.birthDate ? new Date(guest.birthDate) : undefined,
+      })),
       createdBy,
     },
     { session },
@@ -133,7 +137,7 @@ export async function createReservationWeb(
   return reservationFromDb;
 }
 
-function validateCheckInAndCheckOutDates(
+export function validateCheckInAndCheckOutDates(
   checkInDate: string,
   checkOutDate: string,
 ) {
@@ -170,7 +174,7 @@ function validateCheckInAndCheckOutDates(
   }
 }
 
-async function ensureRoomBlockNotExist(
+export async function ensureRoomBlockNotExist(
   roomId: string,
   checkInDate: string,
   checkOutDate: string,
@@ -190,7 +194,7 @@ async function ensureRoomBlockNotExist(
   }
 }
 
-async function ensureRoomBlockExist(
+export async function ensureRoomBlockExist(
   roomId: string,
   checkInDate: string,
   checkOutDate: string,
@@ -210,7 +214,7 @@ async function ensureRoomBlockExist(
   }
 }
 
-async function ensureRoomNotReserved(
+export async function ensureRoomNotReserved(
   roomId: string,
   checkInDate: string,
   checkOutDate: string,
