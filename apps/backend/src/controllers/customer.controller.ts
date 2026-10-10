@@ -7,9 +7,8 @@ import {
   getCustomerIdParamValidator,
   getUpdateCustomerValidator,
 } from "@hotel-management/validator/customer";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as customerService from "@/services/customer.service.js";
 
 export async function getCustomers(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(CustomerModel.find(), req.query)
@@ -30,11 +29,7 @@ export async function insertCustomer(req: Request, res: Response) {
     "insert customer failed",
     "/api/customers/insert",
   );
-
-  await CustomerModel.insertOne({
-    ...data,
-  });
-
+  await customerService.insertCustomer(data);
   res.send(ApiResponse.ok(data, "customer inserted successfully"));
 }
 
@@ -51,19 +46,7 @@ export async function updateCustomer(req: Request, res: Response) {
     path,
   );
 
-  const customer = await CustomerModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!customer) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "customer not found",
-      path,
-    });
-  }
+  const customer = await customerService.updateCustomer(id, data);
 
   res.send(ApiResponse.ok(customer, "customer updated successfully"));
 }
@@ -76,15 +59,7 @@ export async function deleteCustomer(req: Request, res: Response) {
     path,
   );
 
-  const customer = await CustomerModel.findByIdAndDelete(id);
-
-  if (!customer) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "customer not found",
-      path,
-    });
-  }
+  await customerService.deleteCustomerById(id);
 
   res.send(ApiResponse.ok({ id }, "customer deleted successfully"));
 }
