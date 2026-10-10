@@ -67,6 +67,18 @@ export function getUpdateReservationValidator() {
     });
 }
 
+export function getCreateReservationWebValidator() {
+  const validator = z.object({
+    room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
+    checkInDate: z.coerce.date(),
+    checkOutDate: z.coerce.date(),
+    boardType: z.enum(BoardType),
+    currency: z.enum(Currency).optional().default(Currency.USD),
+  });
+
+  return validator;
+}
+
 export type ReservationIdParamDTO = z.infer<
   ReturnType<typeof getReservationIdParamValidator>
 >;
@@ -76,4 +88,8 @@ export type UpdateReservationDTO = z.infer<
 
 export type InsertReservationDTO = z.infer<
   ReturnType<typeof getInsertReservationValidator>
+>;
+
+export type CreateReservationWebDTO = z.infer<
+  ReturnType<typeof getCreateReservationWebValidator>
 >;

@@ -39,7 +39,7 @@ const reservationSchema = new Schema(
     currency: {
       type: String,
       enum: Object.values(Currency),
-      default: Currency.TRY,
+      default: Currency.USD,
     },
     nights: { type: Number, required: true, min: 1 },
     nightlyPrice: { type: Number, required: true, min: 0 },
@@ -62,25 +62,3 @@ reservationSchema.index({ status: 1, checkInDate: 1 });
 
 export type Reservation = InferSchemaType<typeof reservationSchema>;
 export const ReservationModel = model("Reservation", reservationSchema);
-
-const ACTIVE_STATUSES = [
-  ReservationStatus.PENDING,
-  ReservationStatus.CONFIRMED,
-  ReservationStatus.CHECKED_IN,
-];
-
-export async function hasReservationConflict(
-  roomId: Types.ObjectId | string,
-  checkInDate: Date,
-  checkOutDate: Date,
-  excludeReservationId?: Types.ObjectId | string,
-): Promise<boolean> {
-  const filter: Record<string, unknown> = {
-    room: roomId,
-    status: { $in: ACTIVE_STATUSES },
-    checkInDate: { $lt: checkOutDate },
-    checkOutDate: { $gt: checkInDate },
-  };
-  if (excludeReservationId) filter._id = { $ne: excludeReservationId };
-  return (await ReservationModel.exists(filter)) !== null;
-}

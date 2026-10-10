@@ -8,7 +8,11 @@ const pricingSchema = new Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     nightlyPrice: { type: Number, required: true, min: 0 },
-    currency: { type: String, enum: Object.values(Currency), default: Currency.TRY },
+    currency: {
+      type: String,
+      enum: Object.values(Currency),
+      default: Currency.USD,
+    },
   },
   { timestamps: true },
 );

@@ -2,13 +2,19 @@ import { ApiResponse } from "@/util/api-response.js";
 import { ReservationModel } from "@/models/reservation.model.js";
 import type { Request, Response } from "express";
 import { ApiFeatures } from "@/util/api-features.js";
-import { getInsertReservationValidator } from "@hotel-management/validator/reservation";
+import {
+  getCreateReservationWebValidator,
+  getInsertReservationValidator,
+} from "@hotel-management/validator/reservation";
 import {
   getReservationIdParamValidator,
   getUpdateReservationValidator,
 } from "@hotel-management/validator/reservation";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
 import * as reservationService from "@/services/reservation.service.js";
+import mongoose from "mongoose";
+import { AppError } from "@/util/app-error.js";
+import HttpStatusCode from "@/util/http-status-codes.js";
 
 export async function getReservations(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(ReservationModel.find(), req.query)
@@ -66,4 +72,33 @@ export async function deleteReservation(req: Request, res: Response) {
   await reservationService.deleteReservationById(id);
 
   res.send(ApiResponse.ok({ id }, "reservation deleted successfully"));
+}
+
+export async function createReservationWeb(req: Request, res: Response) {
+  const user = req.user!;
+  const validator = getCreateReservationWebValidator();
+  const data = parseOrThrow(
+    await validator.safeParseAsync(req.body),
+    "create reservation failed",
+    "/api/reservations/create-web",
+  );
+
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      await reservationService.createReservationWeb(data, user.id, session);
+    });
+    // crate transection
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: "create profile failed",
+      isOperational: false,
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  res.send(ApiResponse.ok(data, "reservation created successfully"));
 }
