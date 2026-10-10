@@ -2,7 +2,10 @@ import { ApiResponse } from "@/util/api-response.js";
 import { CustomerModel } from "@/models/customer.model.js";
 import type { Request, Response } from "express";
 import { ApiFeatures } from "@/util/api-features.js";
-import { getInsertCustomerValidator } from "@hotel-management/validator/customer";
+import {
+  getCreateProfileValidator,
+  getInsertCustomerValidator,
+} from "@hotel-management/validator/customer";
 import {
   getCustomerIdParamValidator,
   getUpdateCustomerValidator,
@@ -62,4 +65,17 @@ export async function deleteCustomer(req: Request, res: Response) {
   await customerService.deleteCustomerById(id);
 
   res.send(ApiResponse.ok({ id }, "customer deleted successfully"));
+}
+
+// for clients only to crate profie
+export async function createProfile(req: Request, res: Response) {
+  const validator = getCreateProfileValidator();
+  const data = parseOrThrow(
+    await validator.safeParseAsync(req.body),
+    "create profile failed",
+    "/api/customers/create-profile",
+  );
+
+  await customerService.insertCustomer(data);
+  res.send(ApiResponse.ok(data, "customer inserted successfully"));
 }
