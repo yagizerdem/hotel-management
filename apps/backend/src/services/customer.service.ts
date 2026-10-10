@@ -102,7 +102,11 @@ export async function deleteCustomerById(
   return customer;
 }
 
-export async function createProfile(userId: string, dto: InsertCustomerDTO) {
+export async function createProfile(
+  userId: string,
+  dto: InsertCustomerDTO,
+  session?: mongoose.ClientSession,
+) {
   const userFromDb = await userService.ensureUserIsActiveById(userId);
   if (userFromDb.customer) {
     throw AppError.from({
@@ -112,20 +116,12 @@ export async function createProfile(userId: string, dto: InsertCustomerDTO) {
     });
   }
 
-  // crate transection
-  const session = await mongoose.startSession();
-  try {
-    await session.withTransaction(async () => {
-      const customerFromDb = await insertCustomer(dto, session);
-      await userService.updateUser(
-        userId,
-        {
-          customer: customerFromDb.id,
-        },
-        session,
-      );
-    });
-  } finally {
-    await session.endSession();
-  }
+  const customerFromDb = await insertCustomer(dto, session);
+  await userService.updateUser(
+    userId,
+    {
+      customer: customerFromDb.id,
+    },
+    session,
+  );
 }

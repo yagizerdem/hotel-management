@@ -12,6 +12,9 @@ import {
 } from "@hotel-management/validator/customer";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
 import * as customerService from "@/services/customer.service.js";
+import mongoose from "mongoose";
+import { AppError } from "@/util/app-error.js";
+import HttpStatusCode from "@/util/http-status-codes.js";
 
 export async function getCustomers(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(CustomerModel.find(), req.query)
@@ -77,6 +80,23 @@ export async function createProfile(req: Request, res: Response) {
     "/api/customers/create-profile",
   );
 
-  await customerService.createProfile(user!.id, data);
+  const session = await mongoose.startSession();
+
+  try {
+    await session.withTransaction(async () => {
+      await customerService.createProfile(user!.id, data, session);
+    });
+    // crate transection
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: "create profile failed",
+      isOperational: false,
+    });
+  } finally {
+    await session.endSession();
+  }
+
   res.send(ApiResponse.ok(data, "profile created successfully"));
 }
