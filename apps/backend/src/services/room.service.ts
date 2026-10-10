@@ -1,9 +1,9 @@
 import { RoomModel } from "@/models/room.model.js";
 import { AppError } from "@/util/app-error.js";
 import HttpStatusCode from "@/util/http-status-codes.js";
-import type { InsertRoomDTO } from "@hotel-management/validator";
+import type { InsertRoomDTO, UpdateRoomDTO } from "@hotel-management/validator";
 
-export async function ensureRoomExistById(id: number) {
+export async function ensureRoomExistById(id: string) {
   const roomFromDb = await RoomModel.findById(id);
   if (!roomFromDb) {
     throw AppError.from({
@@ -15,7 +15,7 @@ export async function ensureRoomExistById(id: number) {
   return roomFromDb;
 }
 
-export async function ensureRoomNotExistById(id: number) {
+export async function ensureRoomNotExistById(id: string) {
   const roomFromDb = await RoomModel.findById(id);
   if (roomFromDb) {
     throw AppError.from({
@@ -55,7 +55,40 @@ export async function ensureRoomNotExistByNumber(number: string) {
 
 export async function insertRoom(dto: InsertRoomDTO) {
   await ensureRoomNotExistByNumber(dto.number);
-
   const roomFromDb = await RoomModel.insertOne(dto);
   return roomFromDb;
+}
+
+export async function updateRoom(id: string, dto: UpdateRoomDTO) {
+  await ensureRoomExistById(id);
+
+  const room = await RoomModel.findByIdAndUpdate(
+    id,
+    { $set: dto },
+    { new: true, runValidators: true },
+  );
+
+  if (!room) {
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.NOT_FOUND,
+      message: "room not found",
+    });
+  }
+
+  return room;
+}
+
+export async function deleteRoomById(id: string) {
+  await ensureRoomExistById(id);
+
+  const room = await RoomModel.findByIdAndDelete(id);
+
+  if (!room) {
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.NOT_FOUND,
+      message: "room not found",
+    });
+  }
+
+  return room;
 }

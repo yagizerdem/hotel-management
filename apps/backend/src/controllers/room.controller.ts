@@ -7,9 +7,8 @@ import {
   getRoomIdParamValidator,
   getUpdateRoomValidator,
 } from "@hotel-management/validator/room";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as roomService from "@/services/room.service.js";
 
 export async function getRooms(req: Request, res: Response) {
   console.log(req.query);
@@ -32,11 +31,7 @@ export async function insertRoom(req: Request, res: Response) {
     "insert room failed",
     "/api/rooms/insert",
   );
-
-  await RoomModel.insertOne({
-    ...data,
-  });
-
+  await roomService.insertRoom(data);
   res.send(ApiResponse.ok(data, "room inserted successfully"));
 }
 
@@ -53,19 +48,7 @@ export async function updateRoom(req: Request, res: Response) {
     path,
   );
 
-  const room = await RoomModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!room) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "room not found",
-      path,
-    });
-  }
+  const room = await roomService.updateRoom(id, data);
 
   res.send(ApiResponse.ok(room, "room updated successfully"));
 }
@@ -78,15 +61,7 @@ export async function deleteRoom(req: Request, res: Response) {
     path,
   );
 
-  const room = await RoomModel.findByIdAndDelete(id);
-
-  if (!room) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "room not found",
-      path,
-    });
-  }
+  await roomService.deleteRoomById(id);
 
   res.send(ApiResponse.ok({ id }, "room deleted successfully"));
 }
