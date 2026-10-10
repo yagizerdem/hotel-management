@@ -30,11 +30,9 @@ export async function insertRoom(req: Request, res: Response) {
   const data = parseOrThrow(
     await validator.safeParseAsync(req.body),
     "insert room failed",
-    "/api/room/insert",
+    "/api/rooms/insert",
   );
 
-  // The validator package cannot import backend enums; its string unions
-  // carry the same values as RoomType / CleaningStatus.
   await RoomModel.insertOne({
     ...data,
   });
