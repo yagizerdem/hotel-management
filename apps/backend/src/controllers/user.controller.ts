@@ -7,10 +7,8 @@ import {
   getUserIdParamValidator,
   getUpdateUserValidator,
 } from "@hotel-management/validator/user";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
-import bcrypt from "bcrypt";
+import * as userService from "@/services/user.service.js";
 
 export async function getUsers(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(UserModel.find(), req.query)
@@ -32,14 +30,7 @@ export async function insertUser(req: Request, res: Response) {
     "/api/users/insert",
   );
 
-  // Store only the hash; the plain password is never saved or returned.
-  const { password, ...userData } = data;
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  await UserModel.insertOne({
-    ...userData,
-    passwordHash,
-  });
+  const userData = await userService.insertUser(data);
 
   res.send(ApiResponse.ok(userData, "user inserted successfully"));
 }
@@ -57,26 +48,7 @@ export async function updateUser(req: Request, res: Response) {
     path,
   );
 
-  // A new password is stored as a hash, like on insert.
-  const { password, ...userData } = data;
-  const update =
-    password === undefined
-      ? userData
-      : { ...userData, passwordHash: await bcrypt.hash(password, 10) };
-
-  const user = await UserModel.findByIdAndUpdate(
-    id,
-    { $set: update },
-    { new: true, runValidators: true },
-  );
-
-  if (!user) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "user not found",
-      path,
-    });
-  }
+  const user = await userService.updateUser(id, data);
 
   res.send(ApiResponse.ok(user, "user updated successfully"));
 }
@@ -89,15 +61,7 @@ export async function deleteUser(req: Request, res: Response) {
     path,
   );
 
-  const user = await UserModel.findByIdAndDelete(id);
-
-  if (!user) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "user not found",
-      path,
-    });
-  }
+  await userService.deleteUserById(id);
 
   res.send(ApiResponse.ok({ id }, "user deleted successfully"));
 }

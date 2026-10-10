@@ -7,9 +7,8 @@ import {
   getBackupLogIdParamValidator,
   getUpdateBackupLogValidator,
 } from "@hotel-management/validator/backup-log";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as backupLogService from "@/services/backup-log.service.js";
 
 export async function getBackupLogs(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(BackupLogModel.find(), req.query)
@@ -31,10 +30,7 @@ export async function insertBackupLog(req: Request, res: Response) {
     "/api/backup-logs/insert",
   );
 
-  await BackupLogModel.insertOne({
-    ...data,
-    performedBy: req.user?.id,
-  });
+  await backupLogService.insertBackupLog(data, req.user?.id);
 
   res.send(ApiResponse.ok(data, "backup log inserted successfully"));
 }
@@ -52,19 +48,7 @@ export async function updateBackupLog(req: Request, res: Response) {
     path,
   );
 
-  const backupLog = await BackupLogModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!backupLog) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "backup log not found",
-      path,
-    });
-  }
+  const backupLog = await backupLogService.updateBackupLog(id, data);
 
   res.send(ApiResponse.ok(backupLog, "backup log updated successfully"));
 }
@@ -77,15 +61,7 @@ export async function deleteBackupLog(req: Request, res: Response) {
     path,
   );
 
-  const backupLog = await BackupLogModel.findByIdAndDelete(id);
-
-  if (!backupLog) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "backup log not found",
-      path,
-    });
-  }
+  await backupLogService.deleteBackupLogById(id);
 
   res.send(ApiResponse.ok({ id }, "backup log deleted successfully"));
 }

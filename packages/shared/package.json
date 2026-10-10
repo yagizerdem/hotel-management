@@ -10,7 +10,6 @@
   "exports": {
     ".": {
       "types": "./index.d.ts"
-    },
-    "./room": "./room.validator.ts"
+    }
   }
 }

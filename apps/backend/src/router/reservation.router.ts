@@ -470,4 +470,68 @@ router.delete(
   asyncWrapper(reservationController.deleteReservation),
 );
 
+/**
+ * @openapi
+ * /api/reservations/create-web:
+ *   post:
+ *     tags: [Reservations]
+ *     summary: Create a reservation from the web as the authenticated customer
+ *     description: >
+ *       Creates a PENDING reservation for the authenticated customer user.
+ *       The user must be active and have a customer profile. The number of
+ *       nights is calculated from the dates; prices are set to 0 for now.
+ *       The reservation source and creator are taken from the session, not
+ *       from the request body.
+ *     requestBody:
+ *       description: The reservation to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - room
+ *               - checkInDate
+ *               - checkOutDate
+ *               - boardType
+ *             properties:
+ *               room:
+ *                 type: string
+ *                 pattern: "^[a-f\\d]{24}$"
+ *                 description: Room id
+ *               checkInDate:
+ *                 type: string
+ *                 format: date-time
+ *               checkOutDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Must be after checkInDate
+ *               boardType:
+ *                 type: string
+ *                 enum: [FULL_BOARD, ALL_INCLUSIVE]
+ *               currency:
+ *                 type: string
+ *                 enum: [TRY, USD, EUR, GBP]
+ *                 default: USD
+ *     responses:
+ *       "200":
+ *         description: Reservation created successfully
+ *       "400":
+ *         description: >
+ *           Invalid request body or dates, the user has no customer profile,
+ *           or the room is blocked for the chosen dates
+ *       "401":
+ *         description: Not authenticated
+ *       "403":
+ *         description: The user is inactive or is not a customer
+ *       "500":
+ *         description: Reservation could not be created
+ */
+router.post(
+  "/create-web",
+  authenticationGuard,
+  authorizationGuard([UserRole.CUSTOMER]),
+  asyncWrapper(reservationController.createReservationWeb),
+);
+
 export default router;

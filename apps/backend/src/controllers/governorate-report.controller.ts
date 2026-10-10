@@ -7,9 +7,8 @@ import {
   getGovernorateReportIdParamValidator,
   getUpdateGovernorateReportValidator,
 } from "@hotel-management/validator/governorate-report";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as governorateReportService from "@/services/governorate-report.service.js";
 
 export async function getGovernorateReports(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(GovernorateReportModel.find(), req.query)
@@ -36,9 +35,7 @@ export async function insertGovernorateReport(req: Request, res: Response) {
     "/api/governorate-reports/insert",
   );
 
-  await GovernorateReportModel.insertOne({
-    ...data,
-  });
+  await governorateReportService.insertGovernorateReport(data);
 
   res.send(ApiResponse.ok(data, "governorate report inserted successfully"));
 }
@@ -56,19 +53,8 @@ export async function updateGovernorateReport(req: Request, res: Response) {
     path,
   );
 
-  const governorateReport = await GovernorateReportModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!governorateReport) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "governorate report not found",
-      path,
-    });
-  }
+  const governorateReport =
+    await governorateReportService.updateGovernorateReport(id, data);
 
   res.send(
     ApiResponse.ok(
@@ -86,15 +72,7 @@ export async function deleteGovernorateReport(req: Request, res: Response) {
     path,
   );
 
-  const governorateReport = await GovernorateReportModel.findByIdAndDelete(id);
-
-  if (!governorateReport) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "governorate report not found",
-      path,
-    });
-  }
+  await governorateReportService.deleteGovernorateReportById(id);
 
   res.send(ApiResponse.ok({ id }, "governorate report deleted successfully"));
 }

@@ -2,14 +2,19 @@ import { ApiResponse } from "@/util/api-response.js";
 import { CustomerModel } from "@/models/customer.model.js";
 import type { Request, Response } from "express";
 import { ApiFeatures } from "@/util/api-features.js";
-import { getInsertCustomerValidator } from "@hotel-management/validator/customer";
+import {
+  getCreateProfileValidator,
+  getInsertCustomerValidator,
+} from "@hotel-management/validator/customer";
 import {
   getCustomerIdParamValidator,
   getUpdateCustomerValidator,
 } from "@hotel-management/validator/customer";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as customerService from "@/services/customer.service.js";
+import mongoose from "mongoose";
+import { AppError } from "@/util/app-error.js";
+import HttpStatusCode from "@/util/http-status-codes.js";
 
 export async function getCustomers(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(CustomerModel.find(), req.query)
@@ -30,11 +35,7 @@ export async function insertCustomer(req: Request, res: Response) {
     "insert customer failed",
     "/api/customers/insert",
   );
-
-  await CustomerModel.insertOne({
-    ...data,
-  });
-
+  await customerService.insertCustomer(data);
   res.send(ApiResponse.ok(data, "customer inserted successfully"));
 }
 
@@ -51,19 +52,7 @@ export async function updateCustomer(req: Request, res: Response) {
     path,
   );
 
-  const customer = await CustomerModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!customer) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "customer not found",
-      path,
-    });
-  }
+  const customer = await customerService.updateCustomer(id, data);
 
   res.send(ApiResponse.ok(customer, "customer updated successfully"));
 }
@@ -76,15 +65,38 @@ export async function deleteCustomer(req: Request, res: Response) {
     path,
   );
 
-  const customer = await CustomerModel.findByIdAndDelete(id);
-
-  if (!customer) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "customer not found",
-      path,
-    });
-  }
+  await customerService.deleteCustomerById(id);
 
   res.send(ApiResponse.ok({ id }, "customer deleted successfully"));
+}
+
+// for clients only to create profile
+export async function createProfile(req: Request, res: Response) {
+  const user = req.user;
+  const validator = getCreateProfileValidator();
+  const data = parseOrThrow(
+    await validator.safeParseAsync(req.body),
+    "create profile failed",
+    "/api/customers/create-profile",
+  );
+
+  const session = await mongoose.startSession();
+
+  try {
+    await session.withTransaction(async () => {
+      await customerService.createProfile(user!.id, data, session);
+    });
+    // crate transection
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: "create profile failed",
+      isOperational: false,
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  res.send(ApiResponse.ok(data, "profile created successfully"));
 }

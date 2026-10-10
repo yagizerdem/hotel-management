@@ -294,4 +294,67 @@ router.delete(
   asyncWrapper(customerController.deleteCustomer),
 );
 
+/**
+ * @openapi
+ * /api/customers/create-profile:
+ *   post:
+ *     tags: [Customers]
+ *     summary: Create a customer profile
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - birthDate
+ *               - phone
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 minLength: 2
+ *               lastName:
+ *                 type: string
+ *                 minLength: 2
+ *               birthDate:
+ *                 type: string
+ *                 format: date-time
+ *               nationality:
+ *                 type: string
+ *                 minLength: 1
+ *               tcKimlikNo:
+ *                 type: string
+ *                 pattern: "^\\d{11}$"
+ *                 example: "12345678901"
+ *               passportNo:
+ *                 type: string
+ *                 minLength: 1
+ *               phone:
+ *                 type: string
+ *                 minLength: 1
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               address:
+ *                 type: string
+ *                 minLength: 1
+ *               marketingConsent:
+ *                 type: boolean
+ *     responses:
+ *       "200":
+ *         description: Customer inserted successfully
+ *       "400":
+ *         description: Invalid request body
+ *       "409":
+ *         description: A customer with this TC Kimlik No already exists
+ */
+router.post(
+  "/create-profile",
+  authenticationGuard,
+  authorizationGuard([UserRole.CUSTOMER]),
+  asyncWrapper(customerController.createProfile),
+);
+
 export default router;

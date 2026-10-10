@@ -7,9 +7,8 @@ import {
   getPricingIdParamValidator,
   getUpdatePricingValidator,
 } from "@hotel-management/validator/pricing";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as pricingService from "@/services/pricing.service.js";
 
 export async function getPricings(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(PricingModel.find(), req.query)
@@ -31,9 +30,7 @@ export async function insertPricing(req: Request, res: Response) {
     "/api/pricings/insert",
   );
 
-  await PricingModel.insertOne({
-    ...data,
-  });
+  await pricingService.insertPricing(data);
 
   res.send(ApiResponse.ok(data, "pricing inserted successfully"));
 }
@@ -51,19 +48,7 @@ export async function updatePricing(req: Request, res: Response) {
     path,
   );
 
-  const pricing = await PricingModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!pricing) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "pricing not found",
-      path,
-    });
-  }
+  const pricing = await pricingService.updatePricing(id, data);
 
   res.send(ApiResponse.ok(pricing, "pricing updated successfully"));
 }
@@ -76,15 +61,7 @@ export async function deletePricing(req: Request, res: Response) {
     path,
   );
 
-  const pricing = await PricingModel.findByIdAndDelete(id);
-
-  if (!pricing) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "pricing not found",
-      path,
-    });
-  }
+  await pricingService.deletePricingById(id);
 
   res.send(ApiResponse.ok({ id }, "pricing deleted successfully"));
 }

@@ -9,7 +9,7 @@ import {
 const guestValidator = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim().min(1),
-  birthDate: z.coerce.date().optional(),
+  birthDate: z.string().datetime().optional(),
   nationality: z.string().trim().min(1).default("TR"),
   tcKimlikNo: z
     .string()
@@ -23,8 +23,8 @@ export function getInsertReservationValidator() {
     customer: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
     room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
     guests: z.array(guestValidator).optional(),
-    checkInDate: z.coerce.date(),
-    checkOutDate: z.coerce.date(),
+    checkInDate: z.string().datetime(),
+    checkOutDate: z.string().datetime(),
     boardType: z.enum(BoardType),
     source: z.enum(ReservationSource),
     status: z.enum(ReservationStatus).optional(),
@@ -67,6 +67,18 @@ export function getUpdateReservationValidator() {
     });
 }
 
+export function getCreateReservationWebValidator() {
+  const validator = z.object({
+    room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
+    checkInDate: z.string().datetime(),
+    checkOutDate: z.string().datetime(),
+    boardType: z.enum(BoardType),
+    currency: z.enum(Currency).optional().default(Currency.USD),
+  });
+
+  return validator;
+}
+
 export type ReservationIdParamDTO = z.infer<
   ReturnType<typeof getReservationIdParamValidator>
 >;
@@ -76,4 +88,8 @@ export type UpdateReservationDTO = z.infer<
 
 export type InsertReservationDTO = z.infer<
   ReturnType<typeof getInsertReservationValidator>
+>;
+
+export type CreateReservationWebDTO = z.infer<
+  ReturnType<typeof getCreateReservationWebValidator>
 >;

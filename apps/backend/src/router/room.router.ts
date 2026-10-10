@@ -137,7 +137,13 @@ import { UserRole } from "@hotel-management/models";
  *           enum: [CLEAN, DIRTY, IN_PROGRESS]
  *         description: Filter rooms whose cleaning status is not the value
  */
-router.get("/", asyncWrapper(roomController.getRooms));
+
+router.get(
+  "/",
+  authenticationGuard,
+  authorizationGuard([UserRole.ADMIN, UserRole.MANAGER, UserRole.RECEPTIONIST]),
+  asyncWrapper(roomController.getRooms),
+);
 
 /**
  * @openapi
@@ -305,5 +311,52 @@ router.delete(
   authorizationGuard([UserRole.ADMIN, UserRole.MANAGER]),
   asyncWrapper(roomController.deleteRoom),
 );
+
+/**
+ * @openapi
+ * /api/rooms/available:
+ *   get:
+ *     tags: [Rooms]
+ *     summary: Get available rooms
+ *     parameters:
+ *       - in: query
+ *         name: checkInDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: The check-in date
+ *       - in: query
+ *         name: checkOutDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: The check-out date
+ *     responses:
+ *       "200":
+ *         description: Available rooms fetched successfully
+ *       "400":
+ *         description: Invalid query parameters
+ */
+
+router.get(
+  "/available",
+  authenticationGuard,
+  asyncWrapper(roomController.getAvailableRooms),
+);
+
+/**
+ * /api/rooms/all-rooms:
+ *   get:
+ *     tags: [Rooms]
+ *     summary: Get all rooms
+ *     responses:
+ *       "200":
+ *         description: All rooms fetched successfully
+ *       "400":
+ *         description: Invalid request
+ *
+ */
 
 export default router;

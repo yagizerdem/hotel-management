@@ -54,6 +54,13 @@ export function getUpdateRoomValidator() {
     });
 }
 
+export function getCheckInCheckOutValidator() {
+  return z.object({
+    checkInDate: z.string().datetime(),
+    checkOutDate: z.string().datetime(),
+  });
+}
+
 export type RoomIdParamDTO = z.infer<
   ReturnType<typeof getRoomIdParamValidator>
 >;

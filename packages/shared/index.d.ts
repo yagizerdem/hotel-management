@@ -1,1 +1,1 @@
-export * from "./response-dto.js";
+export * from "./response/index.d.ts";

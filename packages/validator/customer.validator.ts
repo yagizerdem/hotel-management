@@ -2,9 +2,9 @@ import { z } from "zod";
 
 export function getInsertCustomerValidator() {
   const validator = z.object({
-    firstName: z.string().trim().min(1),
-    lastName: z.string().trim().min(1),
-    birthDate: z.coerce.date().optional(),
+    firstName: z.string().trim().min(2),
+    lastName: z.string().trim().min(2),
+    birthDate: z.coerce.date(),
     nationality: z.string().trim().min(1).optional(),
     tcKimlikNo: z
       .string()
@@ -12,7 +12,7 @@ export function getInsertCustomerValidator() {
       .optional(),
     isTcVerified: z.boolean().optional(),
     passportNo: z.string().trim().min(1).optional(),
-    phone: z.string().trim().min(1).optional(),
+    phone: z.string().trim().min(1),
     email: z.email().optional(),
     address: z.string().trim().min(1).optional(),
     marketingConsent: z.boolean().optional(),
@@ -50,6 +50,26 @@ export function getUpdateCustomerValidator() {
     });
 }
 
+export function getCreateProfileValidator() {
+  const validator = z.object({
+    firstName: z.string().trim().min(2),
+    lastName: z.string().trim().min(2),
+    birthDate: z.coerce.date(),
+    nationality: z.string().trim().min(1).optional(),
+    tcKimlikNo: z
+      .string()
+      .regex(/^\d{11}$/, "TC Kimlik No must be 11 digits.")
+      .optional(),
+    passportNo: z.string().trim().min(1).optional(),
+    phone: z.string().trim().min(1),
+    email: z.email().optional(),
+    address: z.string().trim().min(1).optional(),
+    marketingConsent: z.boolean().optional(),
+  });
+
+  return validator;
+}
+
 export type CustomerIdParamDTO = z.infer<
   ReturnType<typeof getCustomerIdParamValidator>
 >;
@@ -59,4 +79,8 @@ export type UpdateCustomerDTO = z.infer<
 
 export type InsertCustomerDTO = z.infer<
   ReturnType<typeof getInsertCustomerValidator>
+>;
+
+export type CreateProfileDTO = z.infer<
+  ReturnType<typeof getCreateProfileValidator>
 >;
