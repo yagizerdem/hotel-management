@@ -5,9 +5,15 @@ import type {
   InsertRoomBlockDTO,
   UpdateRoomBlockDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureRoomBlockExistById(id: string) {
-  const roomBlockFromDb = await RoomBlockModel.findById(id);
+export async function ensureRoomBlockExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const roomBlockFromDb = await RoomBlockModel.findById(id).session(
+    session ?? null,
+  );
   if (!roomBlockFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -21,18 +27,26 @@ export async function ensureRoomBlockExistById(id: string) {
 export async function insertRoomBlock(
   dto: InsertRoomBlockDTO,
   createdBy?: string,
+  session?: mongoose.ClientSession,
 ) {
-  const roomBlockFromDb = await RoomBlockModel.insertOne({ ...dto, createdBy });
+  const roomBlockFromDb = await RoomBlockModel.insertOne(
+    { ...dto, createdBy },
+    { session },
+  );
   return roomBlockFromDb;
 }
 
-export async function updateRoomBlock(id: string, dto: UpdateRoomBlockDTO) {
-  await ensureRoomBlockExistById(id);
+export async function updateRoomBlock(
+  id: string,
+  dto: UpdateRoomBlockDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureRoomBlockExistById(id, session);
 
   const roomBlock = await RoomBlockModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!roomBlock) {
@@ -45,10 +59,13 @@ export async function updateRoomBlock(id: string, dto: UpdateRoomBlockDTO) {
   return roomBlock;
 }
 
-export async function deleteRoomBlockById(id: string) {
-  await ensureRoomBlockExistById(id);
+export async function deleteRoomBlockById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureRoomBlockExistById(id, session);
 
-  const roomBlock = await RoomBlockModel.findByIdAndDelete(id);
+  const roomBlock = await RoomBlockModel.findByIdAndDelete(id, { session });
 
   if (!roomBlock) {
     throw AppError.from({

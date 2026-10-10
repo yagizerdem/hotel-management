@@ -5,9 +5,15 @@ import type {
   InsertGovernorateReportDTO,
   UpdateGovernorateReportDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureGovernorateReportExistById(id: string) {
-  const governorateReportFromDb = await GovernorateReportModel.findById(id);
+export async function ensureGovernorateReportExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const governorateReportFromDb = await GovernorateReportModel.findById(
+    id,
+  ).session(session ?? null);
   if (!governorateReportFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -20,10 +26,11 @@ export async function ensureGovernorateReportExistById(id: string) {
 
 export async function ensureGovernorateReportNotExistByReportDate(
   reportDate: Date,
+  session?: mongoose.ClientSession,
 ) {
   const governorateReportFromDb = await GovernorateReportModel.findOne({
     reportDate,
-  });
+  }).session(session ?? null);
   if (governorateReportFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -33,22 +40,28 @@ export async function ensureGovernorateReportNotExistByReportDate(
   }
 }
 
-export async function insertGovernorateReport(dto: InsertGovernorateReportDTO) {
-  await ensureGovernorateReportNotExistByReportDate(dto.reportDate);
-  const governorateReportFromDb = await GovernorateReportModel.insertOne(dto);
+export async function insertGovernorateReport(
+  dto: InsertGovernorateReportDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureGovernorateReportNotExistByReportDate(dto.reportDate, session);
+  const governorateReportFromDb = await GovernorateReportModel.insertOne(dto, {
+    session,
+  });
   return governorateReportFromDb;
 }
 
 export async function updateGovernorateReport(
   id: string,
   dto: UpdateGovernorateReportDTO,
+  session?: mongoose.ClientSession,
 ) {
-  await ensureGovernorateReportExistById(id);
+  await ensureGovernorateReportExistById(id, session);
 
   const governorateReport = await GovernorateReportModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!governorateReport) {
@@ -61,10 +74,15 @@ export async function updateGovernorateReport(
   return governorateReport;
 }
 
-export async function deleteGovernorateReportById(id: string) {
-  await ensureGovernorateReportExistById(id);
+export async function deleteGovernorateReportById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureGovernorateReportExistById(id, session);
 
-  const governorateReport = await GovernorateReportModel.findByIdAndDelete(id);
+  const governorateReport = await GovernorateReportModel.findByIdAndDelete(id, {
+    session,
+  });
 
   if (!governorateReport) {
     throw AppError.from({

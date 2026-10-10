@@ -2,9 +2,13 @@ import { RoomModel } from "@/models/room.model.js";
 import { AppError } from "@/util/app-error.js";
 import HttpStatusCode from "@/util/http-status-codes.js";
 import type { InsertRoomDTO, UpdateRoomDTO } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureRoomExistById(id: string) {
-  const roomFromDb = await RoomModel.findById(id);
+export async function ensureRoomExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const roomFromDb = await RoomModel.findById(id).session(session ?? null);
   if (!roomFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -15,8 +19,11 @@ export async function ensureRoomExistById(id: string) {
   return roomFromDb;
 }
 
-export async function ensureRoomNotExistById(id: string) {
-  const roomFromDb = await RoomModel.findById(id);
+export async function ensureRoomNotExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const roomFromDb = await RoomModel.findById(id).session(session ?? null);
   if (roomFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -26,10 +33,13 @@ export async function ensureRoomNotExistById(id: string) {
   }
 }
 
-export async function ensureRoomExistByNumber(number: string) {
+export async function ensureRoomExistByNumber(
+  number: string,
+  session?: mongoose.ClientSession,
+) {
   const roomFromDb = await RoomModel.findOne({
     number: number,
-  });
+  }).session(session ?? null);
   if (!roomFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -40,10 +50,13 @@ export async function ensureRoomExistByNumber(number: string) {
   return roomFromDb;
 }
 
-export async function ensureRoomNotExistByNumber(number: string) {
+export async function ensureRoomNotExistByNumber(
+  number: string,
+  session?: mongoose.ClientSession,
+) {
   const roomFromDb = await RoomModel.findOne({
     number: number,
-  });
+  }).session(session ?? null);
   if (roomFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -53,19 +66,26 @@ export async function ensureRoomNotExistByNumber(number: string) {
   }
 }
 
-export async function insertRoom(dto: InsertRoomDTO) {
-  await ensureRoomNotExistByNumber(dto.number);
-  const roomFromDb = await RoomModel.insertOne(dto);
+export async function insertRoom(
+  dto: InsertRoomDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureRoomNotExistByNumber(dto.number, session);
+  const roomFromDb = await RoomModel.insertOne(dto, { session });
   return roomFromDb;
 }
 
-export async function updateRoom(id: string, dto: UpdateRoomDTO) {
-  await ensureRoomExistById(id);
+export async function updateRoom(
+  id: string,
+  dto: UpdateRoomDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureRoomExistById(id, session);
 
   const room = await RoomModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!room) {
@@ -78,10 +98,13 @@ export async function updateRoom(id: string, dto: UpdateRoomDTO) {
   return room;
 }
 
-export async function deleteRoomById(id: string) {
-  await ensureRoomExistById(id);
+export async function deleteRoomById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureRoomExistById(id, session);
 
-  const room = await RoomModel.findByIdAndDelete(id);
+  const room = await RoomModel.findByIdAndDelete(id, { session });
 
   if (!room) {
     throw AppError.from({

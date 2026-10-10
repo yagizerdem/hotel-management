@@ -5,9 +5,13 @@ import type {
   InsertShiftDTO,
   UpdateShiftDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureShiftExistById(id: string) {
-  const shiftFromDb = await ShiftModel.findById(id);
+export async function ensureShiftExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const shiftFromDb = await ShiftModel.findById(id).session(session ?? null);
   if (!shiftFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -21,8 +25,11 @@ export async function ensureShiftExistById(id: string) {
 export async function ensureShiftNotExistByStaffAndDate(
   staff: string,
   date: Date,
+  session?: mongoose.ClientSession,
 ) {
-  const shiftFromDb = await ShiftModel.findOne({ staff, date });
+  const shiftFromDb = await ShiftModel.findOne({ staff, date }).session(
+    session ?? null,
+  );
   if (shiftFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -32,19 +39,26 @@ export async function ensureShiftNotExistByStaffAndDate(
   }
 }
 
-export async function insertShift(dto: InsertShiftDTO) {
-  await ensureShiftNotExistByStaffAndDate(dto.staff, dto.date);
-  const shiftFromDb = await ShiftModel.insertOne(dto);
+export async function insertShift(
+  dto: InsertShiftDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureShiftNotExistByStaffAndDate(dto.staff, dto.date, session);
+  const shiftFromDb = await ShiftModel.insertOne(dto, { session });
   return shiftFromDb;
 }
 
-export async function updateShift(id: string, dto: UpdateShiftDTO) {
-  await ensureShiftExistById(id);
+export async function updateShift(
+  id: string,
+  dto: UpdateShiftDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureShiftExistById(id, session);
 
   const shift = await ShiftModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!shift) {
@@ -57,10 +71,13 @@ export async function updateShift(id: string, dto: UpdateShiftDTO) {
   return shift;
 }
 
-export async function deleteShiftById(id: string) {
-  await ensureShiftExistById(id);
+export async function deleteShiftById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureShiftExistById(id, session);
 
-  const shift = await ShiftModel.findByIdAndDelete(id);
+  const shift = await ShiftModel.findByIdAndDelete(id, { session });
 
   if (!shift) {
     throw AppError.from({

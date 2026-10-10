@@ -6,9 +6,15 @@ import type {
   InsertExchangeRateDTO,
   UpdateExchangeRateDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureExchangeRateExistById(id: string) {
-  const exchangeRateFromDb = await ExchangeRateModel.findById(id);
+export async function ensureExchangeRateExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const exchangeRateFromDb = await ExchangeRateModel.findById(id).session(
+    session ?? null,
+  );
   if (!exchangeRateFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -22,11 +28,12 @@ export async function ensureExchangeRateExistById(id: string) {
 export async function ensureExchangeRateNotExistByDateAndCurrency(
   date: Date,
   currency: Currency,
+  session?: mongoose.ClientSession,
 ) {
   const exchangeRateFromDb = await ExchangeRateModel.findOne({
     date,
     currency,
-  });
+  }).session(session ?? null);
   if (exchangeRateFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -36,22 +43,32 @@ export async function ensureExchangeRateNotExistByDateAndCurrency(
   }
 }
 
-export async function insertExchangeRate(dto: InsertExchangeRateDTO) {
-  await ensureExchangeRateNotExistByDateAndCurrency(dto.date, dto.currency);
-  const exchangeRateFromDb = await ExchangeRateModel.insertOne(dto);
+export async function insertExchangeRate(
+  dto: InsertExchangeRateDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureExchangeRateNotExistByDateAndCurrency(
+    dto.date,
+    dto.currency,
+    session,
+  );
+  const exchangeRateFromDb = await ExchangeRateModel.insertOne(dto, {
+    session,
+  });
   return exchangeRateFromDb;
 }
 
 export async function updateExchangeRate(
   id: string,
   dto: UpdateExchangeRateDTO,
+  session?: mongoose.ClientSession,
 ) {
-  await ensureExchangeRateExistById(id);
+  await ensureExchangeRateExistById(id, session);
 
   const exchangeRate = await ExchangeRateModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!exchangeRate) {
@@ -64,10 +81,15 @@ export async function updateExchangeRate(
   return exchangeRate;
 }
 
-export async function deleteExchangeRateById(id: string) {
-  await ensureExchangeRateExistById(id);
+export async function deleteExchangeRateById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureExchangeRateExistById(id, session);
 
-  const exchangeRate = await ExchangeRateModel.findByIdAndDelete(id);
+  const exchangeRate = await ExchangeRateModel.findByIdAndDelete(id, {
+    session,
+  });
 
   if (!exchangeRate) {
     throw AppError.from({

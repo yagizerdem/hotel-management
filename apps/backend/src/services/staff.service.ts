@@ -5,9 +5,13 @@ import type {
   InsertStaffDTO,
   UpdateStaffDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureStaffExistById(id: string) {
-  const staffFromDb = await StaffModel.findById(id);
+export async function ensureStaffExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const staffFromDb = await StaffModel.findById(id).session(session ?? null);
   if (!staffFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -18,8 +22,13 @@ export async function ensureStaffExistById(id: string) {
   return staffFromDb;
 }
 
-export async function ensureStaffNotExistByTcKimlikNo(tcKimlikNo: string) {
-  const staffFromDb = await StaffModel.findOne({ tcKimlikNo });
+export async function ensureStaffNotExistByTcKimlikNo(
+  tcKimlikNo: string,
+  session?: mongoose.ClientSession,
+) {
+  const staffFromDb = await StaffModel.findOne({ tcKimlikNo }).session(
+    session ?? null,
+  );
   if (staffFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.CONFLICT,
@@ -29,19 +38,26 @@ export async function ensureStaffNotExistByTcKimlikNo(tcKimlikNo: string) {
   }
 }
 
-export async function insertStaff(dto: InsertStaffDTO) {
-  await ensureStaffNotExistByTcKimlikNo(dto.tcKimlikNo);
-  const staffFromDb = await StaffModel.insertOne(dto);
+export async function insertStaff(
+  dto: InsertStaffDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureStaffNotExistByTcKimlikNo(dto.tcKimlikNo, session);
+  const staffFromDb = await StaffModel.insertOne(dto, { session });
   return staffFromDb;
 }
 
-export async function updateStaff(id: string, dto: UpdateStaffDTO) {
-  await ensureStaffExistById(id);
+export async function updateStaff(
+  id: string,
+  dto: UpdateStaffDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureStaffExistById(id, session);
 
   const staff = await StaffModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!staff) {
@@ -54,10 +70,13 @@ export async function updateStaff(id: string, dto: UpdateStaffDTO) {
   return staff;
 }
 
-export async function deleteStaffById(id: string) {
-  await ensureStaffExistById(id);
+export async function deleteStaffById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureStaffExistById(id, session);
 
-  const staff = await StaffModel.findByIdAndDelete(id);
+  const staff = await StaffModel.findByIdAndDelete(id, { session });
 
   if (!staff) {
     throw AppError.from({

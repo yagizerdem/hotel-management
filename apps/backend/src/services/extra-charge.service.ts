@@ -5,9 +5,15 @@ import type {
   InsertExtraChargeDTO,
   UpdateExtraChargeDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureExtraChargeExistById(id: string) {
-  const extraChargeFromDb = await ExtraChargeModel.findById(id);
+export async function ensureExtraChargeExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const extraChargeFromDb = await ExtraChargeModel.findById(id).session(
+    session ?? null,
+  );
   if (!extraChargeFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -21,21 +27,29 @@ export async function ensureExtraChargeExistById(id: string) {
 export async function insertExtraCharge(
   dto: InsertExtraChargeDTO,
   createdBy?: string,
+  session?: mongoose.ClientSession,
 ) {
-  const extraChargeFromDb = await ExtraChargeModel.insertOne({
-    ...dto,
-    createdBy,
-  });
+  const extraChargeFromDb = await ExtraChargeModel.insertOne(
+    {
+      ...dto,
+      createdBy,
+    },
+    { session },
+  );
   return extraChargeFromDb;
 }
 
-export async function updateExtraCharge(id: string, dto: UpdateExtraChargeDTO) {
-  await ensureExtraChargeExistById(id);
+export async function updateExtraCharge(
+  id: string,
+  dto: UpdateExtraChargeDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureExtraChargeExistById(id, session);
 
   const extraCharge = await ExtraChargeModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!extraCharge) {
@@ -48,10 +62,13 @@ export async function updateExtraCharge(id: string, dto: UpdateExtraChargeDTO) {
   return extraCharge;
 }
 
-export async function deleteExtraChargeById(id: string) {
-  await ensureExtraChargeExistById(id);
+export async function deleteExtraChargeById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureExtraChargeExistById(id, session);
 
-  const extraCharge = await ExtraChargeModel.findByIdAndDelete(id);
+  const extraCharge = await ExtraChargeModel.findByIdAndDelete(id, { session });
 
   if (!extraCharge) {
     throw AppError.from({

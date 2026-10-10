@@ -5,9 +5,15 @@ import type {
   InsertReservationDTO,
   UpdateReservationDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensureReservationExistById(id: string) {
-  const reservationFromDb = await ReservationModel.findById(id);
+export async function ensureReservationExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const reservationFromDb = await ReservationModel.findById(id).session(
+    session ?? null,
+  );
   if (!reservationFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -21,21 +27,29 @@ export async function ensureReservationExistById(id: string) {
 export async function insertReservation(
   dto: InsertReservationDTO,
   createdBy?: string,
+  session?: mongoose.ClientSession,
 ) {
-  const reservationFromDb = await ReservationModel.insertOne({
-    ...dto,
-    createdBy,
-  });
+  const reservationFromDb = await ReservationModel.insertOne(
+    {
+      ...dto,
+      createdBy,
+    },
+    { session },
+  );
   return reservationFromDb;
 }
 
-export async function updateReservation(id: string, dto: UpdateReservationDTO) {
-  await ensureReservationExistById(id);
+export async function updateReservation(
+  id: string,
+  dto: UpdateReservationDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensureReservationExistById(id, session);
 
   const reservation = await ReservationModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!reservation) {
@@ -48,10 +62,13 @@ export async function updateReservation(id: string, dto: UpdateReservationDTO) {
   return reservation;
 }
 
-export async function deleteReservationById(id: string) {
-  await ensureReservationExistById(id);
+export async function deleteReservationById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensureReservationExistById(id, session);
 
-  const reservation = await ReservationModel.findByIdAndDelete(id);
+  const reservation = await ReservationModel.findByIdAndDelete(id, { session });
 
   if (!reservation) {
     throw AppError.from({

@@ -5,9 +5,15 @@ import type {
   InsertPricingDTO,
   UpdatePricingDTO,
 } from "@hotel-management/validator";
+import type mongoose from "mongoose";
 
-export async function ensurePricingExistById(id: string) {
-  const pricingFromDb = await PricingModel.findById(id);
+export async function ensurePricingExistById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  const pricingFromDb = await PricingModel.findById(id).session(
+    session ?? null,
+  );
   if (!pricingFromDb) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.NOT_FOUND,
@@ -18,18 +24,25 @@ export async function ensurePricingExistById(id: string) {
   return pricingFromDb;
 }
 
-export async function insertPricing(dto: InsertPricingDTO) {
-  const pricingFromDb = await PricingModel.insertOne(dto);
+export async function insertPricing(
+  dto: InsertPricingDTO,
+  session?: mongoose.ClientSession,
+) {
+  const pricingFromDb = await PricingModel.insertOne(dto, { session });
   return pricingFromDb;
 }
 
-export async function updatePricing(id: string, dto: UpdatePricingDTO) {
-  await ensurePricingExistById(id);
+export async function updatePricing(
+  id: string,
+  dto: UpdatePricingDTO,
+  session?: mongoose.ClientSession,
+) {
+  await ensurePricingExistById(id, session);
 
   const pricing = await PricingModel.findByIdAndUpdate(
     id,
     { $set: dto },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, session },
   );
 
   if (!pricing) {
@@ -42,10 +55,13 @@ export async function updatePricing(id: string, dto: UpdatePricingDTO) {
   return pricing;
 }
 
-export async function deletePricingById(id: string) {
-  await ensurePricingExistById(id);
+export async function deletePricingById(
+  id: string,
+  session?: mongoose.ClientSession,
+) {
+  await ensurePricingExistById(id, session);
 
-  const pricing = await PricingModel.findByIdAndDelete(id);
+  const pricing = await PricingModel.findByIdAndDelete(id, { session });
 
   if (!pricing) {
     throw AppError.from({
