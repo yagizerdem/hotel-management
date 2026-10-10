@@ -25,7 +25,8 @@
       "@controllers/*": ["./src/controllers/*"],
       "@router/*": ["./src/router/*"],
       "@validator/*": ["./src/validator/*"],
-      "@middleware/*": ["./src/middleware/*"]
+      "@middleware/*": ["./src/middleware/*"],
+      "@service/*": ["./src/services/*"]
     }
   },
   "include": ["src"]
