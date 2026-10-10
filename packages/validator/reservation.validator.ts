@@ -70,8 +70,8 @@ export function getUpdateReservationValidator() {
 export function getCreateReservationWebValidator() {
   const validator = z.object({
     room: z.string().regex(/^[a-f\d]{24}$/i, "Invalid id."),
-    checkInDate: z.coerce.date(),
-    checkOutDate: z.coerce.date(),
+    checkInDate: z.string().datetime(),
+    checkOutDate: z.string().datetime(),
     boardType: z.enum(BoardType),
     currency: z.enum(Currency).optional().default(Currency.USD),
   });

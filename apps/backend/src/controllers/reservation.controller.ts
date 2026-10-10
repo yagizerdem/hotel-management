@@ -93,7 +93,7 @@ export async function createReservationWeb(req: Request, res: Response) {
     if (error instanceof AppError) throw error;
     throw AppError.from({
       httpStatusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
-      message: "create profile failed",
+      message: "create reservation failed",
       isOperational: false,
     });
   } finally {
