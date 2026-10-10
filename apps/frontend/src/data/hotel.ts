@@ -1,3 +1,5 @@
+import { Globe, type LucideIcon, Sparkles, Store, User, Users } from 'lucide-react'
+
 export type RoomStatus = 'occupied' | 'available' | 'dirty' | 'maintenance' | 'arrival'
 
 export type Room = {
@@ -234,9 +236,9 @@ export type Reservation = {
   dates: string
   nights: string
   pax: string
-  paxIcon: string
+  paxIcon: LucideIcon
   board: string
-  sourceIcon: string
+  sourceIcon: LucideIcon
   source: string
   total: string
   payment: string
@@ -258,9 +260,9 @@ export const initialReservations: Reservation[] = [
     dates: '24 May - 29 May 2025',
     nights: '5 Nights (5 remaining)',
     pax: '2 Ad. + 1 Ch.',
-    paxIcon: 'group',
+    paxIcon: Users,
     board: 'ALL INCLUSIVE',
-    sourceIcon: 'language',
+    sourceIcon: Globe,
     source: 'Website',
     total: '39.050 TRY',
     payment: 'COLLECTED',
@@ -300,9 +302,9 @@ export const initialReservations: Reservation[] = [
     dates: '24 May - 02 Jun 2025',
     nights: '9 Nights',
     pax: '2 Ad. + 2 Ch.',
-    paxIcon: 'group',
+    paxIcon: Users,
     board: 'ULTRA ALL INCLUSIVE',
-    sourceIcon: 'travel_explore',
+    sourceIcon: Globe,
     source: 'TUI Deutschland',
     total: '82.400 TRY',
     payment: 'PARTIAL (30,000 TRY)',
@@ -321,9 +323,9 @@ export const initialReservations: Reservation[] = [
     dates: '25 May - 01 Jun 2025',
     nights: '7 Nights',
     pax: '1 Adult',
-    paxIcon: 'person',
+    paxIcon: User,
     board: 'FULL BOARD PLUS',
-    sourceIcon: 'storefront',
+    sourceIcon: Store,
     source: 'Front Desk Direct',
     total: '61.250 TRY',
     payment: 'COLLECTED',
@@ -341,9 +343,9 @@ export const initialReservations: Reservation[] = [
     dates: '26 May - 30 May 2025',
     nights: '4 Nights (Option expires: 24 May 18:00)',
     pax: '2 Adults',
-    paxIcon: 'group',
+    paxIcon: Users,
     board: 'ALL INCLUSIVE',
-    sourceIcon: 'language',
+    sourceIcon: Globe,
     source: 'Website',
     total: '26.800 TRY',
     payment: 'PAYMENT DUE',
@@ -361,9 +363,9 @@ export const initialReservations: Reservation[] = [
     dates: '17 May - 24 May 2025',
     nights: '7 Nights (Checked out today)',
     pax: '4 Adults',
-    paxIcon: 'group',
+    paxIcon: Users,
     board: 'ULTRA ALL INCLUSIVE',
-    sourceIcon: 'stars',
+    sourceIcon: Sparkles,
     source: 'VIP Concierge',
     total: '148.900 TRY',
     payment: 'CLOSED / ZERO',

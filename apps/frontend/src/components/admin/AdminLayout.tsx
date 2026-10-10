@@ -1,17 +1,22 @@
+import type { CSSProperties } from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from '@/components/admin/Header'
-import Sidebar from '@/components/admin/Sidebar'
+import AdminSidebar from '@/components/admin/Sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 export default function AdminLayout() {
   return (
-    <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen">
-      <Sidebar />
-      <div className="pl-60 min-h-screen flex flex-col">
+    <SidebarProvider
+      className="bg-surface font-body-md text-on-surface antialiased"
+      style={{ '--sidebar-width': '15rem' } as CSSProperties}
+    >
+      <AdminSidebar />
+      <SidebarInset className="min-w-0 bg-surface">
         <Header />
-        <main className="relative pt-14 flex-1 w-full px-gutter bg-surface">
+        <main className="relative flex-1 w-full px-gutter bg-surface">
           <Outlet />
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

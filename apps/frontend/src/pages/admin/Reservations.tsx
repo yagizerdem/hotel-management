@@ -1,50 +1,12 @@
 import { useMemo, useState } from 'react'
-import Icon from '@/components/Icon'
 import ReservationDetail from '@/components/admin/reservations/ReservationDetail'
-import ReservationRow from '@/components/admin/reservations/ReservationRow'
+import ReservationFilters from '@/components/admin/reservations/ReservationFilters'
+import ReservationKpis from '@/components/admin/reservations/ReservationKpis'
+import ReservationTable from '@/components/admin/reservations/ReservationTable'
+import ReservationsHeader from '@/components/admin/reservations/ReservationsHeader'
+import { BASE_COUNTS, BOARDS, SOURCES, type Tab } from '@/components/admin/reservations/filters'
 import { useHotel } from '@/context/HotelProvider'
 import { initialReservations, type LedgerStatus } from '@/data/hotel'
-
-type Tab = 'all' | LedgerStatus
-
-// Hotel-wide totals for the season; the table lists only a sample of them.
-const BASE_COUNTS: Record<Tab, number> = {
-  all: 184,
-  confirmed: 92,
-  checkedIn: 62,
-  pending: 14,
-  checkedOut: 12,
-  cancelled: 4,
-}
-
-const SOURCES: { value: string; label: string; match: string[] }[] = [
-  { value: '', label: 'All Sources', match: [] },
-  { value: 'web', label: 'Official Website (Booking Engine)', match: ['Website'] },
-  { value: 'resepsiyon', label: 'Front Desk Direct / Phone', match: ['Front Desk Direct'] },
-  { value: 'acente', label: 'Agency (ETS Tur / Coral Travel)', match: ['TUI Deutschland'] },
-  { value: 'b2b', label: 'B2B Global (Booking.com / Expedia)', match: [] },
-]
-
-const BOARDS: { value: string; label: string; match: string }[] = [
-  { value: '', label: 'All Board Types', match: '' },
-  { value: 'ai', label: 'Ultra All Inclusive (UAI)', match: 'ULTRA ALL INCLUSIVE' },
-  { value: 'hsd', label: 'All Inclusive (AI)', match: 'ALL INCLUSIVE' },
-  { value: 'tp', label: 'Full Board Plus (FB+)', match: 'FULL BOARD PLUS' },
-  { value: 'yp', label: 'Half Board (HB)', match: 'HALF BOARD' },
-]
-
-const tabs: { key: Tab; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'checkedIn', label: 'Checked In' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'checkedOut', label: 'Checked Out' },
-  { key: 'cancelled', label: 'Cancelled' },
-]
-
-const filterLabel = 'block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1'
-const selectClass =
-  'w-full h-8 px-2 bg-surface-container-low text-body-sm font-body-sm text-on-surface border-0 focus:bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-secondary'
 
 export default function Reservations() {
   const {
@@ -93,286 +55,30 @@ export default function Reservations() {
     setSearch('')
   }
 
-  const kpis: { label: string; value: number; note: string; tone: string; border: string }[] = [
-    { label: 'ALL RECORDS', value: counts.all, note: '%100', tone: 'text-primary', border: 'border-primary' },
-    {
-      label: 'CONFIRMED',
-      value: counts.confirmed,
-      note: 'Awaiting Check-in',
-      tone: 'text-primary',
-      border: 'border-outline',
-    },
-    {
-      label: 'IN-HOUSE',
-      value: counts.checkedIn,
-      note: '80.5% Full',
-      tone: 'text-[#38866C]',
-      border: 'border-[#38866C]',
-    },
-    {
-      label: 'PENDING / PRE-REGISTERED',
-      value: counts.pending,
-      note: 'On Option',
-      tone: 'text-[#D49B43]',
-      border: 'border-[#D49B43]',
-    },
-    {
-      label: 'CHECKED OUT',
-      value: counts.checkedOut,
-      note: 'Today',
-      tone: 'text-on-surface',
-      border: 'border-outline-variant',
-    },
-    {
-      label: 'CANCELLED / NO-SHOW',
-      value: counts.cancelled,
-      note: '2.1% Rate',
-      tone: 'text-error',
-      border: 'border-error',
-    },
-  ]
-
   return (
     <div className="flex flex-col w-full pb-12">
-      <div className="py-space-md flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-label-sm text-label-sm text-secondary tracking-widest uppercase">
-              PMS FRONT OFFICE CONSOLE
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-            <span className="font-mono-data text-mono-data text-on-surface-variant">
-              SEZON 2025 • KEMER / ANTALYA
-            </span>
-          </div>
-          <h1 className="font-headline-xl text-headline-xl text-primary tracking-tight mt-0.5">
-            Reservation Management
-          </h1>
-        </div>
-        <div className="flex items-center flex-wrap gap-2">
-          <button
-            className="h-8 px-3 bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm flex items-center gap-1.5 transition-colors"
-            type="button"
-          >
-            <Icon name="file_download" className="text-[16px] text-on-surface-variant" />
-            <span>Export Excel / CSV</span>
-          </button>
-          <button
-            className="h-8 px-3 bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm flex items-center gap-1.5 transition-colors"
-            type="button"
-          >
-            <Icon name="print" className="text-[16px] text-on-surface-variant" />
-            <span>Daily Arrivals List</span>
-          </button>
-          <button
-            className="h-8 px-4 bg-secondary hover:bg-on-secondary-container text-on-secondary font-label-sm text-label-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
-            type="button"
-          >
-            <Icon name="add_circle" className="text-[18px]" />
-            <span>Create New Reservation</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
-        {kpis.map((kpi) => (
-          <div
-            key={kpi.label}
-            className={`p-3 bg-surface-container-lowest border-l-2 ${kpi.border} shadow-sm flex flex-col justify-between`}
-          >
-            <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {kpi.label}
-            </span>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className={`font-headline-lg text-headline-lg ${kpi.tone} font-bold`}>
-                {kpi.value}
-              </span>
-              <span className={`font-mono-data text-mono-data ${kpi.tone}`}>{kpi.note}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-surface-container-lowest p-space-md mb-4 shadow-sm space-y-3">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 text-on-surface">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={`h-7 px-3 font-label-sm text-label-sm whitespace-nowrap ${
-                tab === t.key
-                  ? 'bg-primary text-on-primary'
-                  : `bg-surface-container hover:bg-surface-variant text-on-surface ${
-                      t.key === 'cancelled' ? 'text-error' : ''
-                    }`
-              }`}
-            >
-              {t.label} ({counts[t.key]})
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
-          <div className="relative">
-            <label className={filterLabel}>Search</label>
-            <div className="relative">
-              <Icon
-                name="search"
-                className="absolute left-2 top-1/2 -translate-y-1/2 text-outline text-[16px]"
-              />
-              <input
-                className="w-full h-8 pl-7 pr-2 bg-surface-container-low text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-secondary"
-                placeholder="Res No, Name, Passport..."
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-          <div>
-            <label className={filterLabel}>Date Range</label>
-            <input
-              className="w-full h-8 px-2 bg-surface-container-low text-body-sm font-body-sm text-on-surface focus:bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-secondary font-mono-data"
-              type="text"
-              defaultValue="24.05.2025 - 31.05.2025"
-            />
-          </div>
-          <div>
-            <label className={filterLabel}>Reservation Source</label>
-            <select className={selectClass} value={source} onChange={(e) => setSource(e.target.value)}>
-              {SOURCES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={filterLabel}>Board Type</label>
-            <select className={selectClass} value={board} onChange={(e) => setBoard(e.target.value)}>
-              {BOARDS.map((b) => (
-                <option key={b.value} value={b.value}>
-                  {b.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={filterLabel}>Room Category</label>
-            <select className={selectClass} defaultValue="">
-              <option value="">All Rooms</option>
-              <option value="std">Standard Sea View</option>
-              <option value="deluxe">Deluxe Family Suite</option>
-              <option value="swim">Swim-Up Garden Room</option>
-              <option value="pres">Kemer Presidential Villa</option>
-            </select>
-          </div>
-          <div className="flex items-end gap-1">
-            <button
-              className="h-8 flex-1 bg-primary text-on-primary hover:bg-primary-container font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-colors"
-              type="button"
-            >
-              <Icon name="tune" className="text-[16px]" />
-              <span>Filter</span>
-            </button>
-            <button
-              className="h-8 w-8 bg-surface-container hover:bg-surface-variant text-on-surface-variant flex items-center justify-center transition-colors"
-              title="Reset Filters"
-              type="button"
-              onClick={resetFilters}
-            >
-              <Icon name="restart_alt" className="text-[16px]" />
-            </button>
-          </div>
-        </div>
-      </div>
-
+      <ReservationsHeader />
+      <ReservationKpis counts={counts} />
+      <ReservationFilters
+        counts={counts}
+        tab={tab}
+        onTabChange={setTab}
+        search={search}
+        onSearchChange={setSearch}
+        source={source}
+        onSourceChange={setSource}
+        board={board}
+        onBoardChange={setBoard}
+        onReset={resetFilters}
+      />
       <div className="flex flex-col 2xl:flex-row gap-4 items-start">
-        <div className="flex-1 w-full overflow-x-auto bg-surface-container-lowest shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container text-on-surface font-label-sm text-label-sm tracking-wider uppercase select-none">
-                {[
-                  'RES NO',
-                  'GUEST INFO',
-                  'ROOM & FLOOR',
-                  'STAY DATES',
-                  'GUESTS',
-                  'BOARD',
-                  'KAYNAK',
-                  'TOTAL / PAYMENT',
-                  'DURUM',
-                  'ACTIONS',
-                ].map((h, i, all) => (
-                  <th
-                    key={h}
-                    className={`py-2.5 px-3 font-semibold ${
-                      i === all.length - 1 ? 'text-center' : i === 7 ? 'text-right' : ''
-                    }`}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-container text-body-sm font-body-sm">
-              {rows.map((r) => (
-                <ReservationRow
-                  key={r.id}
-                  reservation={r}
-                  selected={r.id === selectedReservationId}
-                  onSelect={selectReservation}
-                  onStatusChange={setReservationStatus}
-                />
-              ))}
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={10} className="py-8 text-center text-on-surface-variant">
-                    No reservations match the filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface font-label-sm text-label-sm">
-            <div className="flex items-center gap-2">
-              <span>Records per page:</span>
-              <select
-                className="h-7 px-2 bg-surface-container-lowest text-on-surface border-0 focus:ring-1 focus:ring-secondary font-mono-data text-mono-data"
-                defaultValue="50"
-              >
-                <option>25</option>
-                <option>50</option>
-                <option>100</option>
-              </select>
-              <span className="text-on-surface-variant">
-                Showing {rows.length ? `1 - ${rows.length}` : '0'} of {counts.all} reservations
-                listeleniyor
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                className="h-7 px-2.5 bg-surface-container-lowest hover:bg-surface-variant transition-colors disabled:opacity-40"
-                disabled
-              >
-                <Icon name="chevron_left" className="text-[16px]" />
-              </button>
-              <button className="h-7 px-3 bg-secondary text-on-secondary font-medium font-mono-data text-mono-data">
-                1
-              </button>
-              <button className="h-7 px-3 bg-surface-container-lowest hover:bg-surface-variant transition-colors font-mono-data text-mono-data">
-                2
-              </button>
-              <button className="h-7 px-3 bg-surface-container-lowest hover:bg-surface-variant transition-colors font-mono-data text-mono-data">
-                3
-              </button>
-              <button className="h-7 px-2.5 bg-surface-container-lowest hover:bg-surface-variant transition-colors">
-                <Icon name="chevron_right" className="text-[16px]" />
-              </button>
-            </div>
-          </div>
-        </div>
-
+        <ReservationTable
+          rows={rows}
+          total={counts.all}
+          selectedId={selectedReservationId}
+          onSelect={selectReservation}
+          onStatusChange={setReservationStatus}
+        />
         {selected && (
           <ReservationDetail
             reservation={selected}

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import AdminLayout from '@/components/admin/AdminLayout'
 import { BookingProvider } from '@/context/BookingProvider'
 import { HotelProvider } from '@/context/HotelProvider'
@@ -9,34 +9,33 @@ import Inventory from '@/pages/admin/Inventory'
 import Reservations from '@/pages/admin/Reservations'
 import Booking from '@/pages/public/Booking'
 
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: (
+      <BookingProvider>
+        <Booking />
+      </BookingProvider>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <HotelProvider>
+        <AdminLayout />
+      </HotelProvider>
+    ),
+    children: [
+      { index: true, element: <Dashboard /> },
+      { path: 'reservations', element: <Reservations /> },
+      { path: 'calendar', element: <Calendar /> },
+      { path: 'rooms', element: <Inventory /> },
+      { path: '*', element: <ComingSoon /> },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+])
+
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <BookingProvider>
-              <Booking />
-            </BookingProvider>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <HotelProvider>
-              <AdminLayout />
-            </HotelProvider>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="reservations" element={<Reservations />} />
-          <Route path="calendar" element={<Calendar />} />
-          <Route path="rooms" element={<Inventory />} />
-          <Route path="*" element={<ComingSoon />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return <RouterProvider router={router} />
 }

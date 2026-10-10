@@ -1,12 +1,15 @@
-import type { LedgerStatus, Reservation } from '@/data/hotel'
-import Icon from '@/components/Icon'
+import type { ReactNode } from 'react'
+import { Eye, Folder, Pencil, Printer, X } from 'lucide-react'
 import { paymentTone, statusLabel, statusTone } from '@/components/admin/reservations/statusStyles'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { TableCell, TableRow } from '@/components/ui/table'
+import type { LedgerStatus, Reservation } from '@/data/hotel'
+import { cn } from '@/lib/utils'
 
-const iconButton = 'p-1 bg-surface-container hover:bg-surface-variant text-on-surface transition-colors'
-const textButton =
-  'h-6 px-2 font-label-sm text-[11px] uppercase tracking-wide transition-colors'
+const textButton = 'h-6 px-2 font-label-sm text-[11px] uppercase tracking-wide'
 const primaryText = `${textButton} bg-secondary text-on-secondary hover:bg-on-secondary-container`
-const neutralText = `${textButton} bg-surface-container hover:bg-surface-variant text-on-surface`
+const neutralText = `${textButton} bg-surface-container text-on-surface hover:bg-surface-variant`
 
 type Props = {
   reservation: Reservation
@@ -15,146 +18,150 @@ type Props = {
   onStatusChange: (id: string, status: LedgerStatus) => void
 }
 
+function IconAction({ title, onClick, children }: { title: string; onClick?: () => void; children: ReactNode }) {
+  return (
+    <Button
+      variant="secondary"
+      size="icon-xs"
+      title={title}
+      aria-label={title}
+      className="bg-surface-container text-on-surface hover:bg-surface-variant"
+      onClick={onClick}
+    >
+      {children}
+    </Button>
+  )
+}
+
 export default function ReservationRow({ reservation: r, selected, onSelect, onStatusChange }: Props) {
   const select = () => onSelect(r.id)
 
   return (
-    <tr
-      className={`${
-        selected ? 'bg-secondary/5 hover:bg-secondary/10' : 'hover:bg-surface-container-low'
-      } transition-colors cursor-pointer`}
+    <TableRow
+      className={cn('cursor-pointer', selected && 'bg-secondary/5 hover:bg-secondary/10')}
       onClick={select}
     >
-      <td className="py-2 px-3 font-mono-data text-mono-data font-semibold text-secondary">
+      <TableCell className="py-2 px-3 font-mono-data text-mono-data font-semibold text-secondary">
         {r.id}
         <span className="block text-[10px] text-on-surface-variant font-normal">{r.createdAt}</span>
-      </td>
-      <td className="py-2 px-3">
+      </TableCell>
+      <TableCell className="py-2 px-3">
         <div className="flex items-center gap-2">
-          <span className="w-5 h-3.5 bg-surface-container text-[9px] font-bold flex items-center justify-center text-primary-container">
+          <Badge variant="secondary" className="w-5 h-3.5 px-0 text-[9px] font-bold text-primary-container">
             {r.country}
-          </span>
+          </Badge>
           <div>
             <div className="font-semibold text-on-surface">{r.guest}</div>
             <div className="text-[11px] font-mono-data text-on-surface-variant">{r.phone}</div>
           </div>
         </div>
-      </td>
-      <td className="py-2 px-3">
+      </TableCell>
+      <TableCell className="py-2 px-3">
         <div className="font-medium text-on-surface">{r.room}</div>
         <div className="text-[11px] text-on-surface-variant">{r.roomInfo}</div>
-      </td>
-      <td className="py-2 px-3 font-mono-data text-mono-data">
+      </TableCell>
+      <TableCell className="py-2 px-3 font-mono-data text-mono-data">
         <div className="text-on-surface font-medium">{r.dates}</div>
         <span className="text-[11px] text-on-surface-variant">{r.nights}</span>
-      </td>
-      <td className="py-2 px-3">
+      </TableCell>
+      <TableCell className="py-2 px-3">
         <span className="inline-flex items-center gap-1 font-mono-data">
-          <Icon name={r.paxIcon} className="text-[14px] text-outline" />
+          <r.paxIcon className="size-[14px] text-outline" />
           <span>{r.pax}</span>
         </span>
-      </td>
-      <td className="py-2 px-3">
-        <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface font-label-sm text-label-sm tracking-wider uppercase font-semibold">
+      </TableCell>
+      <TableCell className="py-2 px-3">
+        <Badge
+          variant="secondary"
+          className="bg-surface-container-high text-on-surface font-label-sm text-label-sm tracking-wider uppercase font-semibold"
+        >
           {r.board}
-        </span>
-      </td>
-      <td className="py-2 px-3">
+        </Badge>
+      </TableCell>
+      <TableCell className="py-2 px-3">
         <div className="flex items-center gap-1 text-[11px]">
-          <Icon name={r.sourceIcon} className="text-[14px] text-secondary" />
+          <r.sourceIcon className="size-[14px] text-secondary" />
           <span className="font-medium">{r.source}</span>
         </div>
-      </td>
-      <td className="py-2 px-3 text-right font-mono-data text-mono-data">
+      </TableCell>
+      <TableCell className="py-2 px-3 text-right font-mono-data text-mono-data">
         <div className="font-bold text-on-surface">{r.total}</div>
-        <span
-          className={`inline-block px-1.5 py-0.2 ${paymentTone[r.paymentTone]} font-label-sm text-[10px] font-semibold uppercase`}
-        >
+        <Badge className={cn('font-label-sm text-[10px] font-semibold uppercase', paymentTone[r.paymentTone])}>
           {r.payment}
-        </span>
-      </td>
-      <td className="py-2 px-3">
-        <span
-          className={`px-2 py-0.5 ${statusTone[r.status]} font-label-sm text-label-sm font-semibold uppercase tracking-wider`}
+        </Badge>
+      </TableCell>
+      <TableCell className="py-2 px-3">
+        <Badge
+          className={cn('font-label-sm text-label-sm font-semibold uppercase tracking-wider', statusTone[r.status])}
         >
           {statusLabel[r.status]}
-        </span>
-      </td>
-      <td className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+        </Badge>
+      </TableCell>
+      <TableCell className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-center gap-1">
           {r.status === 'checkedIn' && (
             <>
-              <button className={iconButton} title="Review & Folio" type="button" onClick={select}>
-                <Icon name="visibility" className="text-[16px]" />
-              </button>
-              <button className={iconButton} title="Edit" type="button">
-                <Icon name="edit" className="text-[16px]" />
-              </button>
-              <button className={iconButton} title="Print" type="button">
-                <Icon name="print" className="text-[16px]" />
-              </button>
+              <IconAction title="Review & Folio" onClick={select}>
+                <Eye />
+              </IconAction>
+              <IconAction title="Edit">
+                <Pencil />
+              </IconAction>
+              <IconAction title="Print">
+                <Printer />
+              </IconAction>
             </>
           )}
           {r.status === 'confirmed' && (
             <>
               {r.arrivesToday ? (
-                <button
-                  className={primaryText}
-                  type="button"
-                  onClick={() => onStatusChange(r.id, 'checkedIn')}
-                >
+                <Button className={primaryText} onClick={() => onStatusChange(r.id, 'checkedIn')}>
                   Check-In
-                </button>
+                </Button>
               ) : (
-                <button className={neutralText} type="button" onClick={select}>
+                <Button variant="secondary" className={neutralText} onClick={select}>
                   Detay
-                </button>
+                </Button>
               )}
-              <button className={iconButton} title="Edit" type="button">
-                <Icon name="edit" className="text-[16px]" />
-              </button>
+              <IconAction title="Edit">
+                <Pencil />
+              </IconAction>
             </>
           )}
           {r.status === 'pending' && (
             <>
-              <button
-                className={primaryText}
-                type="button"
-                onClick={() => onStatusChange(r.id, 'confirmed')}
-              >
+              <Button className={primaryText} onClick={() => onStatusChange(r.id, 'confirmed')}>
                 Onayla
-              </button>
-              <button
-                className="p-1 text-error hover:bg-error-container transition-colors"
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-xs"
                 title="Cancel"
-                type="button"
+                aria-label="Cancel"
+                className="text-error hover:bg-error-container"
                 onClick={() => onStatusChange(r.id, 'cancelled')}
               >
-                <Icon name="close" className="text-[16px]" />
-              </button>
+                <X />
+              </Button>
             </>
           )}
           {r.status === 'checkedOut' && (
             <>
-              <button className={neutralText} type="button">
+              <Button variant="secondary" className={neutralText}>
                 Fatura
-              </button>
-              <button className={iconButton} title="Archive" type="button">
-                <Icon name="folder" className="text-[16px]" />
-              </button>
+              </Button>
+              <IconAction title="Archive">
+                <Folder />
+              </IconAction>
             </>
           )}
           {r.status === 'cancelled' && (
-            <button
-              className={neutralText}
-              type="button"
-              onClick={() => onStatusChange(r.id, 'pending')}
-            >
+            <Button variant="secondary" className={neutralText} onClick={() => onStatusChange(r.id, 'pending')}>
               Geri Al
-            </button>
+            </Button>
           )}
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }
