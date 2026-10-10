@@ -347,10 +347,11 @@ router.get(
 );
 
 /**
- * /api/rooms/all-rooms:
+ * @openapi
+ * /api/rooms/client-all-rooms:
  *   get:
  *     tags: [Rooms]
- *     summary: Get all rooms
+ *     summary: Get all rooms for clients
  *     responses:
  *       "200":
  *         description: All rooms fetched successfully
@@ -358,5 +359,7 @@ router.get(
  *         description: Invalid request
  *
  */
+
+router.get("/client-all-rooms", asyncWrapper(roomController.clientGetAllRooms));
 
 export default router;
