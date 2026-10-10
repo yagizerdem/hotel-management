@@ -7,9 +7,8 @@ import {
   getExtraChargeIdParamValidator,
   getUpdateExtraChargeValidator,
 } from "@hotel-management/validator/extra-charge";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as extraChargeService from "@/services/extra-charge.service.js";
 
 export async function getExtraCharges(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(ExtraChargeModel.find(), req.query)
@@ -33,10 +32,7 @@ export async function insertExtraCharge(req: Request, res: Response) {
     "/api/extra-charges/insert",
   );
 
-  await ExtraChargeModel.insertOne({
-    ...data,
-    createdBy: req.user?.id,
-  });
+  await extraChargeService.insertExtraCharge(data, req.user?.id);
 
   res.send(ApiResponse.ok(data, "extra charge inserted successfully"));
 }
@@ -54,19 +50,7 @@ export async function updateExtraCharge(req: Request, res: Response) {
     path,
   );
 
-  const extraCharge = await ExtraChargeModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!extraCharge) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "extra charge not found",
-      path,
-    });
-  }
+  const extraCharge = await extraChargeService.updateExtraCharge(id, data);
 
   res.send(ApiResponse.ok(extraCharge, "extra charge updated successfully"));
 }
@@ -79,15 +63,7 @@ export async function deleteExtraCharge(req: Request, res: Response) {
     path,
   );
 
-  const extraCharge = await ExtraChargeModel.findByIdAndDelete(id);
-
-  if (!extraCharge) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "extra charge not found",
-      path,
-    });
-  }
+  await extraChargeService.deleteExtraChargeById(id);
 
   res.send(ApiResponse.ok({ id }, "extra charge deleted successfully"));
 }

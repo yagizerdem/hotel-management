@@ -7,9 +7,8 @@ import {
   getDiscountRuleIdParamValidator,
   getUpdateDiscountRuleValidator,
 } from "@hotel-management/validator/discount-rule";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as discountRuleService from "@/services/discount-rule.service.js";
 
 export async function getDiscountRules(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(DiscountRuleModel.find(), req.query)
@@ -33,9 +32,7 @@ export async function insertDiscountRule(req: Request, res: Response) {
     "/api/discount-rules/insert",
   );
 
-  await DiscountRuleModel.insertOne({
-    ...data,
-  });
+  await discountRuleService.insertDiscountRule(data);
 
   res.send(ApiResponse.ok(data, "discount rule inserted successfully"));
 }
@@ -53,19 +50,7 @@ export async function updateDiscountRule(req: Request, res: Response) {
     path,
   );
 
-  const discountRule = await DiscountRuleModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!discountRule) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "discount rule not found",
-      path,
-    });
-  }
+  const discountRule = await discountRuleService.updateDiscountRule(id, data);
 
   res.send(ApiResponse.ok(discountRule, "discount rule updated successfully"));
 }
@@ -78,15 +63,7 @@ export async function deleteDiscountRule(req: Request, res: Response) {
     path,
   );
 
-  const discountRule = await DiscountRuleModel.findByIdAndDelete(id);
-
-  if (!discountRule) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "discount rule not found",
-      path,
-    });
-  }
+  await discountRuleService.deleteDiscountRuleById(id);
 
   res.send(ApiResponse.ok({ id }, "discount rule deleted successfully"));
 }

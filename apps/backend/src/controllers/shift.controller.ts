@@ -7,9 +7,8 @@ import {
   getShiftIdParamValidator,
   getUpdateShiftValidator,
 } from "@hotel-management/validator/shift";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as shiftService from "@/services/shift.service.js";
 
 export async function getShifts(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(ShiftModel.find(), req.query)
@@ -31,9 +30,7 @@ export async function insertShift(req: Request, res: Response) {
     "/api/shifts/insert",
   );
 
-  await ShiftModel.insertOne({
-    ...data,
-  });
+  await shiftService.insertShift(data);
 
   res.send(ApiResponse.ok(data, "shift inserted successfully"));
 }
@@ -51,19 +48,7 @@ export async function updateShift(req: Request, res: Response) {
     path,
   );
 
-  const shift = await ShiftModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!shift) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "shift not found",
-      path,
-    });
-  }
+  const shift = await shiftService.updateShift(id, data);
 
   res.send(ApiResponse.ok(shift, "shift updated successfully"));
 }
@@ -76,15 +61,7 @@ export async function deleteShift(req: Request, res: Response) {
     path,
   );
 
-  const shift = await ShiftModel.findByIdAndDelete(id);
-
-  if (!shift) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "shift not found",
-      path,
-    });
-  }
+  await shiftService.deleteShiftById(id);
 
   res.send(ApiResponse.ok({ id }, "shift deleted successfully"));
 }

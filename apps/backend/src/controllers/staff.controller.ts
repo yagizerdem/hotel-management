@@ -7,9 +7,8 @@ import {
   getStaffIdParamValidator,
   getUpdateStaffValidator,
 } from "@hotel-management/validator/staff";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as staffService from "@/services/staff.service.js";
 
 export async function getAllStaff(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(StaffModel.find(), req.query)
@@ -31,9 +30,7 @@ export async function insertStaff(req: Request, res: Response) {
     "/api/staff/insert",
   );
 
-  await StaffModel.insertOne({
-    ...data,
-  });
+  await staffService.insertStaff(data);
 
   res.send(ApiResponse.ok(data, "staff inserted successfully"));
 }
@@ -51,19 +48,7 @@ export async function updateStaff(req: Request, res: Response) {
     path,
   );
 
-  const staff = await StaffModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!staff) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "staff not found",
-      path,
-    });
-  }
+  const staff = await staffService.updateStaff(id, data);
 
   res.send(ApiResponse.ok(staff, "staff updated successfully"));
 }
@@ -76,15 +61,7 @@ export async function deleteStaff(req: Request, res: Response) {
     path,
   );
 
-  const staff = await StaffModel.findByIdAndDelete(id);
-
-  if (!staff) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "staff not found",
-      path,
-    });
-  }
+  await staffService.deleteStaffById(id);
 
   res.send(ApiResponse.ok({ id }, "staff deleted successfully"));
 }

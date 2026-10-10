@@ -7,9 +7,8 @@ import {
   getExchangeRateIdParamValidator,
   getUpdateExchangeRateValidator,
 } from "@hotel-management/validator/exchange-rate";
-import HttpStatusCode from "@/util/http-status-codes.js";
-import { AppError } from "@/util/app-error.js";
 import { parseOrThrow } from "@/util/parse-or-throw.js";
+import * as exchangeRateService from "@/services/exchange-rate.service.js";
 
 export async function getExchangeRates(req: Request, res: Response) {
   const apiFeatures = new ApiFeatures(ExchangeRateModel.find(), req.query)
@@ -33,9 +32,7 @@ export async function insertExchangeRate(req: Request, res: Response) {
     "/api/exchange-rates/insert",
   );
 
-  await ExchangeRateModel.insertOne({
-    ...data,
-  });
+  await exchangeRateService.insertExchangeRate(data);
 
   res.send(ApiResponse.ok(data, "exchange rate inserted successfully"));
 }
@@ -53,19 +50,7 @@ export async function updateExchangeRate(req: Request, res: Response) {
     path,
   );
 
-  const exchangeRate = await ExchangeRateModel.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true },
-  );
-
-  if (!exchangeRate) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "exchange rate not found",
-      path,
-    });
-  }
+  const exchangeRate = await exchangeRateService.updateExchangeRate(id, data);
 
   res.send(ApiResponse.ok(exchangeRate, "exchange rate updated successfully"));
 }
@@ -78,15 +63,7 @@ export async function deleteExchangeRate(req: Request, res: Response) {
     path,
   );
 
-  const exchangeRate = await ExchangeRateModel.findByIdAndDelete(id);
-
-  if (!exchangeRate) {
-    throw AppError.from({
-      httpStatusCode: HttpStatusCode.NOT_FOUND,
-      message: "exchange rate not found",
-      path,
-    });
-  }
+  await exchangeRateService.deleteExchangeRateById(id);
 
   res.send(ApiResponse.ok({ id }, "exchange rate deleted successfully"));
 }
