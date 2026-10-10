@@ -13,7 +13,8 @@ services:
       - mongodb_data:/data/db
     networks:
       - mongodb_network
-    command: ["mongod", "--bind_ip_all"]
+    command: >
+      mongod --replSet rs0 --bind_ip_all
     healthcheck:
       test:
         - CMD
@@ -22,6 +23,31 @@ services:
         - "--eval=db.runCommand({ping:1})"
       retries: 3
       timeout: 5s
+
+  mongo-init:
+    image: mongo:8
+    restart: "no"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mongodb_network
+    entrypoint: ["mongosh"]
+    command:
+      - "mongodb://mongodb:27017/?directConnection=true"
+      - "--eval"
+      - |
+        try {
+          rs.status();
+          print("Replica Set already initialized");
+        } catch (e) {
+          rs.initiate({
+            _id: "rs0",
+            members: [
+              { _id: 0, host: "mongodb:27017" }
+            ]
+          });
+        }
 
   # Mongo Express
   mongo-express:
@@ -37,6 +63,7 @@ services:
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
     depends_on:
       - mongodb
+      - mongo-init
     networks:
       - mongodb_network
 
