@@ -110,6 +110,12 @@ export async function createReservationWeb(
     dto.checkOutDate.toString(),
   );
 
+  await ensureRoomNotReserved(
+    dto.room,
+    dto.checkInDate.toString(),
+    dto.checkOutDate.toString(),
+  );
+
   const reservationFromDb = await ReservationModel.insertOne(
     {
       ...dto,
@@ -199,6 +205,26 @@ async function ensureRoomBlockExist(
     throw AppError.from({
       httpStatusCode: HttpStatusCode.BAD_REQUEST,
       message: "The selected room is not blocked for the chosen dates",
+      isOperational: true,
+    });
+  }
+}
+
+async function ensureRoomNotReserved(
+  roomId: string,
+  checkInDate: string,
+  checkOutDate: string,
+) {
+  const reservation = await ReservationModel.findOne({
+    room: roomId,
+    checkInDate: { $lte: checkInDate },
+    checkOutDate: { $gte: checkOutDate },
+  });
+
+  if (reservation) {
+    throw AppError.from({
+      httpStatusCode: HttpStatusCode.BAD_REQUEST,
+      message: "The selected room is already reserved for the chosen dates",
       isOperational: true,
     });
   }
