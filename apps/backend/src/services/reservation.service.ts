@@ -10,7 +10,7 @@ import type mongoose from "mongoose";
 import * as userService from "@/services/user.service.js";
 import moment from "moment";
 import { RoomBlockModel } from "@/models/room-block.model.js";
-import { ReservationStatus } from "@hotel-management/models";
+import { ReservationSource, ReservationStatus } from "@hotel-management/models";
 
 export async function ensureReservationExistById(
   id: string,
@@ -118,6 +118,7 @@ export async function createReservationWeb(
       totalPrice: 0,
       nightlyPrice: 0,
       status: ReservationStatus.PENDING,
+      source: ReservationSource.WEB,
       customer: userFromDb.customer,
     },
     { session },
@@ -146,7 +147,7 @@ function validateCheckInAndCheckOutDates(
     });
   }
 
-  if (moment(checkInDate).diff(moment(checkOutDate), "days") < 1) {
+  if (moment(checkOutDate).diff(moment(checkInDate), "days") < 1) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.BAD_REQUEST,
       message: "Check-out date must be at least 1 day after check-in date",
@@ -154,7 +155,7 @@ function validateCheckInAndCheckOutDates(
     });
   }
 
-  if (moment(checkInDate).diff(moment(checkOutDate), "days") > 15) {
+  if (moment(checkOutDate).diff(moment(checkInDate), "days") > 15) {
     throw AppError.from({
       httpStatusCode: HttpStatusCode.BAD_REQUEST,
       message: "Check-out date cannot be more than 15 days after check-in date",
