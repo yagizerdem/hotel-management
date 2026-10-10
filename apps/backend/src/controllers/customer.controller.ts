@@ -67,8 +67,9 @@ export async function deleteCustomer(req: Request, res: Response) {
   res.send(ApiResponse.ok({ id }, "customer deleted successfully"));
 }
 
-// for clients only to crate profie
+// for clients only to create profile
 export async function createProfile(req: Request, res: Response) {
+  const user = req.user;
   const validator = getCreateProfileValidator();
   const data = parseOrThrow(
     await validator.safeParseAsync(req.body),
@@ -76,6 +77,6 @@ export async function createProfile(req: Request, res: Response) {
     "/api/customers/create-profile",
   );
 
-  await customerService.insertCustomer(data);
-  res.send(ApiResponse.ok(data, "customer inserted successfully"));
+  await customerService.createProfile(user!.id, data);
+  res.send(ApiResponse.ok(data, "profile created successfully"));
 }
