@@ -1,10 +1,10 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { ThemeProvider } from "./theme-provider";
-import { ReduxProvider } from "./redux-provider";
-import { QueryProvider } from "./query-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@provider/theme-provider";
+import { ReduxProvider } from "@provider/redux-provider";
+import { QueryProvider } from "@provider/query-provider";
+import { TooltipProvider } from "@components/ui/tooltip";
 
 type BaseProviderProps = {
   children: React.ReactNode;
