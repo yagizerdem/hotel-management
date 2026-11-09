@@ -1,6 +1,10 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { ThemeProvider } from "./theme-provider";
+import { ReduxProvider } from "./redux-provider";
+import { QueryProvider } from "./query-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 type BaseProviderProps = {
   children: React.ReactNode;
@@ -16,9 +20,17 @@ export function BaseProvider({ children, ...props }: BaseProviderProps) {
   const value: BaseProviderState = {};
 
   return (
-    <BaseProviderContext.Provider {...props} value={value}>
-      {children}
-    </BaseProviderContext.Provider>
+    <ThemeProvider>
+      <ReduxProvider>
+        <QueryProvider>
+          <TooltipProvider>
+            <BaseProviderContext.Provider {...props} value={value}>
+              {children}
+            </BaseProviderContext.Provider>
+          </TooltipProvider>
+        </QueryProvider>
+      </ReduxProvider>
+    </ThemeProvider>
   );
 }
 
