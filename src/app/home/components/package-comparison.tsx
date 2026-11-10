@@ -1,18 +1,18 @@
 import { CheckIcon } from "lucide-react";
-import { packages } from "../_data/hotel";
+import { packages } from "@/src/app/home/data/hotel";
 
 export function PackageComparison() {
   return (
     <section
-      id="paketler"
+      id="packages"
       className="mx-auto max-w-6xl scroll-mt-16 px-4 py-24 sm:px-6"
     >
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-[family-name:var(--font-bodoni)] text-4xl leading-tight sm:text-5xl">
-          Size uygun paketi seçin
+          Choose the package that suits you
         </h2>
-        <p className="mt-4 text-pine/70">
-          Konaklamanızı tam pansiyon ya da her şey dahil olarak ayırabilirsiniz.
+        <p className="mt-4 text-foreground/70">
+          Book your stay on a full board or all-inclusive basis.
         </p>
       </div>
 
@@ -24,14 +24,14 @@ export function PackageComparison() {
               key={pkg.id}
               className={`flex flex-col rounded-sm border p-8 sm:p-10 ${
                 featured
-                  ? "border-bougainvillea/40 bg-sand"
-                  : "border-pine/10 bg-limestone"
+                  ? "border-primary/40 bg-muted"
+                  : "border-border bg-background"
               }`}
             >
               <h3 className="font-[family-name:var(--font-bodoni)] text-4xl">
                 {pkg.name}
               </h3>
-              <p className="mt-4 border-t border-pine/10 pt-4 text-pine/75">
+              <p className="mt-4 border-t border-border pt-4 text-foreground/75">
                 {pkg.summary}
               </p>
               <ul className="mt-6 flex flex-col gap-4">
@@ -40,25 +40,25 @@ export function PackageComparison() {
                     <CheckIcon
                       aria-hidden
                       className={`mt-0.5 size-5 shrink-0 ${
-                        featured ? "text-bougainvillea" : "text-aegean"
+                        featured ? "text-primary" : "text-secondary"
                       }`}
                     />
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="mt-8 text-sm text-pine/70">
-                En az 1 ay önce internetten ayırana %{pkg.earlyDiscount} indirim
+              <p className="mt-8 text-sm text-foreground/70">
+                {pkg.earlyDiscount}% off when you book online at least a month ahead
               </p>
               <a
-                href="#rezervasyon"
-                className={`mt-6 inline-flex h-12 items-center justify-center rounded-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-bougainvillea/40 focus-visible:outline-none ${
+                href="#booking"
+                className={`mt-6 inline-flex h-12 items-center justify-center rounded-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-primary/40 focus-visible:outline-none ${
                   featured
-                    ? "bg-bougainvillea text-white hover:bg-bougainvillea/90"
-                    : "border border-pine text-pine hover:bg-pine hover:text-limestone"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
-                {pkg.name} ile ara
+                Search with {pkg.name.toLowerCase()}
               </a>
             </article>
           );

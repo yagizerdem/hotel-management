@@ -8,8 +8,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@components/ui/sheet";
-import { homeFontClassName } from "../_lib/fonts";
-import { hotel, navLinks } from "../_data/hotel";
+import { homeFontClassName } from "@/src/app/home/lib/fonts";
+import { hotel, navLinks } from "@/src/app/home/data/hotel";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -18,19 +18,19 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className="ml-auto inline-flex size-10 items-center justify-center rounded-sm text-pine hover:bg-pine/5 md:hidden"
-        aria-label="Menüyü aç"
+        className="ml-auto inline-flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-foreground/5 md:hidden"
+        aria-label="Open menu"
       >
         <MenuIcon className="size-5" />
       </SheetTrigger>
       <SheetContent
         side="right"
-        className={`${homeFontClassName} bg-limestone p-6 text-pine`}
+        className={`${homeFontClassName} bg-background p-6 text-foreground`}
       >
         <SheetTitle className="font-[family-name:var(--font-bodoni)] text-2xl">
           {hotel.name}
         </SheetTitle>
-        <nav aria-label="Mobil menü">
+        <nav aria-label="Mobile menu">
           <ul className="flex flex-col gap-1 text-lg">
             {navLinks.map((link) => (
               <li key={link.href}>
@@ -43,18 +43,18 @@ export function MobileNav() {
         </nav>
         <div className="mt-auto flex flex-col gap-3">
           <a
-            href="#uyelik"
+            href="#membership"
             onClick={close}
-            className="rounded-sm border border-pine/20 px-4 py-2.5 text-center"
+            className="rounded-sm border border-border px-4 py-2.5 text-center"
           >
-            Giriş yap
+            Sign in
           </a>
           <a
-            href="#rezervasyon"
+            href="#booking"
             onClick={close}
-            className="rounded-sm bg-bougainvillea px-4 py-2.5 text-center font-medium text-white"
+            className="rounded-sm bg-primary px-4 py-2.5 text-center font-medium text-primary-foreground"
           >
-            Rezervasyon yap
+            Book a room
           </a>
         </div>
       </SheetContent>

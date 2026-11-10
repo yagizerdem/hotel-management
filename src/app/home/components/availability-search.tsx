@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { ClockIcon, SearchIcon } from "lucide-react";
-import { hotel, packages, type PackageId } from "../_data/hotel";
-import { countNights, getEarlyBookingDiscount } from "../_lib/discount";
+import { hotel, packages, type PackageId } from "@/src/app/home/data/hotel";
+import { countNights, getEarlyBookingDiscount } from "@/src/app/home/lib/discount";
 
 const fieldClassName =
-  "h-12 w-full rounded-sm border border-pine/20 bg-white px-3 text-base text-pine outline-none focus-visible:border-aegean focus-visible:ring-3 focus-visible:ring-aegean/25";
+  "h-12 w-full rounded-sm border border-border bg-popover px-3 text-base text-foreground outline-none focus-visible:border-secondary focus-visible:ring-3 focus-visible:ring-secondary/25";
 
 type Result =
   | { kind: "error"; message: string }
@@ -27,14 +27,14 @@ export function AvailabilitySearch() {
     today.setHours(0, 0, 0, 0);
 
     if (start < today) {
-      setResult({ kind: "error", message: "Giriş tarihi bugünden önce olamaz." });
+      setResult({ kind: "error", message: "Check-in date can't be in the past." });
       return;
     }
     const nights = countNights(start, end);
     if (nights < 1) {
       setResult({
         kind: "error",
-        message: "Çıkış tarihi, giriş tarihinden en az bir gün sonra olmalı.",
+        message: "Check-out must be at least one day after check-in.",
       });
       return;
     }
@@ -51,12 +51,12 @@ export function AvailabilitySearch() {
   return (
     <form
       onSubmit={handleSubmit}
-      aria-label="Boş oda arama"
-      className="rounded-sm border border-pine/10 bg-limestone p-5 sm:p-6"
+      aria-label="Search available rooms"
+      className="rounded-sm border border-border bg-background p-5 sm:p-6"
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
-        <label className="flex flex-col gap-1.5 text-sm text-pine/70">
-          Giriş tarihi
+        <label className="flex flex-col gap-1.5 text-sm text-foreground/70">
+          Check-in
           <input
             type="date"
             required
@@ -65,8 +65,8 @@ export function AvailabilitySearch() {
             className={fieldClassName}
           />
         </label>
-        <label className="flex flex-col gap-1.5 text-sm text-pine/70">
-          Çıkış tarihi
+        <label className="flex flex-col gap-1.5 text-sm text-foreground/70">
+          Check-out
           <input
             type="date"
             required
@@ -76,8 +76,8 @@ export function AvailabilitySearch() {
             className={fieldClassName}
           />
         </label>
-        <label className="flex flex-col gap-1.5 text-sm text-pine/70">
-          Kişi sayısı
+        <label className="flex flex-col gap-1.5 text-sm text-foreground/70">
+          Guests
           <select
             value={guests}
             onChange={(e) => setGuests(e.target.value)}
@@ -85,13 +85,13 @@ export function AvailabilitySearch() {
           >
             {[1, 2, 3, 4].map((n) => (
               <option key={n} value={n}>
-                {n} kişi
+                {n} {n === 1 ? "guest" : "guests"}
               </option>
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1.5 text-sm text-pine/70">
-          Paket
+        <label className="flex flex-col gap-1.5 text-sm text-foreground/70">
+          Package
           <select
             value={packageId}
             onChange={(e) => setPackageId(e.target.value as PackageId)}
@@ -106,35 +106,36 @@ export function AvailabilitySearch() {
         </label>
         <button
           type="submit"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-sm bg-bougainvillea px-6 font-medium text-white transition-colors hover:bg-bougainvillea/90 focus-visible:ring-3 focus-visible:ring-bougainvillea/40 focus-visible:outline-none sm:col-span-2 lg:col-span-1"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-sm bg-primary px-6 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-primary/40 focus-visible:outline-none sm:col-span-2 lg:col-span-1"
         >
           <SearchIcon className="size-4" aria-hidden />
-          Boş odaları göster
+          Show available rooms
         </button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-pine/10 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex items-center gap-2 text-pine/80">
-          <ClockIcon className="size-4 text-aegean" aria-hidden />
-          Giriş {hotel.checkIn}, çıkış {hotel.checkOut}
+      <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="flex items-center gap-2 text-foreground/80">
+          <ClockIcon className="size-4 text-secondary" aria-hidden />
+          Check-in {hotel.checkIn}, check-out {hotel.checkOut}
         </p>
-        <p aria-live="polite" className="text-pine/80">
+        <p aria-live="polite" className="text-foreground/80">
           {result?.kind === "error" && (
-            <span className="text-bougainvillea">{result.message}</span>
+            <span className="text-primary">{result.message}</span>
           )}
           {result?.kind === "ok" &&
             (result.discount > 0 ? (
               <>
-                {result.nights} gece, {packageName}:{" "}
-                <strong className="font-semibold text-bougainvillea">
-                  %{result.discount} erken rezervasyon indirimi
+                {result.nights} {result.nights === 1 ? "night" : "nights"},{" "}
+                {packageName}:{" "}
+                <strong className="font-semibold text-primary">
+                  {result.discount}% early booking discount
                 </strong>{" "}
-                uygulanır.
+                applies.
               </>
             ) : (
               <>
-                {result.nights} gece, {packageName}: standart gecelik fiyat
-                uygulanır.
+                {result.nights} {result.nights === 1 ? "night" : "nights"},{" "}
+                {packageName}: the standard nightly rate applies.
               </>
             ))}
         </p>

@@ -24,7 +24,7 @@ export const hotel = {
   name: "Bilge Hotel",
   location: "Kemer, Antalya",
   phone: "+90 242 000 00 00",
-  email: "rezervasyon@bilgehotel.com",
+  email: "reservations@bilgehotel.com",
   checkIn: "14:00",
   checkOut: "10:00",
 };
@@ -38,23 +38,23 @@ export const packages: {
 }[] = [
   {
     id: "full-board",
-    name: "Tam pansiyon",
-    summary: "Sabah, öğle ve akşam yemekleri otelin restoranında.",
+    name: "Full board",
+    summary: "Breakfast, lunch and dinner at the hotel restaurant.",
     includes: [
-      "Açık büfe kahvaltı, öğle ve akşam yemeği",
-      "Yemeklerde su, çay ve kahve",
-      "İçecek ve ekstra harcamalar çıkışta ödenir",
+      "Buffet breakfast, lunch and dinner",
+      "Water, tea and coffee with meals",
+      "Drinks and extras are paid at check-out",
     ],
     earlyDiscount: 16,
   },
   {
     id: "all-inclusive",
-    name: "Her şey dahil",
-    summary: "Yemekler, içecekler ve ara öğünler konaklamaya dahil.",
+    name: "All inclusive",
+    summary: "Meals, drinks and snacks are included in your stay.",
     includes: [
-      "Tüm ana öğünler ve ara öğünler",
-      "Bar ve havuzbaşı snack bar içecekleri",
-      "Çıkışta ekstra harcama hesabı yok",
+      "All main meals and snacks",
+      "Drinks at the bar and the poolside snack bar",
+      "No extras bill at check-out",
     ],
     earlyDiscount: 18,
   },
@@ -68,13 +68,12 @@ export const floors: Floor[] = [
   {
     level: 4,
     balcony: true,
-    image:
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/hotels/suite-1.jpg",
     rooms: [
       {
         id: "f4-double",
-        name: "Duble oda",
-        beds: "Bir duble yatak",
+        name: "Double room",
+        beds: "One double bed",
         capacity: 2,
         count: 10,
         nightlyPrice: 4800,
@@ -82,8 +81,8 @@ export const floors: Floor[] = [
       },
       {
         id: "f4-quad",
-        name: "Dört kişilik oda",
-        beds: "Bir duble, iki tek yatak",
+        name: "Quadruple room",
+        beds: "One double and two single beds",
         capacity: 4,
         count: 6,
         nightlyPrice: 7400,
@@ -91,8 +90,8 @@ export const floors: Floor[] = [
       },
       {
         id: "f4-king",
-        name: "Kral dairesi",
-        beds: "Salon ve geniş yatak odası",
+        name: "King suite",
+        beds: "Living room and a large bedroom",
         capacity: 4,
         count: 1,
         nightlyPrice: 18500,
@@ -103,13 +102,12 @@ export const floors: Floor[] = [
   {
     level: 3,
     balcony: true,
-    image:
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/hotels/room-3.jpg",
     rooms: [
       {
         id: "f3-double",
-        name: "Duble oda",
-        beds: "Bir duble yatak",
+        name: "Double room",
+        beds: "One double bed",
         capacity: 2,
         count: 10,
         nightlyPrice: 4600,
@@ -117,8 +115,8 @@ export const floors: Floor[] = [
       },
       {
         id: "f3-triple",
-        name: "Üç kişilik oda",
-        beds: "Bir duble, bir tek yatak",
+        name: "Triple room",
+        beds: "One double and one single bed",
         capacity: 3,
         count: 10,
         nightlyPrice: 5900,
@@ -129,13 +127,12 @@ export const floors: Floor[] = [
   {
     level: 2,
     balcony: false,
-    image:
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/hotels/room-2.jpg",
     rooms: [
       {
         id: "f2-single",
-        name: "Tek kişilik oda",
-        beds: "Bir tek yatak",
+        name: "Single room",
+        beds: "One single bed",
         capacity: 1,
         count: 10,
         nightlyPrice: 2900,
@@ -143,8 +140,8 @@ export const floors: Floor[] = [
       },
       {
         id: "f2-twin",
-        name: "İki kişilik oda",
-        beds: "İki tek yatak",
+        name: "Twin room",
+        beds: "Two single beds",
         capacity: 2,
         count: 10,
         nightlyPrice: 4200,
@@ -155,13 +152,12 @@ export const floors: Floor[] = [
   {
     level: 1,
     balcony: false,
-    image:
-      "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/hotels/room-1.jpg",
     rooms: [
       {
         id: "f1-single",
-        name: "Tek kişilik oda",
-        beds: "Bir tek yatak",
+        name: "Single room",
+        beds: "One single bed",
         capacity: 1,
         count: 10,
         nightlyPrice: 2800,
@@ -169,8 +165,8 @@ export const floors: Floor[] = [
       },
       {
         id: "f1-triple",
-        name: "Üç kişilik oda",
-        beds: "Üç tek yatak",
+        name: "Triple room",
+        beds: "Three single beds",
         capacity: 3,
         count: 10,
         nightlyPrice: 5400,
@@ -181,16 +177,17 @@ export const floors: Floor[] = [
 ];
 
 export const navLinks = [
-  { href: "#odalar", label: "Odalar" },
-  { href: "#paketler", label: "Paketler" },
-  { href: "#olanaklar", label: "Olanaklar" },
-  { href: "#erken-rezervasyon", label: "Erken rezervasyon" },
+  { href: "#rooms", label: "Rooms" },
+  { href: "#packages", label: "Packages" },
+  { href: "#amenities", label: "Amenities" },
+  { href: "#early-booking", label: "Early booking" },
 ];
 
 export function formatPrice(value: number) {
-  return new Intl.NumberFormat("tr-TR", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "TRY",
+    currencyDisplay: "narrowSymbol",
     maximumFractionDigits: 0,
   }).format(value);
 }

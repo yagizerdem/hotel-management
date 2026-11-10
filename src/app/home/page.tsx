@@ -1,9 +1,9 @@
-import { Hero } from "./_components/hero";
-import { EarlyBookingTimeline } from "./_components/early-booking-timeline";
-import { FloorExplorer } from "./_components/floor-explorer";
-import { PackageComparison } from "./_components/package-comparison";
-import { RoomStandards } from "./_components/room-standards";
-import { MembershipSignup } from "./_components/membership-signup";
+import { Hero } from "@/src/app/home/components/hero";
+import { EarlyBookingTimeline } from "@/src/app/home/components/early-booking-timeline";
+import { FloorExplorer } from "@/src/app/home/components/floor-explorer";
+import { PackageComparison } from "@/src/app/home/components/package-comparison";
+import { RoomStandards } from "@/src/app/home/components/room-standards";
+import { MembershipSignup } from "@/src/app/home/components/membership-signup";
 
 export default function HomePage() {
   return (
