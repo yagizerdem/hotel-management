@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 import { ThemeProvider } from "@provider/theme-provider";
 import { ReduxProvider } from "@provider/redux-provider";
 import { QueryProvider } from "@provider/query-provider";
-import { TooltipProvider } from "@components/ui/tooltip";
+import { TooltipProvider } from "@/src/components/ui/tooltip";
 
 type BaseProviderProps = {
   children: React.ReactNode;

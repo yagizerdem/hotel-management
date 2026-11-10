@@ -19,10 +19,11 @@
       }
     ],
     "paths": {
-      "@provider/*": ["./app/provider/*"],
-      "@components/*": ["./components/*"],
-      "@hooks/*": ["./hooks/*"],
-      "@lib/*": ["./lib/*"],
+      "@provider/*": ["./src/provider/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@store/*": ["./src/store/*"],
       "@/*": ["./*"]
     }
   },
