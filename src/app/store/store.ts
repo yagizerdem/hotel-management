@@ -1,9 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import loaderReducer from "@store/loader/loader-slice";
 
 export const makeStore = () => {
   return configureStore({
-    reducer: {},
+    reducer: {
+      loader: loaderReducer,
+    },
   });
 };
 
