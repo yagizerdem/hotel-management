@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, Suspense, useContext } from "react";
 import { ThemeProvider } from "@provider/theme-provider";
 import { ReduxProvider } from "@provider/redux-provider";
 import { QueryProvider } from "@provider/query-provider";
@@ -20,17 +20,19 @@ export function BaseProvider({ children, ...props }: BaseProviderProps) {
   const value: BaseProviderState = {};
 
   return (
-    <ThemeProvider>
-      <ReduxProvider>
-        <QueryProvider>
-          <TooltipProvider>
-            <BaseProviderContext.Provider {...props} value={value}>
-              {children}
-            </BaseProviderContext.Provider>
-          </TooltipProvider>
-        </QueryProvider>
-      </ReduxProvider>
-    </ThemeProvider>
+    <Suspense>
+      <ThemeProvider>
+        <ReduxProvider>
+          <QueryProvider>
+            <TooltipProvider>
+              <BaseProviderContext.Provider {...props} value={value}>
+                {children}
+              </BaseProviderContext.Provider>
+            </TooltipProvider>
+          </QueryProvider>
+        </ReduxProvider>
+      </ThemeProvider>
+    </Suspense>
   );
 }
 
