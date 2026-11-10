@@ -3,7 +3,6 @@
 import { createContext, useContext } from "react";
 import { ThemeProvider } from "@provider/theme-provider";
 import { ReduxProvider } from "@provider/redux-provider";
-import { QueryProvider } from "@provider/query-provider";
 import { TooltipProvider } from "@components/ui/tooltip";
 
 type BaseProviderProps = {
@@ -22,13 +21,11 @@ export function BaseProvider({ children, ...props }: BaseProviderProps) {
   return (
     <ThemeProvider>
       <ReduxProvider>
-        <QueryProvider>
-          <TooltipProvider>
-            <BaseProviderContext.Provider {...props} value={value}>
-              {children}
-            </BaseProviderContext.Provider>
-          </TooltipProvider>
-        </QueryProvider>
+        <TooltipProvider>
+          <BaseProviderContext.Provider {...props} value={value}>
+            {children}
+          </BaseProviderContext.Provider>
+        </TooltipProvider>
       </ReduxProvider>
     </ThemeProvider>
   );
