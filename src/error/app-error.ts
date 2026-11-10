@@ -181,7 +181,7 @@ export class AppError extends Error {
    * Turns failed Zod parsing into a validation error, keeping the first
    * message for each field like the forms do.
    */
-  static fromZod(error: ZodError, message = "Check the highlighted fields.") {
+  static fromZod(error: ZodError, message = "Failed validation.") {
     const fieldErrors: FieldErrors = {};
     for (const issue of error.issues) {
       const field = issue.path[0];

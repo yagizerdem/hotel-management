@@ -9,6 +9,7 @@ import { getSignUpSchema } from "@/src/validators/auth-validator";
 import { isKeyof } from "@lib/util";
 import { toast } from "sonner";
 import { signUp } from "@/src/actions/auth-actions";
+import { useRouter } from "next/navigation";
 
 type Values = {
   firstName: string;
@@ -72,6 +73,8 @@ export function SignUpForm() {
   >({});
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const router = useRouter();
 
   const errors = validate(values);
   // Show an error once the person has left the field or tried to submit.
@@ -87,6 +90,7 @@ export function SignUpForm() {
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    setServerErrors([]);
     event.preventDefault();
     setSubmitted(true);
 
@@ -100,8 +104,23 @@ export function SignUpForm() {
       return;
     }
 
-    const r = await signUp({});
-    console.log(r);
+    const r = await signUp(values);
+    if (!r.success) {
+      toast.error(r.error || "Sign up failed. Please try again.", {
+        position: "top-right",
+        duration: 5000,
+      });
+      if (r.fieldErrors) {
+        setServerErrors(Object.values(r.fieldErrors));
+      }
+      return;
+    }
+
+    toast.success("Sign up successful!", {
+      position: "top-right",
+      duration: 5000,
+    });
+    router.push("/home");
   }
 
   const textField = (
@@ -328,6 +347,14 @@ export function SignUpForm() {
             Sign in
           </Link>
         </p>
+
+        {serverErrors.length > 0 && (
+          <div className="mt-2 text-sm text-destructive">
+            {serverErrors.map((error, index) => (
+              <p key={index}>{error}</p>
+            ))}
+          </div>
+        )}
       </form>
     </>
   );
