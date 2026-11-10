@@ -30,39 +30,58 @@ const INTERNAL_MESSAGE = "Something went wrong. Try again in a moment.";
  * The status code says what kind of failure it is. It only goes out over
  * HTTP: a server action answers through React, so its serialized error has
  * no status code.
+ *
+ * isOperational tells expected failures (bad input, a booked room night, the
+ * database being down) from bugs. Operational errors are part of normal use;
+ * a non-operational one is an unexpected throw that should be logged with its
+ * cause and looked into.
  */
 export class AppError extends Error {
   readonly statusCode: HttpStatusCode;
+  readonly isOperational: boolean;
   readonly fieldErrors?: FieldErrors;
   readonly endpointType?: TServerEndpoint;
 
   constructor(
     message: string,
     statusCode: HttpStatusCode,
+    isOperational = true,
     options: AppErrorOptions = {},
   ) {
     super(message, { cause: options.cause });
     this.name = "AppError";
     this.statusCode = statusCode;
+    this.isOperational = isOperational;
     this.fieldErrors = options.fieldErrors;
     this.endpointType = options.endpointType;
   }
 
   /**
-   * Builds an error with any status code. Prefer the named factories below,
-   * which match the ApiResponse helpers one to one.
+   * Builds an error from the constructor arguments, with any status code.
+   * Prefer the named factories below, which match the ApiResponse helpers
+   * one to one.
    */
-  static create(
-    message: string,
-    statusCode: HttpStatusCode,
-    options: AppErrorOptions = {},
-  ): AppError {
-    return new AppError(message, statusCode, options);
+  static from({
+    message,
+    statusCode,
+    isOperational = true,
+    options = {},
+  }: {
+    message: string;
+    statusCode: HttpStatusCode;
+    isOperational?: boolean;
+    options?: AppErrorOptions;
+  }): AppError {
+    return new AppError(message, statusCode, isOperational, options);
   }
 
   /** 400: the input is malformed or fails validation. */
   static badRequest(message: string, options?: AppErrorOptions) {
-    return AppError.create(message, HttpStatusCode.BAD_REQUEST, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      options,
+    });
   }
 
   /** 401: nobody is signed in, or the session has expired. */
@@ -70,7 +89,11 @@ export class AppError extends Error {
     message = "Sign in to continue.",
     options?: AppErrorOptions,
   ) {
-    return AppError.create(message, HttpStatusCode.UNAUTHORIZED, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.UNAUTHORIZED,
+      options,
+    });
   }
 
   /** 403: the person is signed in but their role doesn't allow this. */
@@ -78,12 +101,20 @@ export class AppError extends Error {
     message = "You don't have access to this.",
     options?: AppErrorOptions,
   ) {
-    return AppError.create(message, HttpStatusCode.FORBIDDEN, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.FORBIDDEN,
+      options,
+    });
   }
 
   /** 404: the record doesn't exist. */
   static notFound(message: string, options?: AppErrorOptions) {
-    return AppError.create(message, HttpStatusCode.NOT_FOUND, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.NOT_FOUND,
+      options,
+    });
   }
 
   /**
@@ -91,7 +122,11 @@ export class AppError extends Error {
    * that is already booked.
    */
   static conflict(message: string, options?: AppErrorOptions) {
-    return AppError.create(message, HttpStatusCode.CONFLICT, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.CONFLICT,
+      options,
+    });
   }
 
   /**
@@ -99,11 +134,11 @@ export class AppError extends Error {
    * check-out date before the check-in date.
    */
   static unprocessableEntity(message: string, options?: AppErrorOptions) {
-    return AppError.create(
+    return AppError.from({
       message,
-      HttpStatusCode.UNPROCESSABLE_ENTITY,
+      statusCode: HttpStatusCode.UNPROCESSABLE_ENTITY,
       options,
-    );
+    });
   }
 
   /** 429: too many requests in a short time. */
@@ -111,7 +146,11 @@ export class AppError extends Error {
     message = "Too many requests. Try again in a moment.",
     options?: AppErrorOptions,
   ) {
-    return AppError.create(message, HttpStatusCode.TOO_MANY_REQUESTS, options);
+    return AppError.from({
+      message,
+      statusCode: HttpStatusCode.TOO_MANY_REQUESTS,
+      options,
+    });
   }
 
   /** 500: something failed on the server. Pass the original error as cause. */
@@ -119,11 +158,11 @@ export class AppError extends Error {
     message = INTERNAL_MESSAGE,
     options?: AppErrorOptions,
   ) {
-    return AppError.create(
+    return AppError.from({
       message,
-      HttpStatusCode.INTERNAL_SERVER_ERROR,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
       options,
-    );
+    });
   }
 
   /** 503: a service the request depends on is down, for example the database. */
@@ -131,11 +170,11 @@ export class AppError extends Error {
     message = "The service is unavailable. Try again later.",
     options?: AppErrorOptions,
   ) {
-    return AppError.create(
+    return AppError.from({
       message,
-      HttpStatusCode.SERVICE_UNAVAILABLE,
+      statusCode: HttpStatusCode.SERVICE_UNAVAILABLE,
       options,
-    );
+    });
   }
 
   /**
@@ -157,17 +196,23 @@ export class AppError extends Error {
    * becomes an internal error, with the original kept as its cause.
    * Pass the endpoint where the error is caught, so it serializes correctly.
    */
-  static from({
+  static fromUnknown({
     error,
     endpoint,
   }: {
     error: unknown;
     endpoint?: TServerEndpoint;
   }): AppError {
+    // Anything that isn't an AppError was not expected, so it isn't operational.
     const appError =
       error instanceof AppError
         ? error
-        : AppError.internalServerError(undefined, { cause: error });
+        : AppError.from({
+            message: INTERNAL_MESSAGE,
+            statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+            isOperational: false,
+            options: { cause: error },
+          });
 
     return endpoint ? appError.withEndpoint(endpoint) : appError;
   }
@@ -175,7 +220,7 @@ export class AppError extends Error {
   /** A copy of this error marked as coming from the given endpoint. */
   withEndpoint(endpoint: TServerEndpoint): AppError {
     if (this.endpointType === endpoint) return this;
-    return new AppError(this.message, this.statusCode, {
+    return new AppError(this.message, this.statusCode, this.isOperational, {
       fieldErrors: this.fieldErrors,
       cause: this.cause,
       endpointType: endpoint,
