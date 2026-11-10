@@ -21,7 +21,8 @@ services:
 
     restart: always
     ports:
-      - 27017:27017
+      # 27018 on the host, so it doesn't clash with other projects' MongoDB on 27017.
+      - 27018:27017
     # Initiates the single-node replica set on first run and reports healthy
     # once this node is primary.
     healthcheck:
