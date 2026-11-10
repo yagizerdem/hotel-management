@@ -1,5 +1,6 @@
 import { TServerEndpoint } from "@type/server-endpoint";
 import HttpStatusCode from "@lib/http-status-code";
+import type { AppError } from "@error/app-error";
 
 /**
  * Response body shared by route handlers and server actions. Build it through
@@ -121,6 +122,11 @@ export class ApiResponse<T> {
       error,
       HttpStatusCode.SERVICE_UNAVAILABLE,
     );
+  }
+
+  /** A failure built from an AppError, keeping its message and status code. */
+  static fromError<T = never>(error: AppError) {
+    return ApiResponse.routeFailure<T>(error.message, error.statusCode);
   }
 
   private static routeSuccess<T>(data: T | undefined, status: HttpStatusCode) {
