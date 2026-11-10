@@ -1,0 +1,50 @@
+services:
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+    volumes:
+      - mongo_data:/data/db
+
+    restart: always
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 4s
+    networks:
+      - default
+
+  mongo-express:
+    image: mongo-express:latest
+    environment:
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_MONGODB_AUTH_USERNAME: "root"
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: "1234"
+
+      ME_CONFIG_MONGODB_URL: "mongodb://root:1234@mongodb:27017/"
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: user
+      ME_CONFIG_BASICAUTH_PASSWORD: 1234
+
+      ME_CONFIG_OPTIONS_EDITORTHEME: "default"
+      ME_CONFIG_SITE_BASEURL: "/"
+    ports:
+      - 8081:8081
+
+    networks:
+      - default
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+networks:
+  default:
+    name: "global"
+
+volumes:
+  mongo_data:
