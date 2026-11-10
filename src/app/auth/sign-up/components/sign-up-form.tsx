@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, CircleAlert, Eye, EyeOff } from "lucide-react";
 import { cn } from "cn";
 import { Checkbox } from "@/src/components/ui/checkbox";
+import { getSignUpSchema } from "@/src/validators/auth-validator";
+import { isKeyof } from "@lib/util";
 
 type Values = {
   firstName: string;
@@ -30,35 +32,6 @@ const initialValues: Values = {
   acceptTerms: false,
 };
 
-function validate(values: Values): Errors {
-  const errors: Errors = {};
-
-  if (!values.firstName.trim()) errors.firstName = "Enter your first name";
-  if (!values.lastName.trim()) errors.lastName = "Enter your last name";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
-    errors.email = "Enter a valid email address";
-  }
-  // Phone is optional, but if given it should be a 10-digit Turkish number.
-  if (values.phone.trim() && values.phone.replace(/\D/g, "").length !== 10) {
-    errors.phone = "Enter a 10-digit phone number, for example 532 000 0000";
-  }
-  if (
-    values.password.length < 8 ||
-    !/[a-zA-Z]/.test(values.password) ||
-    !/\d/.test(values.password)
-  ) {
-    errors.password = "Use at least 8 characters, with a letter and a number";
-  }
-  if (!values.confirmPassword || values.confirmPassword !== values.password) {
-    errors.confirmPassword = "The passwords don't match";
-  }
-  if (!values.acceptTerms) {
-    errors.acceptTerms = "Accept the terms of use and privacy policy to continue";
-  }
-
-  return errors;
-}
-
 const inputClassName =
   "h-[52px] w-full rounded-sm border border-border bg-popover px-3.5 text-[15px] text-foreground transition-colors outline-none placeholder:text-foreground/45 focus-visible:border-secondary focus-visible:ring-1 focus-visible:ring-secondary aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive";
 
@@ -73,9 +46,28 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+function validate(values: Values): Errors {
+  const schema = getSignUpSchema();
+  const result = schema.safeParse(values);
+  if (!result.success) {
+    const errors: Errors = {};
+    for (const issue of result.error.issues) {
+      const path = issue.path[0];
+      // Check against values: errors starts empty, so it has no keys yet.
+      if (path !== undefined && isKeyof(path, values)) {
+        errors[path] ??= issue.message;
+      }
+    }
+    return errors;
+  }
+  return {};
+}
+
 export function SignUpForm() {
   const [values, setValues] = useState<Values>(initialValues);
-  const [touched, setTouched] = useState<Partial<Record<keyof Values, boolean>>>({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof Values, boolean>>
+  >({});
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -102,7 +94,8 @@ export function SignUpForm() {
       return;
     }
 
-    // TODO: call the signUp server action once it creates the account.
+    if (Object.keys(validate(values)).length > 0) {
+    }
   }
 
   const textField = (
@@ -158,10 +151,20 @@ export function SignUpForm() {
         safe.
       </p>
 
-      <form noValidate onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+      <form
+        noValidate
+        onSubmit={handleSubmit}
+        className="mt-8 flex flex-col gap-5"
+      >
         <div className="grid gap-5 sm:grid-cols-2 sm:gap-4">
-          {textField("firstName", "First name", { autoComplete: "given-name", required: true })}
-          {textField("lastName", "Last name", { autoComplete: "family-name", required: true })}
+          {textField("firstName", "First name", {
+            autoComplete: "given-name",
+            required: true,
+          })}
+          {textField("lastName", "Last name", {
+            autoComplete: "family-name",
+            required: true,
+          })}
         </div>
 
         {textField("email", "Email address", {
@@ -173,7 +176,10 @@ export function SignUpForm() {
 
         <div>
           <label htmlFor="phone" className={labelClassName}>
-            Phone number <span className="font-normal text-muted-foreground">(optional)</span>
+            Phone number{" "}
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
           </label>
           <div className="flex">
             <span className="inline-flex items-center rounded-l-sm border border-r-0 border-border bg-muted px-3.5 text-sm font-medium select-none">
@@ -233,10 +239,13 @@ export function SignUpForm() {
             id="password-hint"
             className={cn(
               "mt-1.5 text-[13px] leading-5",
-              errorFor("password") ? "text-destructive" : "text-muted-foreground",
+              errorFor("password")
+                ? "text-destructive"
+                : "text-muted-foreground",
             )}
           >
-            {errorFor("password") ?? "At least 8 characters, with a letter and a number"}
+            {errorFor("password") ??
+              "At least 8 characters, with a letter and a number"}
           </p>
         </div>
 
@@ -268,21 +277,32 @@ export function SignUpForm() {
                   touch("acceptTerms");
                 }}
                 aria-invalid={Boolean(errorFor("acceptTerms"))}
-                aria-describedby={errorFor("acceptTerms") ? "acceptTerms-error" : undefined}
+                aria-describedby={
+                  errorFor("acceptTerms") ? "acceptTerms-error" : undefined
+                }
                 className="mt-0.5 rounded-[2px] border-[1.5px] border-foreground/60"
               />
               <span>
                 I accept the{" "}
-                <Link href="/terms" className="font-medium text-secondary hover:underline">
+                <Link
+                  href="/terms"
+                  className="font-medium text-secondary hover:underline"
+                >
                   terms of use
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="font-medium text-secondary hover:underline">
+                <Link
+                  href="/privacy"
+                  className="font-medium text-secondary hover:underline"
+                >
                   privacy policy
                 </Link>
               </span>
             </label>
-            <FieldError id="acceptTerms-error" message={errorFor("acceptTerms")} />
+            <FieldError
+              id="acceptTerms-error"
+              message={errorFor("acceptTerms")}
+            />
           </div>
         </div>
 
@@ -295,7 +315,10 @@ export function SignUpForm() {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/auth/sign-in" className="font-medium text-secondary hover:underline">
+          <Link
+            href="/auth/sign-in"
+            className="font-medium text-secondary hover:underline"
+          >
             Sign in
           </Link>
         </p>

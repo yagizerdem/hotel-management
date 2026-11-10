@@ -25,6 +25,8 @@
       "@lib/*": ["./src/lib/*"],
       "@store/*": ["./src/store/*"],
       "@seeder/*": ["./src/seeder/*"],
+      "@models/*": ["./src/models/*"],
+      "@validator/*": ["./src/validators/*"],
       "@/*": ["./*"]
     }
   },
