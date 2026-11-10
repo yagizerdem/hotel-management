@@ -7,6 +7,8 @@ import { cn } from "cn";
 import { Checkbox } from "@/src/components/ui/checkbox";
 import { getSignUpSchema } from "@/src/validators/auth-validator";
 import { isKeyof } from "@lib/util";
+import { toast } from "sonner";
+import { signUp } from "@/src/actions/auth-actions";
 
 type Values = {
   firstName: string;
@@ -84,18 +86,22 @@ export function SignUpForm() {
     setTouched((current) => ({ ...current, [field]: true }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
 
     const firstInvalid = Object.keys(errors)[0];
     if (firstInvalid) {
       document.getElementById(firstInvalid)?.focus();
+      toast.error("Please enter all required fields correctly.", {
+        position: "top-right",
+        duration: 5000,
+      });
       return;
     }
 
-    if (Object.keys(validate(values)).length > 0) {
-    }
+    const r = await signUp({});
+    console.log(r);
   }
 
   const textField = (
