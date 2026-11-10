@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 const MONGODB_URI: string = process.env.MONGODB_URI ?? "";
 
@@ -30,6 +31,7 @@ async function dbConnect() {
     cached.promise = mongoose.connect(MONGODB_URI);
   }
   cached.conn = await cached.promise;
+
   return cached.conn;
 }
 
