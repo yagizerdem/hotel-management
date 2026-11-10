@@ -1,17 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
-import loaderSlice from "./loader-slice";
+import loaderSlice from "@store/slice/loader-slice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      [loaderSlice.reducerPath]: loaderSlice.reducer,
+      loader: loaderSlice.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        // The loader keeps its keys in a Set, which is not serializable.
-        serializableCheck: { ignoredPaths: ["loader.keys"] },
-      }),
   });
 };
 
