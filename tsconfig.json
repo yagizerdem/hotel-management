@@ -24,6 +24,7 @@
       "@hooks/*": ["./src/hooks/*"],
       "@lib/*": ["./src/lib/*"],
       "@store/*": ["./src/store/*"],
+      "@seeder/*": ["./src/seeder/*"],
       "@/*": ["./*"]
     }
   },
