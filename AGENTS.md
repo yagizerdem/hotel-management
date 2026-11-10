@@ -7,3 +7,7 @@
 
 - Do **not** add any `Co-authored-by:` trailers (Claude, Copilot, or any other AI/tool) to commit messages.
 - Do not mention AI assistants or tools as authors anywhere in the commit message.
+
+## Git worktrees
+
+- Create Git worktrees only under `.claude/worktrees/`; do not create them elsewhere.
