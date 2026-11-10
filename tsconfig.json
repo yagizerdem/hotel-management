@@ -27,6 +27,8 @@
       "@seeder/*": ["./src/seeder/*"],
       "@models/*": ["./src/models/*"],
       "@validator/*": ["./src/validators/*"],
+      "@error/*": ["./src/error/*"],
+      "@type/*": ["./src/type/*"],
       "@/*": ["./*"]
     }
   },
