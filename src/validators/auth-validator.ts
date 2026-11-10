@@ -69,3 +69,26 @@ export function getSignUpSchema() {
 
 export type SignUpInput = z.input<ReturnType<typeof getSignUpSchema>>;
 export type SignUpValues = z.output<ReturnType<typeof getSignUpSchema>>;
+
+export function getSignInSchema() {
+  /**
+   * Sign-in input. Only checks that both fields are filled in: the password
+   * rules belong to sign-up, and a wrong password is the server's answer.
+   */
+  const signInSchema = z.object({
+    email: z
+      .string({ error: "Enter a valid email address" })
+      .trim()
+      .toLowerCase()
+      .pipe(z.email({ error: "Enter a valid email address" })),
+    password: z
+      .string({ error: "Enter your password" })
+      .min(1, { error: "Enter your password" }),
+    rememberMe: z.boolean().default(false),
+  });
+
+  return signInSchema;
+}
+
+export type SignInInput = z.input<ReturnType<typeof getSignInSchema>>;
+export type SignInValues = z.output<ReturnType<typeof getSignInSchema>>;
