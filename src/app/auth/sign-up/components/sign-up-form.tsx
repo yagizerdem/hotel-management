@@ -74,6 +74,7 @@ export function SignUpForm() {
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const errors = validate(values);
@@ -90,37 +91,41 @@ export function SignUpForm() {
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    setServerErrors([]);
-    event.preventDefault();
-    setSubmitted(true);
+    try {
+      setServerErrors([]);
+      event.preventDefault();
+      setSubmitted(true);
 
-    const firstInvalid = Object.keys(errors)[0];
-    if (firstInvalid) {
-      document.getElementById(firstInvalid)?.focus();
-      toast.error("Please enter all required fields correctly.", {
-        position: "top-right",
-        duration: 5000,
-      });
-      return;
-    }
-
-    const r = await signUp(values);
-    if (!r.success) {
-      toast.error(r.error || "Sign up failed. Please try again.", {
-        position: "top-right",
-        duration: 5000,
-      });
-      if (r.fieldErrors) {
-        setServerErrors(Object.values(r.fieldErrors));
+      const firstInvalid = Object.keys(errors)[0];
+      if (firstInvalid) {
+        document.getElementById(firstInvalid)?.focus();
+        toast.error("Please enter all required fields correctly.", {
+          position: "top-right",
+          duration: 5000,
+        });
+        return;
       }
-      return;
-    }
 
-    toast.success("Sign up successful!", {
-      position: "top-right",
-      duration: 5000,
-    });
-    router.push("/home");
+      const r = await signUp(values);
+      if (!r.success) {
+        toast.error(r.error || "Sign up failed. Please try again.", {
+          position: "top-right",
+          duration: 5000,
+        });
+        if (r.fieldErrors) {
+          setServerErrors(Object.values(r.fieldErrors));
+        }
+        return;
+      }
+
+      toast.success("Sign up successful!", {
+        position: "top-right",
+        duration: 5000,
+      });
+      router.push("/home");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const textField = (
@@ -334,6 +339,7 @@ export function SignUpForm() {
         <button
           type="submit"
           className="mt-3 h-[52px] w-full rounded-sm bg-primary px-6 text-sm font-medium tracking-[0.02em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-primary/40 focus-visible:outline-none"
+          disabled={isLoading}
         >
           Create account
         </button>
