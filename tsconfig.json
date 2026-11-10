@@ -29,6 +29,7 @@
       "@validator/*": ["./src/validators/*"],
       "@error/*": ["./src/error/*"],
       "@type/*": ["./src/type/*"],
+      "@service/*": ["./src/service/*"],
       "@/*": ["./*"]
     }
   },
