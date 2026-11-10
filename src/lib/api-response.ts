@@ -1,6 +1,6 @@
 import { TServerEndpoint } from "@type/server-endpoint";
 import HttpStatusCode from "@lib/http-status-code";
-import type { AppError } from "@error/app-error";
+import type { AppError, FieldErrors } from "@error/app-error";
 
 /**
  * Response body shared by route handlers and server actions. Build it through
@@ -17,6 +17,7 @@ export class ApiResponse<T> {
     public data?: T,
     public message?: string,
     public error?: string,
+    public fieldErrors?: FieldErrors,
     public httpStatusCode?: number,
     public endpoint?: TServerEndpoint,
   ) {}
@@ -32,22 +33,37 @@ export class ApiResponse<T> {
         message,
         undefined,
         undefined,
+        undefined,
         "server-action",
       ),
     };
   }
 
-  static actionFailure<T = never>(message?: string, error?: string) {
+  static actionFailure<T = never>(
+    message?: string,
+    error?: string,
+    fieldErrors?: FieldErrors,
+  ) {
     return {
       ...new ApiResponse<T>(
         false,
         undefined,
         message,
         error,
+        fieldErrors,
         undefined,
         "server-action",
       ),
     };
+  }
+
+  /** A server action failure built from an AppError, keeping its field errors. */
+  static actionFromError<T = never>(error: AppError, message?: string) {
+    return ApiResponse.actionFailure<T>(
+      message,
+      error.message,
+      error.fieldErrors,
+    );
   }
 
   // Route handler constructors, one per status code.
@@ -71,11 +87,16 @@ export class ApiResponse<T> {
   }
 
   /** 400: the request is malformed, for example invalid JSON or a missing field. */
-  static badRequest<T = never>(error: string, message?: string) {
+  static badRequest<T = never>(
+    error: string,
+    message?: string,
+    fieldErrors?: FieldErrors,
+  ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.BAD_REQUEST,
+      fieldErrors,
     );
   }
 
@@ -96,31 +117,53 @@ export class ApiResponse<T> {
     error = "You don't have access to this.",
     message?: string,
   ) {
-    return ApiResponse.routeFailure<T>(error, message, HttpStatusCode.FORBIDDEN);
+    return ApiResponse.routeFailure<T>(
+      error,
+      message,
+      HttpStatusCode.FORBIDDEN,
+    );
   }
 
   /** 404: the record doesn't exist. */
   static notFound<T = never>(error: string, message?: string) {
-    return ApiResponse.routeFailure<T>(error, message, HttpStatusCode.NOT_FOUND);
+    return ApiResponse.routeFailure<T>(
+      error,
+      message,
+      HttpStatusCode.NOT_FOUND,
+    );
   }
 
   /**
    * 409: the request clashes with the current data, for example a room night
    * that is already booked.
    */
-  static conflict<T = never>(error: string, message?: string) {
-    return ApiResponse.routeFailure<T>(error, message, HttpStatusCode.CONFLICT);
+  static conflict<T = never>(
+    error: string,
+    message?: string,
+    fieldErrors?: FieldErrors,
+  ) {
+    return ApiResponse.routeFailure<T>(
+      error,
+      message,
+      HttpStatusCode.CONFLICT,
+      fieldErrors,
+    );
   }
 
   /**
    * 422: the request is well formed but breaks a business rule, for example a
    * check-out date before the check-in date.
    */
-  static unprocessableEntity<T = never>(error: string, message?: string) {
+  static unprocessableEntity<T = never>(
+    error: string,
+    message?: string,
+    fieldErrors?: FieldErrors,
+  ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.UNPROCESSABLE_ENTITY,
+      fieldErrors,
     );
   }
 
@@ -160,12 +203,16 @@ export class ApiResponse<T> {
     );
   }
 
-  /** A failure built from an AppError, keeping its message and status code. */
+  /**
+   * A failure built from an AppError, keeping its message, status code and
+   * field errors.
+   */
   static fromError<T = never>(error: AppError, message?: string) {
     return ApiResponse.routeFailure<T>(
       error.message,
       message,
       error.statusCode,
+      error.fieldErrors,
     );
   }
 
@@ -179,6 +226,7 @@ export class ApiResponse<T> {
       data,
       message,
       undefined,
+      undefined,
       status,
       "route-handler",
     );
@@ -188,12 +236,14 @@ export class ApiResponse<T> {
     error: string,
     message: string | undefined,
     status: HttpStatusCode,
+    fieldErrors?: FieldErrors,
   ) {
     return new ApiResponse<T>(
       false,
       undefined,
       message,
       error,
+      fieldErrors,
       status,
       "route-handler",
     );

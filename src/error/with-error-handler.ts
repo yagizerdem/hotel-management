@@ -51,9 +51,7 @@ export function withActionErrorHandler<Args extends unknown[], Result>(
     try {
       return await action(...args);
     } catch (error) {
-      return ApiResponse.actionFailure(
-        toAppError(error, "server-action").message,
-      );
+      return ApiResponse.actionFromError(toAppError(error, "server-action"));
     }
   };
 }
