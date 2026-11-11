@@ -27,13 +27,15 @@ export function today() {
 
 /** Why the stay can't be searched, or null when it can. */
 export function stayError(stay: StayDetails): string | null {
-  if (!stay.checkIn || !stay.checkOut) return "Choose your check-in and check-out dates.";
+  if (!stay.checkIn || !stay.checkOut)
+    return "Choose your check-in and check-out dates.";
   const start = parseDate(stay.checkIn);
   const end = parseDate(stay.checkOut);
   if (start < today()) return "Check-in can't be in the past.";
   if (countNights(start, end) < 1)
     return "Check-out must be at least one day after check-in.";
-  if (countNights(start, end) > 30) return "Online bookings are for up to 30 nights.";
+  if (countNights(start, end) > 30)
+    return "Online bookings are for up to 30 nights.";
   return null;
 }
 
@@ -69,7 +71,11 @@ export function nextDiscountTier(stay: StayDetails, packageId: PackageId) {
   const daysAhead = Math.floor(
     (parseDate(stay.checkIn).getTime() - today().getTime()) / DAY_MS,
   );
-  const current = getEarlyBookingDiscount(parseDate(stay.checkIn), packageId, today());
+  const current = getEarlyBookingDiscount(
+    parseDate(stay.checkIn),
+    packageId,
+    today(),
+  );
   if (daysAhead < 30 && current === 0) {
     return {
       threshold: "a month",
