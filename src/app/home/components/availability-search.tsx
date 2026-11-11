@@ -7,6 +7,11 @@ import {
   countNights,
   getEarlyBookingDiscount,
 } from "@/src/app/home/lib/discount";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import API from "@lib/axios-wrapper";
+import { ApiResponse } from "@lib/api-response";
+import { AvailableRoom } from "@domain/home/room";
 
 const fieldClassName =
   "h-12 w-full rounded-sm border border-border bg-popover px-3 text-base text-foreground outline-none focus-visible:border-secondary focus-visible:ring-3 focus-visible:ring-secondary/25";
@@ -21,6 +26,33 @@ export function AvailabilitySearch() {
   const [guests, setGuests] = useState("2");
   const [packageId, setPackageId] = useState<PackageId>("all-inclusive");
   const [result, setResult] = useState<Result | null>(null);
+
+  const { isLoading, isError, isSuccess, refetch, data } = useQuery({
+    queryKey: ["availability", checkIn, checkOut, guests, packageId],
+    queryFn: async () => {
+      // Replace with actual API call
+      const response =
+        // Only the stay goes in params: any other key is read as a room
+        // field filter, so an extra packageId matched no rooms at all.
+        (
+          await API.get("/room/client/available", {
+            params: {
+              checkIn,
+              checkOut,
+              guests,
+              boardType:
+                packageId == "all-inclusive" ? "all_inclusive" : "full_board",
+            },
+          })
+        ).data as ApiResponse<AvailableRoom[]>;
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch availability");
+      }
+      return response.data;
+    },
+    enabled: false, // Disable automatic query execution, will use refetch instead
+  });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,6 +74,10 @@ export function AvailabilitySearch() {
         kind: "error",
         message: "Check-out must be at least one day after check-in.",
       });
+      toast.error("Check-out must be at least one day after check-in.", {
+        position: "top-right",
+        duration: 5000,
+      });
       return;
     }
 
@@ -50,9 +86,13 @@ export function AvailabilitySearch() {
       nights,
       discount: getEarlyBookingDiscount(start, packageId, today),
     });
+
+    refetch();
   }
 
   const packageName = packages.find((p) => p.id === packageId)?.name;
+
+  console.log(data);
 
   return (
     <form
