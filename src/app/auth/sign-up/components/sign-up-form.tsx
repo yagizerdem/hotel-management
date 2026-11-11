@@ -6,7 +6,7 @@ import { ArrowLeft, CircleAlert, Eye, EyeOff } from "lucide-react";
 import { cn } from "cn";
 import { Checkbox } from "@/src/components/ui/checkbox";
 import { getSignUpSchema } from "@/src/validators/auth-validator";
-import { isKeyof } from "@lib/util";
+import { isKeyof } from "@lib/utils";
 import { toast } from "sonner";
 import { signUp } from "@/src/actions/auth-actions";
 import { useRouter } from "next/navigation";

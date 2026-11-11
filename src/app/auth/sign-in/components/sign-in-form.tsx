@@ -8,7 +8,7 @@ import { cn } from "cn";
 import { toast } from "sonner";
 import { Checkbox } from "@/src/components/ui/checkbox";
 import { getSignInSchema } from "@/src/validators/auth-validator";
-import { isKeyof } from "@lib/util";
+import { isKeyof } from "@lib/utils";
 import { signInWithCredentials } from "@/src/actions/auth-actions";
 import { useDispatch } from "react-redux";
 import { setUser } from "@store/slice/auth-slice";
