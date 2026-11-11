@@ -1,5 +1,6 @@
 import { TServerEndpoint } from "@type/server-endpoint";
 import HttpStatusCode from "@lib/http-status-code";
+import { MachineCode } from "@lib/machine-code";
 import type { AppError, FieldErrors } from "@error/app-error";
 
 /** What a server action returns when it works. */
@@ -17,6 +18,7 @@ export type ActionFailure = {
   message?: string;
   error?: string;
   fieldErrors?: FieldErrors;
+  machineCode?: MachineCode;
   endpoint: "server-action";
 };
 
@@ -34,6 +36,9 @@ export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
  *
  * `message` is an optional sentence for the person using the app, such as
  * "Your reservation is confirmed." `error` says what went wrong on a failure.
+ * `machineCode` says the same for code to check, for example EMAIL_IN_USE,
+ * and stays the same when the wording changes. Each failure constructor
+ * uses the general code for its status unless it is given one.
  */
 export class ApiResponse<T> {
   private constructor(
@@ -44,6 +49,7 @@ export class ApiResponse<T> {
     public fieldErrors?: FieldErrors,
     public httpStatusCode?: number,
     public endpoint?: TServerEndpoint,
+    public machineCode?: MachineCode,
   ) {}
 
   // React can't pass class instances from a server action to the client, so
@@ -69,6 +75,7 @@ export class ApiResponse<T> {
     message?: string,
     error?: string,
     fieldErrors?: FieldErrors,
+    machineCode?: MachineCode,
   ): ActionFailure {
     return {
       ...new ApiResponse<never>(
@@ -79,18 +86,23 @@ export class ApiResponse<T> {
         fieldErrors,
         undefined,
         "server-action",
+        machineCode,
       ),
       success: false,
       endpoint: "server-action",
     };
   }
 
-  /** A server action failure built from an AppError, keeping its field errors. */
+  /**
+   * A server action failure built from an AppError, keeping its field errors
+   * and machine code.
+   */
   static actionFromError(error: AppError, message?: string): ActionFailure {
     return ApiResponse.actionFailure(
       message,
       error.message,
       error.fieldErrors,
+      error.machineCode,
     );
   }
 
@@ -119,12 +131,14 @@ export class ApiResponse<T> {
     error: string,
     message?: string,
     fieldErrors?: FieldErrors,
+    machineCode = MachineCode.BAD_REQUEST,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.BAD_REQUEST,
       fieldErrors,
+      machineCode,
     );
   }
 
@@ -132,11 +146,14 @@ export class ApiResponse<T> {
   static unauthorized<T = never>(
     error = "Sign in to continue.",
     message?: string,
+    machineCode = MachineCode.UNAUTHORIZED,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.UNAUTHORIZED,
+      undefined,
+      machineCode,
     );
   }
 
@@ -144,20 +161,29 @@ export class ApiResponse<T> {
   static forbidden<T = never>(
     error = "You don't have access to this.",
     message?: string,
+    machineCode = MachineCode.FORBIDDEN,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.FORBIDDEN,
+      undefined,
+      machineCode,
     );
   }
 
   /** 404: the record doesn't exist. */
-  static notFound<T = never>(error: string, message?: string) {
+  static notFound<T = never>(
+    error: string,
+    message?: string,
+    machineCode = MachineCode.NOT_FOUND,
+  ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.NOT_FOUND,
+      undefined,
+      machineCode,
     );
   }
 
@@ -169,12 +195,14 @@ export class ApiResponse<T> {
     error: string,
     message?: string,
     fieldErrors?: FieldErrors,
+    machineCode = MachineCode.CONFLICT,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.CONFLICT,
       fieldErrors,
+      machineCode,
     );
   }
 
@@ -186,12 +214,14 @@ export class ApiResponse<T> {
     error: string,
     message?: string,
     fieldErrors?: FieldErrors,
+    machineCode = MachineCode.UNPROCESSABLE_ENTITY,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.UNPROCESSABLE_ENTITY,
       fieldErrors,
+      machineCode,
     );
   }
 
@@ -199,11 +229,14 @@ export class ApiResponse<T> {
   static tooManyRequests<T = never>(
     error = "Too many requests. Try again in a moment.",
     message?: string,
+    machineCode = MachineCode.TOO_MANY_REQUESTS,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.TOO_MANY_REQUESTS,
+      undefined,
+      machineCode,
     );
   }
 
@@ -211,11 +244,14 @@ export class ApiResponse<T> {
   static internalServerError<T = never>(
     error = "Something went wrong. Try again in a moment.",
     message?: string,
+    machineCode = MachineCode.INTERNAL_SERVER_ERROR,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.INTERNAL_SERVER_ERROR,
+      undefined,
+      machineCode,
     );
   }
 
@@ -223,17 +259,20 @@ export class ApiResponse<T> {
   static serviceUnavailable<T = never>(
     error = "The service is unavailable. Try again later.",
     message?: string,
+    machineCode = MachineCode.SERVICE_UNAVAILABLE,
   ) {
     return ApiResponse.routeFailure<T>(
       error,
       message,
       HttpStatusCode.SERVICE_UNAVAILABLE,
+      undefined,
+      machineCode,
     );
   }
 
   /**
-   * A failure built from an AppError, keeping its message, status code and
-   * field errors.
+   * A failure built from an AppError, keeping its message, status code,
+   * field errors and machine code.
    */
   static fromError<T = never>(error: AppError, message?: string) {
     return ApiResponse.routeFailure<T>(
@@ -241,6 +280,7 @@ export class ApiResponse<T> {
       message,
       error.statusCode,
       error.fieldErrors,
+      error.machineCode,
     );
   }
 
@@ -265,6 +305,7 @@ export class ApiResponse<T> {
     message: string | undefined,
     status: HttpStatusCode,
     fieldErrors?: FieldErrors,
+    machineCode?: MachineCode,
   ) {
     return new ApiResponse<T>(
       false,
@@ -274,6 +315,7 @@ export class ApiResponse<T> {
       fieldErrors,
       status,
       "route-handler",
+      machineCode,
     );
   }
 }
@@ -284,6 +326,7 @@ export interface IApiResponse<T> {
   message?: string;
   error?: string;
   fieldErrors?: FieldErrors;
+  machineCode?: MachineCode;
   status: HttpStatusCode;
   source: string;
 }

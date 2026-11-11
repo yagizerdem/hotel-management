@@ -1,5 +1,6 @@
 import type { ZodError } from "zod";
 import HttpStatusCode from "@lib/http-status-code";
+import { MachineCode } from "@lib/machine-code";
 import type { TServerEndpoint } from "@type/server-endpoint";
 
 /** First error message for each invalid field, keyed by field name. */
@@ -11,6 +12,7 @@ interface AppErrorOptions {
   fieldErrors?: FieldErrors;
   cause?: unknown;
   endpointType?: TServerEndpoint;
+  machineCode?: MachineCode;
 }
 
 /** Plain-object form of an AppError, safe to return from a server action. */
@@ -18,9 +20,19 @@ export interface SerializedAppError {
   message: string;
   statusCode?: HttpStatusCode;
   fieldErrors?: FieldErrors;
+  machineCode?: MachineCode;
 }
 
 const INTERNAL_MESSAGE = "Something went wrong. Try again in a moment.";
+
+// Keeps a machine code the caller passed, or falls back to the general code
+// for the status.
+function withMachineCode(
+  options: AppErrorOptions | undefined,
+  machineCode: MachineCode,
+): AppErrorOptions {
+  return { ...options, machineCode: options?.machineCode ?? machineCode };
+}
 
 /**
  * An error whose message is written for the person using the app, so it can
@@ -30,6 +42,10 @@ const INTERNAL_MESSAGE = "Something went wrong. Try again in a moment.";
  * The status code says what kind of failure it is. It only goes out over
  * HTTP: a server action answers through React, so its serialized error has
  * no status code.
+ *
+ * The machine code says why it failed in a form code can check, for example
+ * EMAIL_IN_USE. Each factory below sets the general code for its status
+ * unless the options name a more specific one.
  *
  * isOperational tells expected failures (bad input, a booked room night, the
  * database being down) from bugs. Operational errors are part of normal use;
@@ -41,6 +57,7 @@ export class AppError extends Error {
   readonly isOperational: boolean;
   readonly fieldErrors?: FieldErrors;
   readonly endpointType?: TServerEndpoint;
+  readonly machineCode?: MachineCode;
 
   constructor(
     message: string,
@@ -54,6 +71,7 @@ export class AppError extends Error {
     this.isOperational = isOperational;
     this.fieldErrors = options.fieldErrors;
     this.endpointType = options.endpointType;
+    this.machineCode = options.machineCode;
   }
 
   /**
@@ -80,7 +98,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.BAD_REQUEST,
-      options,
+      options: withMachineCode(options, MachineCode.BAD_REQUEST),
     });
   }
 
@@ -92,7 +110,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.UNAUTHORIZED,
-      options,
+      options: withMachineCode(options, MachineCode.UNAUTHORIZED),
     });
   }
 
@@ -104,7 +122,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.FORBIDDEN,
-      options,
+      options: withMachineCode(options, MachineCode.FORBIDDEN),
     });
   }
 
@@ -113,7 +131,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.NOT_FOUND,
-      options,
+      options: withMachineCode(options, MachineCode.NOT_FOUND),
     });
   }
 
@@ -125,7 +143,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.CONFLICT,
-      options,
+      options: withMachineCode(options, MachineCode.CONFLICT),
     });
   }
 
@@ -137,7 +155,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.UNPROCESSABLE_ENTITY,
-      options,
+      options: withMachineCode(options, MachineCode.UNPROCESSABLE_ENTITY),
     });
   }
 
@@ -149,7 +167,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.TOO_MANY_REQUESTS,
-      options,
+      options: withMachineCode(options, MachineCode.TOO_MANY_REQUESTS),
     });
   }
 
@@ -161,7 +179,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
-      options,
+      options: withMachineCode(options, MachineCode.INTERNAL_SERVER_ERROR),
     });
   }
 
@@ -173,7 +191,7 @@ export class AppError extends Error {
     return AppError.from({
       message,
       statusCode: HttpStatusCode.SERVICE_UNAVAILABLE,
-      options,
+      options: withMachineCode(options, MachineCode.SERVICE_UNAVAILABLE),
     });
   }
 
@@ -188,7 +206,11 @@ export class AppError extends Error {
       if (field === undefined) continue;
       fieldErrors[String(field)] ??= issue.message;
     }
-    return AppError.badRequest(message, { fieldErrors, cause: error });
+    return AppError.badRequest(message, {
+      fieldErrors,
+      cause: error,
+      machineCode: MachineCode.VALIDATION_FAILED,
+    });
   }
 
   /**
@@ -211,7 +233,10 @@ export class AppError extends Error {
             message: INTERNAL_MESSAGE,
             statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
             isOperational: false,
-            options: { cause: error },
+            options: {
+              cause: error,
+              machineCode: MachineCode.INTERNAL_SERVER_ERROR,
+            },
           });
 
     return endpoint ? appError.withEndpoint(endpoint) : appError;
@@ -224,6 +249,7 @@ export class AppError extends Error {
       fieldErrors: this.fieldErrors,
       cause: this.cause,
       endpointType: endpoint,
+      machineCode: this.machineCode,
     });
   }
 
@@ -234,6 +260,7 @@ export class AppError extends Error {
         statusCode: this.statusCode,
       }),
       ...(this.fieldErrors && { fieldErrors: this.fieldErrors }),
+      ...(this.machineCode && { machineCode: this.machineCode }),
     };
   }
 }

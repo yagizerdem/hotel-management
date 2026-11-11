@@ -1,5 +1,6 @@
 import { Error as MongooseError, mongo } from "mongoose";
 import { AppError, type FieldErrors } from "@error/app-error";
+import { MachineCode } from "@lib/machine-code";
 import type { TServerEndpoint } from "@type/server-endpoint";
 
 /**
@@ -44,18 +45,25 @@ export function handleMongoError(
     return AppError.badRequest("Check the highlighted fields.", {
       ...options,
       fieldErrors: validationFieldErrors(error),
+      machineCode: MachineCode.VALIDATION_FAILED,
     });
   }
   if (error instanceof MongooseError.CastError) {
-    return AppError.badRequest(`The ${error.path} is not valid.`, options);
+    return AppError.badRequest(`The ${error.path} is not valid.`, {
+      ...options,
+      machineCode: MachineCode.INVALID_ID,
+    });
   }
   if (error instanceof MongooseError.DocumentNotFoundError) {
-    return AppError.notFound("This record no longer exists.", options);
+    return AppError.notFound("This record no longer exists.", {
+      ...options,
+      machineCode: MachineCode.RECORD_NOT_FOUND,
+    });
   }
   if (error instanceof MongooseError.VersionError) {
     return AppError.conflict(
       "This record was changed by someone else. Reload it and try again.",
-      options,
+      { ...options, machineCode: MachineCode.VERSION_CONFLICT },
     );
   }
 
@@ -68,24 +76,28 @@ export function handleMongoError(
         ? AppError.conflict(`This ${field} is already in use.`, {
             ...options,
             fieldErrors: { [field]: `This ${field} is already in use.` },
+            machineCode: MachineCode.DUPLICATE_KEY,
           })
-        : AppError.conflict("This record already exists.", options);
+        : AppError.conflict("This record already exists.", {
+            ...options,
+            machineCode: MachineCode.DUPLICATE_KEY,
+          });
     }
     case MONGO_ERROR_CODES.DocumentValidationFailure:
       return AppError.badRequest(
         "Some of the details aren't valid. Check them and try again.",
-        options,
+        { ...options, machineCode: MachineCode.VALIDATION_FAILED },
       );
     case MONGO_ERROR_CODES.WriteConflict:
       return AppError.conflict(
         "Someone else changed this at the same time. Try again.",
-        options,
+        { ...options, machineCode: MachineCode.WRITE_CONFLICT },
       );
     case MONGO_ERROR_CODES.MaxTimeMSExpired:
     case MONGO_ERROR_CODES.ExceededTimeLimit:
       return AppError.serviceUnavailable(
         "This took too long. Try again in a moment.",
-        options,
+        { ...options, machineCode: MachineCode.QUERY_TIMEOUT },
       );
     default:
       return AppError.internalServerError(undefined, options);

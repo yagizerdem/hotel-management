@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import UserModel from "@models/user";
 import dbConnect from "@lib/db";
 import { AppError } from "@error/app-error";
+import { MachineCode } from "@lib/machine-code";
 import { getSignInSchema } from "@validator/auth-validator";
 
 declare global {
@@ -63,7 +64,9 @@ const credentialsProvider = Credentials({
       // passwordHash is select: false on the model, so ask for it here.
       const user = await UserModel.findOne({ email }).select("+passwordHash");
       if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-        throw AppError.unauthorized(INVALID_CREDENTIALS);
+        throw AppError.unauthorized(INVALID_CREDENTIALS, {
+          machineCode: MachineCode.INVALID_CREDENTIALS,
+        });
       }
 
       // Only what the session needs; never the password hash.

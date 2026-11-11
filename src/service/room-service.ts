@@ -1,5 +1,6 @@
 import RoomModel from "@models/room";
 import { AppError } from "@error/app-error";
+import { MachineCode } from "@lib/machine-code";
 import { ApiFeatures } from "@lib/api-features";
 import { Room as RoomDomainModel } from "@domain/home/room";
 
@@ -36,7 +37,9 @@ export async function getRooms(
     // ApiFeatures throws a RangeError for a limit or skip that isn't a valid
     // integer, which is the caller's mistake rather than ours.
     if (error instanceof RangeError) {
-      throw AppError.badRequest(error.message);
+      throw AppError.badRequest(error.message, {
+        machineCode: MachineCode.INVALID_QUERY_PARAM,
+      });
     }
 
     throw error;

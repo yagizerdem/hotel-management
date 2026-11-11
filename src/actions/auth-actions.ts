@@ -10,6 +10,7 @@ import {
 } from "@validator/auth-validator";
 import { signIn, signOut as authSignOut, auth } from "@/src/auth/auth";
 import { AppError } from "@error/app-error";
+import { MachineCode } from "@lib/machine-code";
 import { withActionErrorHandler } from "@error/with-error-handler";
 import { ApiResponse } from "@lib/api-response";
 import bcrypt from "bcrypt";
@@ -55,16 +56,22 @@ export const signInWithCredentials = withActionErrorHandler(
       });
     } catch (error) {
       // authorize() turns its AppErrors into CredentialsSignin with the
-      // message in `code`; turn it back so the form can show it.
+      // message in `code`; turn it back so the form can show it. The machine
+      // code doesn't survive the trip, and a failed sign-in always means the
+      // credentials were wrong.
       if (error instanceof CredentialsSignin) {
-        throw AppError.unauthorized(error.code);
+        throw AppError.unauthorized(error.code, {
+          machineCode: MachineCode.INVALID_CREDENTIALS,
+        });
       }
       throw error;
     }
 
     const userFromDb = await UserModel.findOne({ email: result.data.email });
     if (!userFromDb) {
-      throw AppError.notFound("User not found");
+      throw AppError.notFound("User not found", {
+        machineCode: MachineCode.USER_NOT_FOUND,
+      });
     }
 
     return ApiResponse.actionSuccess<UserDomain>("You're signed in.", {
@@ -87,11 +94,15 @@ export const me = withActionErrorHandler(async () => {
   await dbConnect();
   const session = await auth();
   if (!session || !session.user) {
-    throw AppError.unauthorized("Not authenticated");
+    throw AppError.unauthorized("Not authenticated", {
+      machineCode: MachineCode.NOT_AUTHENTICATED,
+    });
   }
   const userFromDb = await UserModel.findById(session.user.id);
   if (!userFromDb) {
-    throw AppError.notFound("User not found");
+    throw AppError.notFound("User not found", {
+      machineCode: MachineCode.USER_NOT_FOUND,
+    });
   }
 
   const userDomain: UserDomain = {
