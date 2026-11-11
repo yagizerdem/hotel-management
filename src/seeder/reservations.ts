@@ -168,7 +168,16 @@ export async function seedReservations(input: SeedReservationsInput) {
       const checkInDay = cursor;
       const nights = faker.number.int({ min: MIN_NIGHTS, max: MAX_NIGHTS });
       const checkOutDay = addDays(checkInDay, nights);
-      cursor = addDays(checkOutDay, faker.number.int({ min: 0, max: 6 }));
+      // Leave a gap before the next stay, sometimes none and sometimes a few
+      // weeks, so rooms run about half full and searches find free rooms.
+      cursor = addDays(
+        checkOutDay,
+        faker.helpers.weightedArrayElement([
+          { weight: 30, value: faker.number.int({ min: 0, max: 2 }) },
+          { weight: 40, value: faker.number.int({ min: 3, max: 10 }) },
+          { weight: 30, value: faker.number.int({ min: 11, max: 25 }) },
+        ]),
+      );
       const checkIn = atHotelTime(checkInDay, CHECK_IN_HOUR);
       const checkOut = atHotelTime(checkOutDay, CHECK_OUT_HOUR);
 
