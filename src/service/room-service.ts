@@ -35,12 +35,17 @@ export async function getRooms(
       .skip()
       .limit();
 
-    const rooms = await features.query;
+    // The generic types roomType as the populated subdocument, and passing
+    // the model registers its schema before populate looks it up.
+    const rooms = await features.query.populate<{
+      roomType: RoomTypeDocument;
+    }>({ path: "roomType", model: RoomTypeModel });
+
     return rooms.map((room) => ({
       id: room._id.toString(),
       number: room.number,
       floor: room.floor,
-      roomTypeId: room.roomType.toString(),
+      roomTypeId: room.roomType._id.toString(),
       amenities: {
         balcony: room.amenities?.balcony ?? false,
         minibar: room.amenities?.minibar ?? false,
@@ -48,6 +53,18 @@ export async function getRooms(
         tv: room.amenities?.tv ?? true,
         hairDryer: room.amenities?.hairDryer ?? true,
         wifi: room.amenities?.wifi ?? true,
+      },
+      roomType: {
+        id: room.roomType._id.toString(),
+        code: room.roomType.code,
+        name: room.roomType.name,
+        description: room.roomType.description ?? "",
+        capacity: room.roomType.capacity,
+        beds: {
+          single: room.roomType.beds?.single ?? 0,
+          double: room.roomType.beds?.double ?? 0,
+        },
+        images: room.roomType.images ?? [],
       },
     }));
   } catch (error) {
@@ -125,21 +142,30 @@ export async function getAvailableRooms(
     AvailableRoomDomainModel["pricing"]
   >();
   for (const roomType of roomTypes) {
-    const typeRates = rates.filter((rate) => rate.roomType.equals(roomType._id));
+    const typeRates = rates.filter((rate) =>
+      rate.roomType.equals(roomType._id),
+    );
     const nightlyRates = [];
     for (const night of nights) {
       const rate = typeRates.find(
         (r) => r.validFrom <= night && r.validTo >= night,
       );
       if (!rate) break;
-      nightlyRates.push({ night, amount: rate.nightlyPrice, currency: rate.currency });
+      nightlyRates.push({
+        night,
+        amount: rate.nightlyPrice,
+        currency: rate.currency,
+      });
     }
     if (nightlyRates.length !== nights.length) continue;
 
     pricingByRoomType.set(String(roomType._id), {
       boardType,
       nights: nights.length,
-      nightlyRates: nightlyRates.map(({ night, amount }) => ({ night, amount })),
+      nightlyRates: nightlyRates.map(({ night, amount }) => ({
+        night,
+        amount,
+      })),
       total: nightlyRates.reduce((sum, rate) => sum + rate.amount, 0),
       currency: nightlyRates[0].currency,
     });
