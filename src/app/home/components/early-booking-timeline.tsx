@@ -1,5 +1,5 @@
 import { InfoIcon } from "lucide-react";
-import { earlyBookingDiscount, packages } from "@/src/app/home/data/hotel";
+import { earlyBookingDiscount, packages } from "@/src/app/home/data/sd";
 
 const fullBoard = packages.find((p) => p.id === "full-board")!;
 const allInclusive = packages.find((p) => p.id === "all-inclusive")!;

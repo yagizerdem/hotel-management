@@ -1,4 +1,11 @@
-import { hotel, navLinks } from "@/src/app/home/data/hotel";
+import { hotel } from "@/src/app/home/data/sd";
+
+export const navLinks = [
+  { href: "#rooms", label: "Rooms" },
+  { href: "#packages", label: "Packages" },
+  { href: "#amenities", label: "Amenities" },
+  { href: "#early-booking", label: "Early booking" },
+];
 
 export function SiteFooter() {
   return (

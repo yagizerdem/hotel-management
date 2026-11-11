@@ -1,4 +1,8 @@
-import { earlyBookingDiscount, packages, type PackageId } from "@/src/app/home/data/hotel";
+import {
+  earlyBookingDiscount,
+  packages,
+  type PackageId,
+} from "@/src/app/home/data/sd";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

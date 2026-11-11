@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { ClockIcon, SearchIcon } from "lucide-react";
-import { hotel, packages, type PackageId } from "@/src/app/home/data/hotel";
-import { countNights, getEarlyBookingDiscount } from "@/src/app/home/lib/discount";
+import { packages, PackageId, hotel } from "@/src/app/home/data/sd";
+import {
+  countNights,
+  getEarlyBookingDiscount,
+} from "@/src/app/home/lib/discount";
 
 const fieldClassName =
   "h-12 w-full rounded-sm border border-border bg-popover px-3 text-base text-foreground outline-none focus-visible:border-secondary focus-visible:ring-3 focus-visible:ring-secondary/25";
@@ -27,7 +30,10 @@ export function AvailabilitySearch() {
     today.setHours(0, 0, 0, 0);
 
     if (start < today) {
-      setResult({ kind: "error", message: "Check-in date can't be in the past." });
+      setResult({
+        kind: "error",
+        message: "Check-in date can't be in the past.",
+      });
       return;
     }
     const nights = countNights(start, end);

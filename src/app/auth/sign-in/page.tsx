@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CircleCheck } from "lucide-react";
-import { hotel } from "@/src/app/home/data/hotel";
+import { hotel } from "@/src/app/home/data/sd";
 import { homeFontClassName } from "@/src/app/home/lib/fonts";
 import { SignInForm } from "@/src/app/auth/sign-in/components/sign-in-form";
 

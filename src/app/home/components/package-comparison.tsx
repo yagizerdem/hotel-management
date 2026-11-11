@@ -1,5 +1,5 @@
 import { CheckIcon } from "lucide-react";
-import { packages } from "@/src/app/home/data/hotel";
+import { packages } from "@/src/app/home/data/sd";
 
 export function PackageComparison() {
   return (
@@ -48,7 +48,8 @@ export function PackageComparison() {
                 ))}
               </ul>
               <p className="mt-8 text-sm text-foreground/70">
-                {pkg.earlyDiscount}% off when you book online at least a month ahead
+                {pkg.earlyDiscount}% off when you book online at least a month
+                ahead
               </p>
               <a
                 href="#booking"

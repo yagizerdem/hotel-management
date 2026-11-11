@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CircleCheck } from "lucide-react";
-import { earlyBookingDiscount, hotel } from "@/src/app/home/data/hotel";
+import { earlyBookingDiscount, hotel } from "@/src/app/home/data/sd";
 import { homeFontClassName } from "@/src/app/home/lib/fonts";
 import { SignUpForm } from "@/src/app/auth/sign-up/components/sign-up-form";
 

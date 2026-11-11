@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { hotel } from "@/src/app/home/data/hotel";
+import { hotel } from "@/src/app/home/data/sd";
 import { homeFontClassName } from "@/src/app/home/lib/fonts";
 
 export const metadata: Metadata = {

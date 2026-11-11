@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { earlyBookingDiscount } from "@/src/app/home/data/hotel";
+import { earlyBookingDiscount } from "@/src/app/home/data/sd";
 import { AvailabilitySearch } from "@/src/app/home/components/availability-search";
 
 export function Hero() {

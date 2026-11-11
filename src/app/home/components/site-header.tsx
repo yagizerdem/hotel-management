@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { hotel, navLinks } from "@/src/app/home/data/hotel";
+import { hotel } from "@/src/app/home/data/sd";
 import { MobileNav } from "@/src/app/home/components/mobile-nav";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -16,6 +16,13 @@ import { signOut } from "@actions/auth-actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+export const navLinks = [
+  { href: "#rooms", label: "Rooms" },
+  { href: "#packages", label: "Packages" },
+  { href: "#amenities", label: "Amenities" },
+  { href: "#early-booking", label: "Early booking" },
+];
 
 export function SiteHeader() {
   const user = useSelector(selectUser);
@@ -78,6 +85,14 @@ export function SiteHeader() {
                 </a>
               </li>
             ))}
+            <li>
+              <Button
+                onMouseUp={() => router.push("/rooms")}
+                className="cursor-pointer"
+              >
+                Visit rooms
+              </Button>
+            </li>
           </ul>
         </nav>
 

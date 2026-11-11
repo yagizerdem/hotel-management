@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MenuIcon } from "lucide-react";
 import {
@@ -9,11 +9,20 @@ import {
   SheetTrigger,
 } from "@components/ui/sheet";
 import { homeFontClassName } from "@/src/app/home/lib/fonts";
-import { hotel, navLinks } from "@/src/app/home/data/hotel";
+import { hotel } from "@/src/app/home/data/sd";
+import { Button } from "@components/ui/button";
+
+export const navLinks = [
+  { href: "#rooms", label: "Rooms" },
+  { href: "#packages", label: "Packages" },
+  { href: "#amenities", label: "Amenities" },
+  { href: "#early-booking", label: "Early booking" },
+];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  const router = useRouter();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -39,6 +48,11 @@ export function MobileNav() {
                 </a>
               </li>
             ))}
+            <li>
+              <Button onMouseUp={() => router.push("/rooms")}>
+                visit rooms
+              </Button>
+            </li>
           </ul>
         </nav>
         <div className="mt-auto flex flex-col gap-3">
