@@ -1,15 +1,13 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { enableMapSet } from "immer";
 
-// Immer needs this to draft and update a Set inside the state.
-enableMapSet();
-
+// The active keys as an object rather than a Set: Redux state has to be
+// plain, serializable data, and a Set makes it warn on every action.
 type LoaderState = {
-  keys: Set<string>;
+  keys: Record<string, true>;
 };
 
 const initialState: LoaderState = {
-  keys: new Set(),
+  keys: {},
 };
 
 const loaderSlice = createSlice({
@@ -17,18 +15,18 @@ const loaderSlice = createSlice({
   initialState,
   reducers: {
     startLoading(state, action: PayloadAction<string>) {
-      state.keys.add(action.payload);
+      state.keys[action.payload] = true;
     },
     stopLoading(state, action: PayloadAction<string>) {
-      state.keys.delete(action.payload);
+      delete state.keys[action.payload];
     },
     resetLoading(state) {
-      state.keys.clear();
+      state.keys = {};
     },
   },
   selectors: {
-    selectIsLoading: (state) => state.keys.size > 0,
-    selectIsLoadingKey: (state, key: string) => state.keys.has(key),
+    selectIsLoading: (state) => Object.keys(state.keys).length > 0,
+    selectIsLoadingKey: (state, key: string) => key in state.keys,
   },
 });
 
