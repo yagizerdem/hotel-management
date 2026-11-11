@@ -29,6 +29,17 @@ export interface Room {
   roomType: RoomType;
 }
 
+/** A room that is free for a searched stay, with the price of that stay. */
+export interface AvailableRoom extends Room {
+  pricing: {
+    boardType: string;
+    nights: number;
+    nightlyRates: { night: Date; amount: number }[];
+    total: number;
+    currency: string;
+  };
+}
+
 export interface RoomRate {
   roomType: RoomType;
   boardType: string;
