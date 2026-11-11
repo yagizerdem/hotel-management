@@ -224,3 +224,73 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Scrollbars: a slim pine-ink bar on the page surface, with a hairline
+ * edge instead of a shadow and a 2px radius instead of a pill. The thumb
+ * widens and darkens under the pointer and turns Aegean blue while dragged.
+ * Colors come from the theme tokens, so dark mode follows on its own.
+ */
+:root {
+  --scrollbar-track: var(--background);
+  --scrollbar-edge: color-mix(in oklab, var(--foreground) 8%, transparent);
+  --scrollbar-thumb: color-mix(in oklab, var(--foreground) 26%, transparent);
+  --scrollbar-thumb-hover: color-mix(
+    in oklab,
+    var(--foreground) 44%,
+    transparent
+  );
+  --scrollbar-thumb-active: var(--secondary);
+}
+
+@layer base {
+  /* Chromium and Safari. Chromium ignores these pseudo-elements once
+     scrollbar-color is set, so the standard properties below are only
+     used where these aren't supported. */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-track:vertical {
+    box-shadow: inset 1px 0 0 var(--scrollbar-edge);
+  }
+
+  ::-webkit-scrollbar-track:horizontal {
+    box-shadow: inset 0 1px 0 var(--scrollbar-edge);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    background-clip: padding-box;
+    border: 3px solid transparent;
+    border-radius: 0.3125rem;
+    min-height: 40px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+    border-width: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+    border-width: 2px;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--scrollbar-track);
+  }
+
+  /* Firefox */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+  }
+}
