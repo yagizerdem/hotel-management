@@ -4,7 +4,11 @@ import {
   isMongoError,
   isMongooseError,
 } from "@hooks/handle-mongo-errors";
-import { ApiResponse, type ActionFailure } from "@lib/api-response";
+import {
+  ApiResponse,
+  type ActionFailure,
+  type ActionSuccess,
+} from "@lib/api-response";
 import type { TServerEndpoint } from "@type/server-endpoint";
 import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
@@ -44,10 +48,14 @@ export function withHttpErrorHandler<Context>(
  * failure instead of reaching the client as an exception, which Next.js
  * strips of its message in production. AppErrors keep their message;
  * anything else is logged and answered with a generic message.
+ *
+ * The action must return ApiResponse.actionSuccess(...), so every wrapped
+ * action resolves to an ActionResult the caller can narrow on `success`.
  */
-export function withActionErrorHandler<Args extends unknown[], Result>(
-  action: ActionFn<Args, Result>,
-): ActionFn<Args, Result | ActionFailure> {
+export function withActionErrorHandler<
+  Args extends unknown[],
+  Result extends ActionSuccess<unknown>,
+>(action: ActionFn<Args, Result>): ActionFn<Args, Result | ActionFailure> {
   return async (...args) => {
     try {
       return await action(...args);

@@ -7,8 +7,12 @@ import { MembershipSignup } from "@/src/app/home/components/membership-signup";
 import { getHotelRooms, getHotelRoomRates } from "@actions/room-actions";
 
 export default async function HomePage() {
-  const rooms = await getHotelRooms();
-  const roomRates = await getHotelRoomRates();
+  const roomsResponse = await getHotelRooms();
+  const roomRatesResponse = await getHotelRoomRates();
+
+  // A failed action has no data, so the section falls back to empty lists.
+  const rooms = roomsResponse.data ?? [];
+  const roomRates = roomRatesResponse.data ?? [];
 
   return (
     <>
