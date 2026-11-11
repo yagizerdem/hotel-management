@@ -16,6 +16,12 @@ import {
   seedStaffUsers,
 } from "@seeder/staff";
 import { TODAY, addDays, faker, fakerEN } from "@seeder/utils";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({
+  path: path.resolve(import.meta.dirname, "../../.env"),
+});
 
 // Same seed, same data on every run.
 const FAKER_SEED = 2026;
@@ -133,9 +139,9 @@ async function main() {
   console.log(`All accounts use the password "${SEED_PASSWORD}".`);
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  })
-  .finally(() => mongoose.disconnect());
+// main()
+//   .catch((error) => {
+//     console.error(error);
+//     process.exitCode = 1;
+//   })
+//   .finally(() => mongoose.disconnect());
