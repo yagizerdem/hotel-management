@@ -5,10 +5,11 @@ import { PackageComparison } from "@/src/app/home/components/package-comparison"
 import { RoomStandards } from "@/src/app/home/components/room-standards";
 import { MembershipSignup } from "@/src/app/home/components/membership-signup";
 import { getHotelRooms } from "@actions/room-actions";
-import { useEffect } from "react";
 
 export default async function HomePage() {
   const rooms = await getHotelRooms();
+
+  console.log(rooms);
 
   return (
     <>
