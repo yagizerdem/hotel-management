@@ -12,6 +12,22 @@ import { useQuery } from "@tanstack/react-query";
 import API from "@lib/axios-wrapper";
 import { ApiResponse } from "@lib/api-response";
 import { AvailableRoom } from "@domain/home/room";
+import { isAxiosError } from "axios";
+import { AvailableRooms } from "@/src/app/home/components/available-rooms";
+
+/**
+ * The reason a search failed. A 400 from the endpoint carries the first
+ * invalid field's message, which says what to change.
+ */
+function searchErrorMessage(error: unknown) {
+  if (isAxiosError<ApiResponse<never>>(error) && error.response?.data) {
+    const { fieldErrors, error: reason } = error.response.data;
+    const firstFieldError = fieldErrors && Object.values(fieldErrors)[0];
+    if (firstFieldError) return firstFieldError;
+    if (reason) return reason;
+  }
+  return "Couldn't load the free rooms. Try again in a moment.";
+}
 
 const fieldClassName =
   "h-12 w-full rounded-sm border border-border bg-popover px-3 text-base text-foreground outline-none focus-visible:border-secondary focus-visible:ring-3 focus-visible:ring-secondary/25";
@@ -27,7 +43,10 @@ export function AvailabilitySearch() {
   const [packageId, setPackageId] = useState<PackageId>("all-inclusive");
   const [result, setResult] = useState<Result | null>(null);
 
-  const { isLoading, isError, isSuccess, refetch, data } = useQuery({
+  const boardType =
+    packageId == "all-inclusive" ? "all_inclusive" : "full_board";
+
+  const { isFetching, isError, error, isSuccess, refetch, data } = useQuery({
     queryKey: ["availability", checkIn, checkOut, guests, packageId],
     queryFn: async () => {
       // Replace with actual API call
@@ -36,13 +55,7 @@ export function AvailabilitySearch() {
         // field filter, so an extra packageId matched no rooms at all.
         (
           await API.get("/room/client/available", {
-            params: {
-              checkIn,
-              checkOut,
-              guests,
-              boardType:
-                packageId == "all-inclusive" ? "all_inclusive" : "full_board",
-            },
+            params: { checkIn, checkOut, guests, boardType },
           })
         ).data as ApiResponse<AvailableRoom[]>;
 
@@ -91,8 +104,6 @@ export function AvailabilitySearch() {
   }
 
   const packageName = packages.find((p) => p.id === packageId)?.name;
-
-  console.log(data);
 
   return (
     <form
@@ -185,6 +196,25 @@ export function AvailabilitySearch() {
               </>
             ))}
         </p>
+      </div>
+
+      <div aria-live="polite">
+        {isFetching && (
+          <p className="mt-4 border-t border-border pt-4 text-sm text-foreground/80">
+            Looking for free rooms…
+          </p>
+        )}
+        {!isFetching && isError && (
+          <p className="mt-4 border-t border-border pt-4 text-sm text-primary">
+            {searchErrorMessage(error)}
+          </p>
+        )}
+        {!isFetching && isSuccess && (
+          <AvailableRooms
+            rooms={data ?? []}
+            search={{ checkIn, checkOut, guests, boardType }}
+          />
+        )}
       </div>
     </form>
   );
