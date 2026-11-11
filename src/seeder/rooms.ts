@@ -1,5 +1,5 @@
-import RoomModel from "../models/room";
-import RoomTypeModel from "../models/room-type";
+import RoomModel from "@models/room";
+import RoomTypeModel from "@models/room-type";
 
 const ROOM_TYPES = [
   {

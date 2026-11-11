@@ -1,8 +1,8 @@
 import type { Types } from "mongoose";
-import EarlyBookingDiscountModel, { type EarlyBookingDiscountDocument } from "../models/early-booking-discount";
-import ExchangeRateModel from "../models/exchange-rate";
-import RoomRateModel, { BOARD_TYPES, type BoardType } from "../models/room-rate";
-import type { RoomTypeDocument } from "../models/room-type";
+import EarlyBookingDiscountModel, { type EarlyBookingDiscountDocument } from "@models/early-booking-discount";
+import ExchangeRateModel from "@models/exchange-rate";
+import RoomRateModel, { BOARD_TYPES, type BoardType } from "@models/room-rate";
+import type { RoomTypeDocument } from "@models/room-type";
 import { addDays, eachDay, faker, money } from "@seeder/utils";
 
 // Full board nightly price in TRY outside the high season.

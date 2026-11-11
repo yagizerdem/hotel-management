@@ -1,9 +1,9 @@
 import type { Types } from "mongoose";
-import AuthorityReportModel from "../models/authority-report";
-import type { GuestDocument } from "../models/guest";
-import type { Reservation } from "../models/reservation";
-import type { RoomDocument } from "../models/room";
-import type { RoomNightDocument } from "../models/room-night";
+import AuthorityReportModel from "@models/authority-report";
+import type { GuestDocument } from "@models/guest";
+import type { Reservation } from "@models/reservation";
+import type { RoomDocument } from "@models/room";
+import type { RoomNightDocument } from "@models/room-night";
 import { TODAY, addDays, addHours, chance, eachDay, faker } from "@seeder/utils";
 
 type ReportedReservation = Pick<Reservation, "guests" | "room" | "checkIn" | "checkOut"> & { _id: Types.ObjectId };

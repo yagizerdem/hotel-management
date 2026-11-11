@@ -1,5 +1,5 @@
-import GuestModel, { type GuestDocument } from "../models/guest";
-import UserModel from "../models/user";
+import GuestModel, { type GuestDocument } from "@models/guest";
+import UserModel from "@models/user";
 import { chance, faker, fakerEN, hashPassword, nationalId, pick, slug } from "@seeder/utils";
 
 const FOREIGN_NATIONALITIES = ["DE", "GB", "RU", "NL", "UA", "PL"];

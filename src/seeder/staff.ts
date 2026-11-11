@@ -1,7 +1,7 @@
-import EmployeeModel, { EMPLOYEE_POSITIONS, type EmployeeDocument } from "../models/employee";
-import PayrollModel from "../models/payroll";
-import ShiftAssignmentModel, { SHIFT_HOURS, type Shift } from "../models/shift-assignment";
-import UserModel, { type UserRole } from "../models/user";
+import EmployeeModel, { EMPLOYEE_POSITIONS, type EmployeeDocument } from "@models/employee";
+import PayrollModel from "@models/payroll";
+import ShiftAssignmentModel, { SHIFT_HOURS, type Shift } from "@models/shift-assignment";
+import UserModel, { type UserRole } from "@models/user";
 import { DAY_MS, addDays, atHotelTime, chance, eachDay, faker, hashPassword, money, nationalId, slug } from "@seeder/utils";
 
 type Position = (typeof EMPLOYEE_POSITIONS)[number];

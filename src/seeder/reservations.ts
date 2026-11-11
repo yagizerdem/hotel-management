@@ -1,22 +1,41 @@
 import { Types } from "mongoose";
-import ChargeModel, { CHARGE_CATEGORIES } from "../models/charge";
-import type { EarlyBookingDiscountDocument } from "../models/early-booking-discount";
-import type { EmployeeDocument } from "../models/employee";
-import type { GuestDocument } from "../models/guest";
-import PaymentModel, { PAYMENT_METHODS } from "../models/payment";
-import ReservationModel, { CHECK_IN_HOUR, CHECK_OUT_HOUR, RESERVATION_CHANNELS } from "../models/reservation";
-import RoomModel, { type RoomDocument } from "../models/room";
-import RoomBlockModel, { ROOM_BLOCK_REASONS } from "../models/room-block";
-import RoomNightModel from "../models/room-night";
-import type { BoardType } from "../models/room-rate";
-import type { RoomTypeDocument } from "../models/room-type";
-import type { UserDocument } from "../models/user";
+import ChargeModel, { CHARGE_CATEGORIES } from "@models/charge";
+import type { EarlyBookingDiscountDocument } from "@models/early-booking-discount";
+import type { EmployeeDocument } from "@models/employee";
+import type { GuestDocument } from "@models/guest";
+import PaymentModel, { PAYMENT_METHODS } from "@models/payment";
+import ReservationModel, {
+  CHECK_IN_HOUR,
+  CHECK_OUT_HOUR,
+  RESERVATION_CHANNELS,
+} from "@models/reservation";
+import RoomModel, { type RoomDocument } from "@models/room";
+import RoomBlockModel, { ROOM_BLOCK_REASONS } from "@models/room-block";
+import RoomNightModel from "@models/room-night";
+import type { BoardType } from "@models/room-rate";
+import type { RoomTypeDocument } from "@models/room-type";
+import type { UserDocument } from "@models/user";
 import { bestDiscount } from "@seeder/pricing";
-import { TODAY, addDays, addHours, atHotelTime, chance, daysBetween, eachDay, faker, money, pick } from "@seeder/utils";
+import {
+  TODAY,
+  addDays,
+  addHours,
+  atHotelTime,
+  chance,
+  daysBetween,
+  eachDay,
+  faker,
+  money,
+  pick,
+} from "@seeder/utils";
 
 type ChargeCategory = (typeof CHARGE_CATEGORIES)[number];
 
-const CHARGE_ITEMS: { category: ChargeCategory; description: string; unitPrice: number }[] = [
+const CHARGE_ITEMS: {
+  category: ChargeCategory;
+  description: string;
+  unitPrice: number;
+}[] = [
   { category: "minibar", description: "Minibar - su", unitPrice: 60 },
   { category: "minibar", description: "Minibar - meşrubat", unitPrice: 110 },
   { category: "minibar", description: "Minibar - çikolata", unitPrice: 140 },
@@ -25,15 +44,44 @@ const CHARGE_ITEMS: { category: ChargeCategory; description: string; unitPrice: 
   { category: "bar", description: "Türk kahvesi", unitPrice: 120 },
   { category: "snack_bar", description: "Hamburger", unitPrice: 420 },
   { category: "snack_bar", description: "Tost", unitPrice: 220 },
-  { category: "restaurant", description: "A la carte akşam yemeği", unitPrice: 1800 },
-  { category: "room_service", description: "Oda servisi kahvaltı", unitPrice: 650 },
+  {
+    category: "restaurant",
+    description: "A la carte akşam yemeği",
+    unitPrice: 1800,
+  },
+  {
+    category: "room_service",
+    description: "Oda servisi kahvaltı",
+    unitPrice: 650,
+  },
   { category: "laundry", description: "Çamaşırhane", unitPrice: 300 },
   { category: "spa", description: "Masaj (50 dk)", unitPrice: 2400 },
   { category: "spa", description: "Hamam", unitPrice: 1200 },
 ];
 
 // Extras an all-inclusive guest still pays for.
-const ALL_INCLUSIVE_EXTRAS: ChargeCategory[] = ["restaurant", "room_service", "laundry", "spa"];
+const ALL_INCLUSIVE_EXTRAS: ChargeCategory[] = [
+  "restaurant",
+  "room_service",
+  "laundry",
+  "spa",
+];
+
+// Every stay is at least one night and at most fifteen.
+const MIN_NIGHTS = 1;
+const MAX_NIGHTS = 15;
+
+function earliest(...dates: Date[]): Date {
+  return new Date(Math.min(...dates.map((date) => date.getTime())));
+}
+
+/**
+ * A random instant between two dates. faker throws when `to` is not after
+ * `from`, so an empty or reversed range returns `from` instead.
+ */
+function dateBetween(from: Date, to: Date): Date {
+  return to > from ? faker.date.between({ from, to }) : from;
+}
 
 type SeedReservationsInput = {
   rooms: RoomDocument[];
@@ -43,7 +91,11 @@ type SeedReservationsInput = {
   receptionists: EmployeeDocument[];
   managers: EmployeeDocument[];
   discounts: EarlyBookingDiscountDocument[];
-  priceOf: (roomType: Types.ObjectId, boardType: BoardType, night: Date) => number;
+  priceOf: (
+    roomType: Types.ObjectId,
+    boardType: BoardType,
+    night: Date,
+  ) => number;
   from: Date;
   to: Date;
 };
@@ -53,8 +105,21 @@ type SeedReservationsInput = {
  * and the odd maintenance block, so no two bookings ever overlap.
  */
 export async function seedReservations(input: SeedReservationsInput) {
-  const { rooms, roomTypes, guests, customers, receptionists, managers, discounts, priceOf, from, to } = input;
-  const roomTypeById = new Map(roomTypes.map((roomType) => [String(roomType._id), roomType]));
+  const {
+    rooms,
+    roomTypes,
+    guests,
+    customers,
+    receptionists,
+    managers,
+    discounts,
+    priceOf,
+    from,
+    to,
+  } = input;
+  const roomTypeById = new Map(
+    roomTypes.map((roomType) => [String(roomType._id), roomType]),
+  );
 
   const reservations = [];
   const roomNights = [];
@@ -62,6 +127,7 @@ export async function seedReservations(input: SeedReservationsInput) {
   const charges = [];
   const payments = [];
   const dirtyRooms = new Set<Types.ObjectId>();
+  const now = new Date();
   let sequence = 0;
 
   for (const room of rooms) {
@@ -79,20 +145,32 @@ export async function seedReservations(input: SeedReservationsInput) {
           startDate: cursor,
           endDate: addDays(endDay, -1),
           reason: pick(ROOM_BLOCK_REASONS),
-          note: pick(["Klima bakımı", "Boya badana", "Tesisat arızası", "Mobilya değişimi"]),
+          note: pick([
+            "Klima bakımı",
+            "Boya badana",
+            "Tesisat arızası",
+            "Mobilya değişimi",
+          ]),
           createdBy: pick(managers)._id,
         });
         for (const night of eachDay(cursor, endDay)) {
-          roomNights.push({ room: room._id, night, kind: "block" as const, block: blockId });
+          roomNights.push({
+            room: room._id,
+            night,
+            kind: "block" as const,
+            block: blockId,
+          });
         }
         cursor = endDay;
         continue;
       }
 
       const checkInDay = cursor;
-      const nights = faker.number.int({ min: 2, max: 10 });
+      const nights = faker.number.int({ min: MIN_NIGHTS, max: MAX_NIGHTS });
       const checkOutDay = addDays(checkInDay, nights);
       cursor = addDays(checkOutDay, faker.number.int({ min: 0, max: 6 }));
+      const checkIn = atHotelTime(checkInDay, CHECK_IN_HOUR);
+      const checkOut = atHotelTime(checkOutDay, CHECK_OUT_HOUR);
 
       const channel = faker.helpers.weightedArrayElement([
         { weight: 45, value: RESERVATION_CHANNELS[0] },
@@ -106,13 +184,26 @@ export async function seedReservations(input: SeedReservationsInput) {
         channel === "reception" && chance(0.5) && minLead === 0
           ? 0
           : Math.max(minLead, faker.number.int({ min: 0, max: 150 }));
-      const bookedAt = addHours(addDays(checkInDay, -leadDays), faker.number.int({ min: 6, max: 20 }));
+      // A same-day booking can't land after check-in or after now.
+      const bookedAt = earliest(
+        addHours(
+          addDays(checkInDay, -leadDays),
+          faker.number.int({ min: 6, max: 20 }),
+        ),
+        checkIn,
+        now,
+      );
 
-      const boardType: BoardType = chance(0.55) ? "all_inclusive" : "full_board";
+      const boardType: BoardType = chance(0.55)
+        ? "all_inclusive"
+        : "full_board";
       const customer = channel === "web" ? pick(customers) : undefined;
       const primaryGuest = customer ? customer.guest! : pick(guests)._id;
       const companions = faker.helpers
-        .arrayElements(guests, faker.number.int({ min: 0, max: roomType.capacity - 1 }))
+        .arrayElements(
+          guests,
+          faker.number.int({ min: 0, max: roomType.capacity - 1 }),
+        )
         .map((guest) => guest._id)
         .filter((id) => String(id) !== String(primaryGuest));
 
@@ -121,21 +212,32 @@ export async function seedReservations(input: SeedReservationsInput) {
         amount: priceOf(roomType._id, boardType, night),
       }));
       const subtotal = nightlyRates.reduce((sum, rate) => sum + rate.amount, 0);
-      const discount = channel === "web" ? bestDiscount(discounts, boardType, leadDays) : undefined;
-      const discountAmount = discount ? money((subtotal * discount.percent) / 100) : 0;
+      const discount =
+        channel === "web"
+          ? bestDiscount(discounts, boardType, leadDays)
+          : undefined;
+      const discountAmount = discount
+        ? money((subtotal * discount.percent) / 100)
+        : 0;
       const total = money(subtotal - discountAmount);
 
-      const checkIn = atHotelTime(checkInDay, CHECK_IN_HOUR);
-      const checkOut = atHotelTime(checkOutDay, CHECK_OUT_HOUR);
-
-      let status: "pending" | "confirmed" | "checked_in" | "checked_out" | "cancelled" | "no_show";
+      let status:
+        | "pending"
+        | "confirmed"
+        | "checked_in"
+        | "checked_out"
+        | "cancelled"
+        | "no_show";
       if (checkOutDay <= TODAY) {
         status = faker.helpers.weightedArrayElement([
           { weight: 93, value: "checked_out" as const },
           { weight: 4, value: "cancelled" as const },
           { weight: 3, value: "no_show" as const },
         ]);
-      } else if (checkInDay < TODAY || (checkInDay.getTime() === TODAY.getTime() && chance(0.5))) {
+      } else if (
+        checkInDay < TODAY ||
+        (checkInDay.getTime() === TODAY.getTime() && chance(0.5))
+      ) {
         status = "checked_in";
       } else if (chance(0.05)) {
         status = "cancelled";
@@ -145,12 +247,19 @@ export async function seedReservations(input: SeedReservationsInput) {
 
       const reservationId = new Types.ObjectId();
       const checkedInAt = ["checked_in", "checked_out"].includes(status)
-        ? addHours(checkIn, faker.number.float({ min: 0, max: 8 }))
+        ? earliest(
+            addHours(checkIn, faker.number.float({ min: 0, max: 8 })),
+            now,
+          )
         : undefined;
       const checkedOutAt =
-        status === "checked_out" ? addHours(checkOut, -faker.number.float({ min: 0, max: 3 })) : undefined;
+        status === "checked_out"
+          ? addHours(checkOut, -faker.number.float({ min: 0, max: 3 }))
+          : undefined;
       const cancelledAt =
-        status === "cancelled" ? faker.date.between({ from: bookedAt, to: checkIn < new Date() ? checkIn : new Date() }) : undefined;
+        status === "cancelled"
+          ? dateBetween(bookedAt, earliest(checkIn, now))
+          : undefined;
       const handledBy =
         channel !== "web" || checkedInAt ? pick(receptionists)._id : undefined;
 
@@ -174,7 +283,11 @@ export async function seedReservations(input: SeedReservationsInput) {
           currency: "TRY",
           nightlyRates,
           subtotal,
-          discount: { rule: discount?._id, percent: discount?.percent ?? 0, amount: discountAmount },
+          discount: {
+            rule: discount?._id,
+            percent: discount?.percent ?? 0,
+            amount: discountAmount,
+          },
           total,
         },
         checkedInAt,
@@ -187,11 +300,19 @@ export async function seedReservations(input: SeedReservationsInput) {
       // Cancelled and no-show stays give their nights back.
       if (status !== "cancelled" && status !== "no_show") {
         for (const { night } of nightlyRates) {
-          roomNights.push({ room: room._id, night, kind: "reservation" as const, reservation: reservationId });
+          roomNights.push({
+            room: room._id,
+            night,
+            kind: "reservation" as const,
+            reservation: reservationId,
+          });
         }
       }
 
-      if (checkOutDay.getTime() === TODAY.getTime() && status === "checked_out") {
+      if (
+        checkOutDay.getTime() === TODAY.getTime() &&
+        status === "checked_out"
+      ) {
         dirtyRooms.add(room._id);
       }
 
@@ -199,11 +320,15 @@ export async function seedReservations(input: SeedReservationsInput) {
       if (checkedInAt) {
         const items = CHARGE_ITEMS.filter(
           (item) =>
-            (boardType === "full_board" || ALL_INCLUSIVE_EXTRAS.includes(item.category)) &&
+            (boardType === "full_board" ||
+              ALL_INCLUSIVE_EXTRAS.includes(item.category)) &&
             (item.category !== "minibar" || room.amenities?.minibar),
         );
-        const stayEnd = checkedOutAt ?? new Date();
-        const count = faker.number.int({ min: 0, max: boardType === "full_board" ? 6 : 2 });
+        const stayEnd = checkedOutAt ?? now;
+        const count = faker.number.int({
+          min: 0,
+          max: boardType === "full_board" ? 6 : 2,
+        });
 
         for (let i = 0; i < count; i += 1) {
           const item = pick(items);
@@ -215,14 +340,15 @@ export async function seedReservations(input: SeedReservationsInput) {
             ...item,
             quantity,
             amount,
-            postedAt: faker.date.between({ from: checkedInAt, to: stayEnd }),
+            postedAt: dateBetween(checkedInAt, stayEnd),
             postedBy: pick(receptionists)._id,
           });
         }
       }
 
       // Web bookings pay a 30% deposit up front.
-      const deposit = channel === "web" && status !== "pending" ? money(total * 0.3) : 0;
+      const deposit =
+        channel === "web" && status !== "pending" ? money(total * 0.3) : 0;
       if (deposit > 0) {
         payments.push({
           reservation: reservationId,
@@ -259,7 +385,10 @@ export async function seedReservations(input: SeedReservationsInput) {
   const insertedRoomNights = await RoomNightModel.insertMany(roomNights);
   await ChargeModel.insertMany(charges);
   await PaymentModel.insertMany(payments);
-  await RoomModel.updateMany({ _id: { $in: [...dirtyRooms] } }, { $set: { housekeepingStatus: "dirty" } });
+  await RoomModel.updateMany(
+    { _id: { $in: [...dirtyRooms] } },
+    { $set: { housekeepingStatus: "dirty" } },
+  );
 
   return {
     reservations: insertedReservations,
