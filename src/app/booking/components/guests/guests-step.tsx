@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ShieldCheckIcon } from "lucide-react";
-import { AccountNotice } from "@/src/app/booking/components/account-notice";
-import { GuestFields } from "@/src/app/booking/components/guest-fields";
+import { AccountNotice } from "@/src/app/booking/components/guests/account-notice";
+import { GuestFields } from "@/src/app/booking/components/guests/guest-fields";
 import { TextField } from "@/src/app/booking/components/text-field";
 import type { ContactDetails, GuestDetails } from "@/src/app/booking/lib/types";
 import {

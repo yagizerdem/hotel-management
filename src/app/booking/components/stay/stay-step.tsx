@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ClockIcon } from "lucide-react";
 import { hotel } from "@/src/app/home/data/sd";
-import { PackagePicker } from "@/src/app/booking/components/package-picker";
+import { PackagePicker } from "@/src/app/booking/components/stay/package-picker";
 import { stayError, toInputDate, today } from "@/src/app/booking/lib/pricing";
 import type { StayDetails } from "@/src/app/booking/lib/types";
 import {

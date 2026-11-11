@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PaymentFields } from "@/src/app/booking/components/payment-fields";
+import { PaymentFields } from "@/src/app/booking/components/review/payment-fields";
 import type {
   ContactDetails,
   GuestDetails,

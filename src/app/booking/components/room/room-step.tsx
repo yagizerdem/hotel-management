@@ -6,7 +6,7 @@ import { packages } from "@/src/app/home/data/sd";
 import {
   RoomOption,
   type RoomTypeGroup,
-} from "@/src/app/booking/components/room-option";
+} from "@/src/app/booking/components/room/room-option";
 import { formatStayDate } from "@/src/app/booking/lib/pricing";
 import type { StayDetails } from "@/src/app/booking/lib/types";
 import {

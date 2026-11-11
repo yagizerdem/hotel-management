@@ -7,10 +7,10 @@ import type { PackageId } from "@/src/app/home/data/sd";
 import { BookingConfirmed } from "@/src/app/booking/components/booking-confirmed";
 import { BookingSteps } from "@/src/app/booking/components/booking-steps";
 import { BookingSummary } from "@/src/app/booking/components/booking-summary";
-import { GuestsStep } from "@/src/app/booking/components/guests-step";
-import { ReviewStep } from "@/src/app/booking/components/review-step";
-import { RoomStep } from "@/src/app/booking/components/room-step";
-import { StayStep } from "@/src/app/booking/components/stay-step";
+import { GuestsStep } from "@/src/app/booking/components/guests/guests-step";
+import { ReviewStep } from "@/src/app/booking/components/review/review-step";
+import { RoomStep } from "@/src/app/booking/components/room/room-step";
+import { StayStep } from "@/src/app/booking/components/stay/stay-step";
 import { sampleAvailability } from "@/src/app/booking/data/sample-availability";
 import { stayError } from "@/src/app/booking/lib/pricing";
 import type {
