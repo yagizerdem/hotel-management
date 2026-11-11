@@ -4,7 +4,7 @@ import {
   isMongoError,
   isMongooseError,
 } from "@hooks/handle-mongo-errors";
-import { ApiResponse } from "@lib/api-response";
+import { ApiResponse, type ActionFailure } from "@lib/api-response";
 import type { TServerEndpoint } from "@type/server-endpoint";
 import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,7 +18,7 @@ type ActionFn<Args extends unknown[], Result> = (
   ...args: Args
 ) => Promise<Result>;
 
-export type ActionFailure = ReturnType<typeof ApiResponse.actionFailure>;
+export type { ActionFailure };
 
 /**
  * Wraps a route handler so every thrown error answers with an ApiResponse
@@ -32,6 +32,7 @@ export function withHttpErrorHandler<Context>(
     try {
       return await handler(req, context);
     } catch (error) {
+      console.error(error);
       const body = ApiResponse.fromError(toAppError(error, "route-handler"));
       return NextResponse.json(body, { status: body.httpStatusCode });
     }
@@ -51,6 +52,7 @@ export function withActionErrorHandler<Args extends unknown[], Result>(
     try {
       return await action(...args);
     } catch (error) {
+      console.error(error);
       return ApiResponse.actionFromError(toAppError(error, "server-action"));
     }
   };

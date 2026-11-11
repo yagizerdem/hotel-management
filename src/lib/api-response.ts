@@ -2,6 +2,30 @@ import { TServerEndpoint } from "@type/server-endpoint";
 import HttpStatusCode from "@lib/http-status-code";
 import type { AppError, FieldErrors } from "@error/app-error";
 
+/** What a server action returns when it works. */
+export type ActionSuccess<T> = {
+  success: true;
+  data?: T;
+  message?: string;
+  endpoint: "server-action";
+};
+
+/** What a server action returns when it fails. */
+export type ActionFailure = {
+  success: false;
+  data?: never;
+  message?: string;
+  error?: string;
+  fieldErrors?: FieldErrors;
+  endpoint: "server-action";
+};
+
+/**
+ * Either result of a server action. Checking `success` narrows it, so after
+ * `if (response.success)` the data has the action's type.
+ */
+export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
+
 /**
  * Response body shared by route handlers and server actions. Build it through
  * the static constructors, which keep the status code rules in one place:
@@ -25,7 +49,7 @@ export class ApiResponse<T> {
   // React can't pass class instances from a server action to the client, so
   // the action constructors return a plain copy.
 
-  static actionSuccess<T>(message?: string, data?: T) {
+  static actionSuccess<T>(message?: string, data?: T): ActionSuccess<T> {
     return {
       ...new ApiResponse<T>(
         true,
@@ -36,16 +60,18 @@ export class ApiResponse<T> {
         undefined,
         "server-action",
       ),
+      success: true,
+      endpoint: "server-action",
     };
   }
 
-  static actionFailure<T = never>(
+  static actionFailure(
     message?: string,
     error?: string,
     fieldErrors?: FieldErrors,
-  ) {
+  ): ActionFailure {
     return {
-      ...new ApiResponse<T>(
+      ...new ApiResponse<never>(
         false,
         undefined,
         message,
@@ -54,12 +80,14 @@ export class ApiResponse<T> {
         undefined,
         "server-action",
       ),
+      success: false,
+      endpoint: "server-action",
     };
   }
 
   /** A server action failure built from an AppError, keeping its field errors. */
-  static actionFromError<T = never>(error: AppError, message?: string) {
-    return ApiResponse.actionFailure<T>(
+  static actionFromError(error: AppError, message?: string): ActionFailure {
+    return ApiResponse.actionFailure(
       message,
       error.message,
       error.fieldErrors,
@@ -248,4 +276,14 @@ export class ApiResponse<T> {
       "route-handler",
     );
   }
+}
+
+export interface IApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+  fieldErrors?: FieldErrors;
+  status: HttpStatusCode;
+  source: string;
 }
