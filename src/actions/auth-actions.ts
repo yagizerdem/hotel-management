@@ -8,12 +8,13 @@ import {
   getSignUpSchema,
   type SignInInput,
 } from "@validator/auth-validator";
-import { signIn } from "@/src/auth/auth";
+import { signIn, signOut as authSignOut, auth } from "@/src/auth/auth";
 import { AppError } from "@error/app-error";
 import { withActionErrorHandler } from "@error/with-error-handler";
 import { ApiResponse } from "@lib/api-response";
 import bcrypt from "bcrypt";
 import { ensureUserNotExistByEmail } from "@service/user-service";
+import { User as UserDomain } from "@domain/user";
 
 export const signUp = withActionErrorHandler(async (user: Partial<User>) => {
   await dbConnect();
@@ -40,6 +41,7 @@ export const signUp = withActionErrorHandler(async (user: Partial<User>) => {
  */
 export const signInWithCredentials = withActionErrorHandler(
   async (values: SignInInput) => {
+    await dbConnect();
     const result = getSignInSchema().safeParse(values);
     if (!result.success) {
       throw AppError.fromZod(result.error);
@@ -60,6 +62,46 @@ export const signInWithCredentials = withActionErrorHandler(
       throw error;
     }
 
-    return ApiResponse.actionSuccess("You're signed in.");
+    const userFromDb = await UserModel.findOne({ email: result.data.email });
+    if (!userFromDb) {
+      throw AppError.notFound("User not found");
+    }
+
+    return ApiResponse.actionSuccess<UserDomain>("You're signed in.", {
+      email: userFromDb.email,
+      firstName: userFromDb.firstName,
+      lastName: userFromDb.lastName,
+      id: userFromDb.id,
+    });
   },
 );
+
+export const signOut = withActionErrorHandler(async () => {
+  // Without redirect: false, Auth.js redirects by throwing NEXT_REDIRECT, so
+  // the action never returns and the caller can't tell how it went.
+  await authSignOut({ redirect: false });
+  return ApiResponse.actionSuccess("You're signed out.");
+});
+
+export const me = withActionErrorHandler(async () => {
+  await dbConnect();
+  const session = await auth();
+  if (!session || !session.user) {
+    throw AppError.unauthorized("Not authenticated");
+  }
+  const userFromDb = await UserModel.findById(session.user.id);
+  if (!userFromDb) {
+    throw AppError.notFound("User not found");
+  }
+
+  const userDomain: UserDomain = {
+    id: userFromDb.id,
+    firstName: userFromDb.firstName,
+    lastName: userFromDb.lastName,
+    email: userFromDb.email,
+  };
+
+  return ApiResponse.actionSuccess("Current user retrieved.", {
+    ...userDomain,
+  });
+});

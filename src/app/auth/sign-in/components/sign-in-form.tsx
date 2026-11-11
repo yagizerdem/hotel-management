@@ -10,6 +10,8 @@ import { Checkbox } from "@/src/components/ui/checkbox";
 import { getSignInSchema } from "@/src/validators/auth-validator";
 import { isKeyof } from "@lib/util";
 import { signInWithCredentials } from "@/src/actions/auth-actions";
+import { useDispatch } from "react-redux";
+import { setUser } from "@store/slice/auth-slice";
 
 type Values = {
   email: string;
@@ -63,6 +65,8 @@ export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const dispatcher = useDispatch();
+
   const errors = validate(values);
   // Show an error once the person has left the field or tried to submit.
   const errorFor = (field: keyof Values) =>
@@ -97,6 +101,11 @@ export function SignInForm() {
           duration: 5000,
         });
         return;
+      }
+
+      const userDomain = response.data;
+      if (userDomain) {
+        dispatcher(setUser(userDomain));
       }
 
       toast.success("You're signed in.", {

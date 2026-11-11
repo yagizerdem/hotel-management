@@ -1,3 +1,4 @@
+"use client";
 import { Hero } from "@/src/app/home/components/hero";
 import { EarlyBookingTimeline } from "@/src/app/home/components/early-booking-timeline";
 import { FloorExplorer } from "@/src/app/home/components/floor-explorer";

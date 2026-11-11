@@ -89,4 +89,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   // Send Auth.js redirects to our own page instead of its built-in one.
   pages: { signIn: "/auth/sign-in" },
+
+  callbacks: {
+    // Auth.js already stores the user's id as token.sub at sign-in, but the
+    // default session callback only copies name, email and image. Copy the
+    // id too, so auth() returns session.user.id.
+    session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+  },
 });
