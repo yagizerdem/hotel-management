@@ -30,6 +30,8 @@
       "@error/*": ["./src/error/*"],
       "@type/*": ["./src/type/*"],
       "@service/*": ["./src/service/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@actions/*": ["./src/actions/*"],
       "@/*": ["./*"]
     }
   },
